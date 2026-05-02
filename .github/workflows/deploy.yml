@@ -44,7 +44,7 @@ jobs:
           mkdir -p public/generated
           python -m multilingualprogramming compile src/automate_universel.ml > public/generated/automate_universel.py
           python -m multilingualprogramming build-wasm-bundle src/automate_packed_wasm.ml --out-dir public/generated/automate_packed
-          cp public/generated/automate_packed/host_shim.js public/generated/automate_packed/host_shim.mjs
+          python scripts/ensure_wasm_bundle.py public/generated/automate_packed
 
       - name: Verifier les artefacts de compilation
         run: |
