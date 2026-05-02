@@ -408,7 +408,14 @@ async function fetchPreset(id) {
 
 function buildGeneratedRuleConfig() {
   const config = window.AutomaginariumCore.normaliserConfiguration(controlsToConfig());
-  const generator = controls.ruleGenerator.value;
+  let generator = controls.ruleGenerator.value;
+
+  // Wolfram only works with neighborhood 3 and 1 output channel
+  if (generator === "wolfram" && (config.taille_voisinage !== 3 || config.nombre_canaux_sortie !== 1)) {
+    generator = "random";
+    controls.ruleGenerator.value = "random";
+  }
+
   if (generator === "wolfram") {
     config.alphabet_entree = [0, 1];
     config.alphabet_sortie = [0, 1];

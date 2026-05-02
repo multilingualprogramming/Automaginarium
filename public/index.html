@@ -80,7 +80,8 @@
             <h3>Univers</h3>
             <div class="field-grid compact-fields">
               <label>Alphabet<input id="alphabet-input-quick" type="text" placeholder="0,1,2" /></label>
-              <label>Voisinage<input id="neighborhood-size-quick" type="number" min="1" max="9" step="1" /></label>
+              <label>Voisinage<input id="neighborhood-size-quick" type="number" min="1" max="9" step="2" /></label>
+              <label>Canaux sortie<input id="channel-count-quick" type="number" min="1" max="4" step="1" value="1" /></label>
               <label>Largeur<input id="grid-width-quick" type="number" min="21" max="401" step="2" value="805" /></label>
               <label>Hauteur<input id="grid-height-quick" type="number" min="20" max="240" step="5" value="500" /></label>
             </div>
@@ -261,7 +262,7 @@
             <label>Nom<input id="config-name" type="text" /></label>
             <label>Alphabet entr&eacute;e<input id="alphabet-input" type="text" placeholder="0,1,2 ou air,feu,eau" /></label>
             <label>Alphabet sortie<input id="alphabet-output" type="text" placeholder="0,1" /></label>
-            <label>Voisinage<input id="neighborhood-size" type="number" min="1" max="9" step="1" /></label>
+            <label>Voisinage<input id="neighborhood-size" type="number" min="1" max="9" step="2" /></label>
             <label>Canaux sortie<input id="channel-count" type="number" min="1" max="4" step="1" /></label>
             <label>Largeur<input id="grid-width" type="number" min="21" max="401" step="2" /></label>
             <label>Hauteur<input id="grid-height" type="number" min="20" max="240" step="5" /></label>
@@ -756,6 +757,7 @@
       const syncPairs = [
         { quick: 'alphabet-input-quick', main: 'alphabet-input' },
         { quick: 'neighborhood-size-quick', main: 'neighborhood-size' },
+        { quick: 'channel-count-quick', main: 'channel-count' },
         { quick: 'grid-width-quick', main: 'grid-width' },
         { quick: 'grid-height-quick', main: 'grid-height' },
         { quick: 'rule-mode-quick', main: 'rule-mode' },
@@ -772,9 +774,11 @@
             mainEl.dispatchEvent(new Event('input', { bubbles: true }));
             mainEl.dispatchEvent(new Event('change', { bubbles: true }));
 
+            const generateBtnMain = document.getElementById('generate-rule');
+            const ruleGen = document.getElementById('rule-generator');
+
             // When neighborhood changes, regenerate the rule table to match new structure
             if (pair.quick === 'neighborhood-size-quick' && oldValue !== quickEl.value) {
-              const ruleGen = document.getElementById('rule-generator');
               const newNeighborhood = Number(quickEl.value);
 
               // If using Wolfram but neighborhood is not 3, switch to random generator
@@ -783,7 +787,13 @@
               }
 
               // Regenerate rules for the new neighborhood
-              const generateBtnMain = document.getElementById('generate-rule');
+              if (generateBtnMain) {
+                setTimeout(() => generateBtnMain.click(), 100);
+              }
+            }
+
+            // When channel-count changes, regenerate the rule table to match new output structure
+            if (pair.quick === 'channel-count-quick' && oldValue !== quickEl.value) {
               if (generateBtnMain) {
                 setTimeout(() => generateBtnMain.click(), 100);
               }
