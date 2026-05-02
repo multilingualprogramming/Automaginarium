@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Automaginarium configuration",
+  "type": "object",
+  "required": [
+    "alphabet_entree",
+    "alphabet_sortie",
+    "taille_voisinage",
+    "nombre_canaux_sortie",
+    "mode_regle"
+  ],
+  "properties": {
+    "nom": { "type": "string" },
+    "alphabet_entree": { "type": "array", "minItems": 1 },
+    "alphabet_sortie": { "type": "array", "minItems": 1 },
+    "taille_voisinage": { "type": "integer", "minimum": 1 },
+    "nombre_canaux_sortie": { "type": "integer", "minimum": 1 },
+    "mode_regle": { "enum": ["table", "totalistique", "aleatoire"] },
+    "table_transition": {
+      "type": "object",
+      "additionalProperties": { "type": "array" }
+    },
+    "frontiere": { "enum": ["fixe", "circulaire"] },
+    "largeur": { "type": "integer", "minimum": 1 },
+    "hauteur": { "type": "integer", "minimum": 1 },
+    "etat_initial": { "type": "object" },
+    "rendu": { "type": "object" }
+  }
+}

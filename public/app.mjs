@@ -1,0 +1,302 @@
+import { installAutomaginariumPacked } from "./generated/automate_packed_runtime.mjs";
+
+await installAutomaginariumPacked();
+
+const PRESETS = [
+  { id: "wolfram-30", label: "Wolfram 30" },
+  { id: "wolfram-90", label: "Wolfram 90" },
+  { id: "binaire-5-sillage", label: "Binaire 5 - Sillage" },
+  { id: "ternaire-totalistique", label: "Ternaire totalistique" },
+  { id: "multi-canal-aurore", label: "Multi-canal Aurore" },
+];
+
+const state = { config: null, universe: null, lastValidConfig: null };
+const canvas = document.querySelector("#universe");
+const ctx = canvas.getContext("2d");
+const presetSelect = document.querySelector("#preset");
+const title = document.querySelector("#config-title");
+const meta = document.querySelector("#config-meta");
+const statusBox = document.querySelector("#validation-status");
+const tableView = document.querySelector("#rule-table");
+const controls = {
+  name: document.querySelector("#config-name"),
+  alphabetInput: document.querySelector("#alphabet-input"),
+  alphabetOutput: document.querySelector("#alphabet-output"),
+  neighborhood: document.querySelector("#neighborhood-size"),
+  channels: document.querySelector("#channel-count"),
+  width: document.querySelector("#grid-width"),
+  height: document.querySelector("#grid-height"),
+  boundary: document.querySelector("#boundary-mode"),
+  initialMode: document.querySelector("#initial-mode"),
+  initialValues: document.querySelector("#initial-values"),
+  initialProbability: document.querySelector("#initial-probability"),
+  cellSize: document.querySelector("#cell-size"),
+  ruleMode: document.querySelector("#rule-mode"),
+  wolframRule: document.querySelector("#wolfram-rule"),
+  ruleGenerator: document.querySelector("#rule-generator"),
+  json: document.querySelector("#config-json"),
+  importJson: document.querySelector("#import-json"),
+};
+
+function parseSymbol(raw) {
+  const trimmed = raw.trim();
+  if (trimmed === "") return null;
+  const numeric = Number(trimmed);
+  return Number.isFinite(numeric) && String(numeric) === trimmed ? numeric : trimmed;
+}
+
+function parseList(value, fallback) {
+  const parsed = value.split(",").map(parseSymbol).filter((item) => item !== null);
+  return parsed.length > 0 ? parsed : fallback;
+}
+
+function encodeList(values) {
+  return (values || []).join(",");
+}
+
+function allNeighborhoodKeys(alphabet, size) {
+  return window.AutomaginariumCore.toutesClesVoisinage(alphabet, size);
+}
+
+function parseNeighborhoodKey(key) {
+  try {
+    const parsed = JSON.parse(key);
+    return Array.isArray(parsed) ? parsed : key.split("");
+  } catch (error) {
+    return key.split("");
+  }
+}
+
+function randomOutput(config) {
+  return Array.from(
+    { length: config.nombre_canaux_sortie },
+    () => config.alphabet_sortie[Math.floor(Math.random() * config.alphabet_sortie.length)],
+  );
+}
+
+function generateRandomTable(config) {
+  return Object.fromEntries(allNeighborhoodKeys(config.alphabet_entree, config.taille_voisinage).map((key) => [key, randomOutput(config)]));
+}
+
+function generateSymmetricTable(config) {
+  const table = {};
+  allNeighborhoodKeys(config.alphabet_entree, config.taille_voisinage).forEach((key) => {
+    const mirror = JSON.stringify(parseNeighborhoodKey(key).reverse());
+    if (table[key]) return;
+    const output = randomOutput(config);
+    table[key] = output;
+    table[mirror] = output;
+  });
+  return table;
+}
+
+function generateTotalisticTable(config) {
+  return Object.fromEntries(allNeighborhoodKeys(config.alphabet_entree, config.taille_voisinage).map((key) => {
+    const sum = parseNeighborhoodKey(key).reduce((acc, value) => acc + Number(value), 0);
+    const index = Number.isFinite(sum) ? Math.abs(sum) % config.alphabet_sortie.length : key.length % config.alphabet_sortie.length;
+    return [key, Array.from({ length: config.nombre_canaux_sortie }, (_, channel) => config.alphabet_sortie[(index + channel) % config.alphabet_sortie.length])];
+  }));
+}
+
+function controlsToConfig() {
+  const inputAlphabet = parseList(controls.alphabetInput.value, [0, 1]);
+  const outputAlphabet = parseList(controls.alphabetOutput.value, inputAlphabet);
+  let neighborhood = Number(controls.neighborhood.value || 3);
+  if (neighborhood % 2 === 0) neighborhood += 1;
+  const current = state.config || {};
+  const initialMode = controls.initialMode.value;
+  const config = {
+    ...current,
+    nom: controls.name.value.trim() || "Univers sans nom",
+    alphabet_entree: inputAlphabet,
+    alphabet_sortie: outputAlphabet,
+    taille_voisinage: Math.max(1, neighborhood),
+    nombre_canaux_sortie: Math.max(1, Number(controls.channels.value || 1)),
+    largeur: Math.max(1, Number(controls.width.value || 161)),
+    hauteur: Math.max(1, Number(controls.height.value || 100)),
+    frontiere: controls.boundary.value,
+    mode_regle: controls.ruleMode.value,
+    etat_initial: { mode: initialMode },
+    rendu: { ...(current.rendu || {}), taille_cellule: Math.max(1, Number(controls.cellSize.value || 5)) },
+  };
+  if (initialMode === "motif") config.etat_initial.valeurs = parseList(controls.initialValues.value, [outputAlphabet[1] ?? outputAlphabet[0]]);
+  if (initialMode === "aleatoire") {
+    config.etat_initial.graine = current.etat_initial?.graine ?? 42;
+    config.etat_initial.probabilite = Math.max(0, Math.min(1, Number(controls.initialProbability.value || 0.28)));
+  }
+  if (!config.table_transition) config.table_transition = {};
+  return config;
+}
+
+function validateConfig(config) {
+  const result = window.AutomaginariumCore.validerConfiguration(config);
+  return {
+    valid: result.valide,
+    errors: result.erreurs,
+    warnings: result.avertissements.length > 0
+      ? [`${result.avertissements.length} avertissement(s); voir la table ou le JSON pour details.`]
+      : [],
+  };
+}
+
+function showStatus(result) {
+  statusBox.className = `status ${result.valid ? "ok" : "error"}`;
+  if (!result.valid) {
+    statusBox.textContent = result.errors.join(" ");
+    return;
+  }
+  statusBox.textContent = result.warnings.length > 0 ? result.warnings.join(" ") : "Configuration valide";
+}
+
+function syncControls(config) {
+  controls.name.value = config.nom || "";
+  controls.alphabetInput.value = encodeList(config.alphabet_entree || [0, 1]);
+  controls.alphabetOutput.value = encodeList(config.alphabet_sortie || config.alphabet_entree || [0, 1]);
+  controls.neighborhood.value = config.taille_voisinage || 3;
+  controls.channels.value = config.nombre_canaux_sortie || 1;
+  controls.width.value = config.largeur || 161;
+  controls.height.value = config.hauteur || 100;
+  controls.boundary.value = config.frontiere || "fixe";
+  controls.initialMode.value = config.etat_initial?.mode || "centre";
+  controls.initialValues.value = encodeList(config.etat_initial?.valeurs || []);
+  controls.initialProbability.value = config.etat_initial?.probabilite ?? 0.28;
+  controls.cellSize.value = config.rendu?.taille_cellule || 5;
+  controls.ruleMode.value = config.mode_regle || "table";
+  controls.json.value = JSON.stringify(config, null, 2);
+}
+
+function colorFor(value, config, rowIndex, colIndex, channels) {
+  const palette = config.rendu.palette || ["#07121f", "#ff9d4d", "#53b0ff", "#f5f7ff"];
+  const visualValue = channels && channels.length > 1 ? channels[1] : value;
+  const alphabet = config.alphabet_sortie || config.alphabet_entree || [0, 1];
+  let index = alphabet.findIndex((item) => String(item) === String(visualValue));
+  if (index < 0) index = Math.abs(Number(visualValue) || Number(value) || 0) % palette.length;
+  const drift = (rowIndex + colIndex) % Math.max(1, palette.length - 1);
+  return palette[(index + drift) % palette.length] || palette[0];
+}
+
+function resizeCanvas(config) {
+  const cell = Number(config.rendu.taille_cellule || 5);
+  canvas.width = config.largeur * cell;
+  canvas.height = config.hauteur * cell;
+}
+
+function render() {
+  if (!state.universe) return;
+  const { configuration, lignes, sorties } = state.universe;
+  resizeCanvas(configuration);
+  const cell = Number(configuration.rendu.taille_cellule || 5);
+  ctx.fillStyle = configuration.rendu.fond || "#05070d";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  lignes.forEach((ligne, y) => {
+    ligne.forEach((value, x) => {
+      if (String(value) === String(configuration.alphabet_entree[0]) && !configuration.rendu.afficher_zero) return;
+      ctx.fillStyle = colorFor(value, configuration, y, x, sorties?.[y]?.[x]);
+      ctx.fillRect(x * cell, y * cell, cell, cell);
+    });
+  });
+}
+
+function describe(config) {
+  title.textContent = config.nom;
+  meta.textContent = `${config.alphabet_entree.length} symbole(s) entree | ${config.alphabet_sortie.length} sortie | voisinage ${config.taille_voisinage} | ${config.nombre_canaux_sortie} canal(aux) | ${config.mode_regle}`;
+  const entries = Object.entries(config.table_transition || {}).slice(0, 24);
+  tableView.innerHTML = entries.length > 0
+    ? entries.map(([key, value]) => `<span><b>${key}</b> -> ${JSON.stringify(value)}</span>`).join("")
+    : `<span><b>${config.mode_regle}</b> -> genere par le noyau</span>`;
+}
+
+function applyConfig(config, { updateJson = true, updateControls = true } = {}) {
+  const normalized = window.AutomaginariumCore.normaliserConfiguration(config);
+  const validation = validateConfig(normalized);
+  showStatus(validation);
+  if (!validation.valid) return false;
+  state.config = normalized;
+  state.lastValidConfig = structuredClone(normalized);
+  state.universe = window.AutomaginariumCore.genererUnivers(normalized);
+  if (updateControls) syncControls(normalized);
+  if (updateJson) controls.json.value = JSON.stringify(normalized, null, 2);
+  describe(normalized);
+  render();
+  return true;
+}
+
+async function loadPreset(id) {
+  const response = await fetch(`../examples/${id}.json`);
+  const config = await response.json();
+  applyConfig(config);
+}
+
+function applyGeneratedRule() {
+  const config = window.AutomaginariumCore.normaliserConfiguration(controlsToConfig());
+  const generator = controls.ruleGenerator.value;
+  if (generator === "wolfram") {
+    config.alphabet_entree = [0, 1];
+    config.alphabet_sortie = [0, 1];
+    config.taille_voisinage = 3;
+    config.nombre_canaux_sortie = 1;
+    config.mode_regle = "table";
+    config.table_transition = window.AutomaginariumCore.tableWolfram(Number(controls.wolframRule.value || 90));
+  } else if (generator === "random") {
+    config.mode_regle = "table";
+    config.table_transition = generateRandomTable(config);
+  } else if (generator === "symmetric") {
+    config.mode_regle = "table";
+    config.table_transition = generateSymmetricTable(config);
+  } else if (generator === "totalistic") {
+    config.mode_regle = "totalistique";
+    config.table_transition = generateTotalisticTable(config);
+  }
+  applyConfig(config);
+}
+
+function downloadText(filename, text) {
+  const blob = new Blob([text], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.download = filename;
+  link.href = url;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+PRESETS.forEach((preset) => {
+  const option = document.createElement("option");
+  option.value = preset.id;
+  option.textContent = preset.label;
+  presetSelect.appendChild(option);
+});
+
+presetSelect.addEventListener("change", () => loadPreset(presetSelect.value));
+document.querySelector("#apply-controls").addEventListener("click", () => applyConfig(controlsToConfig()));
+document.querySelector("#generate-rule").addEventListener("click", applyGeneratedRule);
+document.querySelector("#apply-json").addEventListener("click", () => {
+  try {
+    applyConfig(JSON.parse(controls.json.value), { updateJson: true, updateControls: true });
+  } catch (error) {
+    showStatus({ valid: false, errors: [`JSON invalide: ${error.message}`], warnings: [] });
+  }
+});
+document.querySelector("#reset-json").addEventListener("click", () => {
+  controls.json.value = JSON.stringify(state.lastValidConfig || state.config, null, 2);
+});
+controls.importJson.addEventListener("change", async () => {
+  const file = controls.importJson.files[0];
+  if (!file) return;
+  try {
+    applyConfig(JSON.parse(await file.text()));
+  } catch (error) {
+    showStatus({ valid: false, errors: [`Import impossible: ${error.message}`], warnings: [] });
+  }
+});
+document.querySelector("#export-json").addEventListener("click", () => {
+  downloadText(`${state.config?.nom || "automaginarium"}.json`, JSON.stringify(state.config, null, 2));
+});
+document.querySelector("#export-png").addEventListener("click", () => {
+  const link = document.createElement("a");
+  link.download = `${state.universe?.configuration.nom || "automaginarium"}.png`;
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+});
+
+loadPreset("wolfram-90");

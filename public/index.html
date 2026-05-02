@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Automaginarium</title>
+    <meta name="description" content="Laboratoire configurable d'automates cellulaires en Multilingual francais." />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero-band" aria-labelledby="app-title">
+        <div>
+          <p class="eyebrow">multilingual francais -> univers configurables</p>
+          <h1 id="app-title">Automaginarium</h1>
+          <p class="lede">Un laboratoire de regles, d'alphabets et de voisinages pour faire apparaitre des mondes.</p>
+        </div>
+        <div class="quick-controls" aria-label="Actions rapides">
+          <label>Preset<select id="preset"></select></label>
+          <button id="apply-controls" type="button">Appliquer</button>
+          <button id="export-png" type="button">PNG</button>
+          <button id="export-json" type="button">JSON</button>
+        </div>
+      </section>
+
+      <section class="workspace" aria-label="Univers genere">
+        <div class="canvas-wrap"><canvas id="universe" width="805" height="500"></canvas></div>
+        <aside class="inspector">
+          <p class="eyebrow">configuration active</p>
+          <h2 id="config-title">Chargement</h2>
+          <p id="config-meta" class="meta"></p>
+          <p id="validation-status" class="status">Pret</p>
+          <div id="rule-table" class="rule-table" aria-label="Table de transition"></div>
+        </aside>
+      </section>
+
+      <section class="config-lab" aria-label="Configuration de l'univers">
+        <div class="config-panel">
+          <div class="panel-heading">
+            <p class="eyebrow">parametres</p>
+            <h2>Univers</h2>
+          </div>
+          <div class="field-grid">
+            <label>Nom<input id="config-name" type="text" /></label>
+            <label>Alphabet entree<input id="alphabet-input" type="text" placeholder="0,1,2 ou air,feu,eau" /></label>
+            <label>Alphabet sortie<input id="alphabet-output" type="text" placeholder="0,1" /></label>
+            <label>Voisinage<input id="neighborhood-size" type="number" min="1" max="9" step="2" /></label>
+            <label>Canaux sortie<input id="channel-count" type="number" min="1" max="4" step="1" /></label>
+            <label>Largeur<input id="grid-width" type="number" min="21" max="401" step="2" /></label>
+            <label>Hauteur<input id="grid-height" type="number" min="20" max="240" step="5" /></label>
+            <label>Frontiere<select id="boundary-mode"><option value="fixe">Fixe</option><option value="circulaire">Circulaire</option></select></label>
+            <label>Etat initial<select id="initial-mode"><option value="centre">Centre</option><option value="motif">Motif</option><option value="aleatoire">Aleatoire</option></select></label>
+            <label>Motif initial<input id="initial-values" type="text" placeholder="1,0,1,1" /></label>
+            <label>Probabilite initiale<input id="initial-probability" type="number" min="0" max="1" step="0.01" /></label>
+            <label>Taille cellule<input id="cell-size" type="number" min="1" max="12" step="1" /></label>
+          </div>
+        </div>
+
+        <div class="config-panel">
+          <div class="panel-heading">
+            <p class="eyebrow">regles</p>
+            <h2>Espace de transition</h2>
+          </div>
+          <div class="field-grid compact-fields">
+            <label>Mode<select id="rule-mode"><option value="table">Table</option><option value="totalistique">Totalistique</option><option value="aleatoire">Aleatoire dynamique</option></select></label>
+            <label>Wolfram<input id="wolfram-rule" type="number" min="0" max="255" step="1" value="90" /></label>
+            <label>Generateur<select id="rule-generator"><option value="wolfram">Wolfram</option><option value="random">Table aleatoire</option><option value="symmetric">Table symetrique</option><option value="totalistic">Totalistique</option></select></label>
+            <button id="generate-rule" type="button">Generer</button>
+          </div>
+          <p class="meta">Les tables sont declaratives. Le mode totalistique calcule la sortie depuis la somme du voisinage; les autres modes materialisent une table.</p>
+        </div>
+
+        <div class="config-panel json-panel">
+          <div class="panel-heading inline-heading">
+            <div>
+              <p class="eyebrow">json</p>
+              <h2>Configuration brute</h2>
+            </div>
+            <div class="button-row">
+              <button id="apply-json" type="button">Appliquer JSON</button>
+              <button id="reset-json" type="button">Recharger</button>
+              <label class="file-button">Importer<input id="import-json" type="file" accept="application/json,.json" /></label>
+            </div>
+          </div>
+          <textarea id="config-json" spellcheck="false"></textarea>
+        </div>
+      </section>
+    </main>
+    <script src="automate-core.js"></script>
+    <script type="module" src="app.mjs"></script>
+  </body>
+</html>

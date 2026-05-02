@@ -1,0 +1,38 @@
+{
+  "nom": "Binaire voisinage 5 - sillage",
+  "alphabet_entree": [
+    0,
+    1
+  ],
+  "alphabet_sortie": [
+    0,
+    1
+  ],
+  "taille_voisinage": 5,
+  "nombre_canaux_sortie": 1,
+  "mode_regle": "totalistique",
+  "largeur": 151,
+  "hauteur": 105,
+  "etat_initial": {
+    "mode": "motif",
+    "valeurs": [
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1
+    ]
+  },
+  "rendu": {
+    "taille_cellule": 5,
+    "fond": "#07111a",
+    "palette": [
+      "#07111a",
+      "#9be564",
+      "#53b0ff"
+    ]
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "nom": "Wolfram 90 - triangle de Sierpinski",
+  "alphabet_entree": [
+    0,
+    1
+  ],
+  "alphabet_sortie": [
+    0,
+    1
+  ],
+  "taille_voisinage": 3,
+  "nombre_canaux_sortie": 1,
+  "mode_regle": "table",
+  "table_transition": {
+    "[1,1,1]": [
+      0
+    ],
+    "[1,1,0]": [
+      1
+    ],
+    "[1,0,1]": [
+      0
+    ],
+    "[1,0,0]": [
+      1
+    ],
+    "[0,1,1]": [
+      1
+    ],
+    "[0,1,0]": [
+      0
+    ],
+    "[0,0,1]": [
+      1
+    ],
+    "[0,0,0]": [
+      0
+    ]
+  },
+  "largeur": 161,
+  "hauteur": 110,
+  "frontiere": "fixe",
+  "etat_initial": {
+    "mode": "centre"
+  },
+  "rendu": {
+    "taille_cellule": 5,
+    "fond": "#05070d",
+    "palette": [
+      "#05070d",
+      "#53b0ff",
+      "#ff9d4d"
+    ]
+  }
+}

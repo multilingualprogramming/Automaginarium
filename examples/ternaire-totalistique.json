@@ -1,0 +1,35 @@
+{
+  "nom": "Ternaire totalistique - marees",
+  "alphabet_entree": [
+    0,
+    1,
+    2
+  ],
+  "alphabet_sortie": [
+    0,
+    1,
+    2
+  ],
+  "taille_voisinage": 3,
+  "nombre_canaux_sortie": 1,
+  "mode_regle": "totalistique",
+  "largeur": 150,
+  "hauteur": 100,
+  "frontiere": "circulaire",
+  "etat_initial": {
+    "mode": "aleatoire",
+    "graine": 73,
+    "probabilite": 0.42
+  },
+  "rendu": {
+    "taille_cellule": 5,
+    "fond": "#020b12",
+    "afficher_zero": true,
+    "palette": [
+      "#020b12",
+      "#00d1b2",
+      "#f7d154",
+      "#f97068"
+    ]
+  }
+}

@@ -1,0 +1,127 @@
+name: Surveiller la compatibilite multilingual
+
+on:
+  schedule:
+    - cron: "35 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  compat:
+    name: Compatibilite multilingual (${{ matrix.channel.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        channel:
+          - name: pinned
+            install_command: python -m pip install -r requirements-build.txt
+          - name: latest
+            install_command: python -m pip install "multilingualprogramming[wasm]"
+          - name: upstream-main
+            install_command: python -m pip install "multilingualprogramming[wasm] @ git+https://github.com/johnsamuelwrites/multilingual.git@main"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurer Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Configurer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Installer les dependances de build
+        run: |
+          python -m pip install --upgrade pip
+          ${{ matrix.channel.install_command }}
+
+      - name: Capturer la version multilingual
+        env:
+          CHANNEL_NAME: ${{ matrix.channel.name }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import pathlib
+          import subprocess
+
+          data = {
+              "channel": os.environ["CHANNEL_NAME"],
+              "pip_freeze": subprocess.check_output(["python", "-m", "pip", "freeze"], text=True).splitlines(),
+          }
+          try:
+              from multilingualprogramming.version import __version__
+              data["multilingual_version"] = __version__
+          except Exception as exc:
+              data["multilingual_version_error"] = str(exc)
+
+          out = pathlib.Path("build")
+          out.mkdir(exist_ok=True)
+          path = out / f"multilingual-metadata-{os.environ['CHANNEL_NAME']}.json"
+          path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+          print(path.read_text(encoding="utf-8"))
+          PY
+
+      - name: Compiler les sources francais
+        run: |
+          mkdir -p public/generated
+          python -m multilingualprogramming compile src/automate_universel.ml > public/generated/automate_universel.py
+          python -m multilingualprogramming build-wasm-bundle src/automate_packed_wasm.ml --out-dir public/generated/automate_packed --wasm-target browser
+          cp public/generated/automate_packed/host_shim.js public/generated/automate_packed/host_shim.mjs
+
+      - name: Verifier la syntaxe JavaScript
+        run: |
+          node --check public/automate-core.js
+          node --check public/app.mjs
+          node --check public/generated/automate_packed_runtime.mjs
+          node --check public/generated/automate_packed/host_shim.mjs
+
+      - name: Valider le moteur et le WASM
+        run: |
+          node tests/stage3-smoke.js
+          node tests/stage4-wasm.mjs
+
+      - name: Upload metadata artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: automaginarium-multilingual-${{ matrix.channel.name }}
+          path: build/multilingual-metadata-${{ matrix.channel.name }}.json
+
+  notifier:
+    name: Ouvrir une alerte si la surveillance echoue
+    if: failure() && github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    needs: compat
+
+    steps:
+      - name: Creer ou reutiliser une issue de compatibilite
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = 'Alerte compatibilite: multilingual a casse Automaginarium';
+            const { owner, repo } = context.repo;
+            const existing = await github.rest.issues.listForRepo({ owner, repo, state: 'open', per_page: 100 });
+            const match = existing.data.find((issue) => issue.title === title);
+            const body = [
+              'La surveillance planifiee de compatibilite avec `multilingual` a echoue.',
+              '',
+              `Workflow: ${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`,
+              `Date: ${new Date().toISOString()}`,
+              '',
+              'Verifier en priorite les jobs `latest` et `upstream-main`.',
+            ].join('\n');
+
+            if (match) {
+              await github.rest.issues.createComment({ owner, repo, issue_number: match.number, body });
+              return;
+            }
+
+            await github.rest.issues.create({ owner, repo, title, body, labels: ['bug'] });
