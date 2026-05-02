@@ -84,4 +84,10 @@ def sortie_table_code(code_sortie, taille_alphabet):
 
 def validation_mode_regle(code_mode):
     # 0=table, 1=totalistique, 2=aleatoire
-    retour 1 si code_mode == 0 ou code_mode == 1 ou code_mode == 2 sinon 0
+    si code_mode == 0:
+        retour 1
+    si code_mode == 1:
+        retour 1
+    si code_mode == 2:
+        retour 1
+    retour 0

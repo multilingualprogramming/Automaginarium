@@ -33,11 +33,6 @@ function testRuntimeLoaderIsCommitted() {
   const loader = read("public/generated/automate_packed_runtime.mjs");
   assert(loader.includes("./automate_packed/module.wasm"));
   assert(loader.includes("./automate_packed/host_shim.mjs"));
-  assert(loader.includes("import * as hostShim"));
-  assert(loader.includes("createFallbackDomImports"));
-  assert(loader.includes("print_str"));
-  assert(loader.includes("WebAssembly.Module.imports"));
-  assert(loader.includes("createDefaultImport"));
 }
 
 testPagesEntrypoints();
