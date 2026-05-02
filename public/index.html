@@ -4,87 +4,237 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Automaginarium</title>
-    <meta name="description" content="Laboratoire configurable d'automates cellulaires en Multilingual francais." />
+    <meta name="description" content="Laboratoire configurable d'automates cellulaires en Multilingual français." />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <!-- Top Navigation -->
+    <header class="topbar">
+      <div class="brand-lockup">
+        <p class="eyebrow">Multilingual français → univers configurables</p>
+        <h1 id="app-title">Automaginarium</h1>
+      </div>
+      <nav class="tab-nav">
+        <button type="button" class="tab active" id="tab-main">Univers</button>
+        <button type="button" class="tab" id="tab-lab">Laboratoire</button>
+        <button type="button" class="tab" id="tab-gallery">Galerie</button>
+        <button type="button" class="ghost-btn" id="btn-theme" aria-label="Changer de thème" title="Basculer clair/sombre">☀️</button>
+      </nav>
+    </header>
+
     <main class="app-shell">
+      <!-- Hero Section -->
       <section class="hero-band" aria-labelledby="app-title">
         <div>
-          <p class="eyebrow">multilingual francais -> univers configurables</p>
-          <h1 id="app-title">Automaginarium</h1>
-          <p class="lede">Un laboratoire de regles, d'alphabets et de voisinages pour faire apparaitre des mondes.</p>
+          <p class="eyebrow">Laboratoire interactif</p>
+          <p class="lede">Un laboratoire de règles, d'alphabets et de voisinages pour faire apparaître des univers configurables.</p>
         </div>
         <div class="quick-controls" aria-label="Actions rapides">
-          <label>Preset<select id="preset"></select></label>
+          <label>Préset<select id="preset"></select></label>
           <button id="apply-controls" type="button">Appliquer</button>
           <button id="export-png" type="button">PNG</button>
           <button id="export-json" type="button">JSON</button>
         </div>
       </section>
 
-      <section class="workspace" aria-label="Univers genere">
-        <div class="canvas-wrap"><canvas id="universe" width="805" height="500"></canvas></div>
+      <!-- Main Panel: Univers -->
+      <section id="main-panel" class="workspace" aria-label="Univers généré">
+        <div class="canvas-wrap">
+          <canvas id="universe" width="805" height="500"></canvas>
+          <div class="canvas-hud">
+            <div class="hud-metric">
+              <strong id="hud-rule">90</strong>
+              <span>règle</span>
+            </div>
+            <div class="hud-metric">
+              <strong id="hud-gen">0</strong>
+              <span>générations</span>
+            </div>
+            <div class="hud-metric">
+              <strong id="hud-density">0%</strong>
+              <span>densité</span>
+            </div>
+            <div class="hud-metric">
+              <strong id="hud-entropy">0.00</strong>
+              <span>entropie</span>
+            </div>
+          </div>
+          <div class="canvas-controls">
+            <button type="button" class="canvas-control-btn" id="canvas-zoom-out" title="Dézoomer">−</button>
+            <span id="canvas-zoom-display" class="canvas-zoom-display">100%</span>
+            <button type="button" class="canvas-control-btn" id="canvas-zoom-in" title="Zoomer">+</button>
+            <button type="button" class="canvas-control-btn" id="canvas-reset" title="Réinitialiser">↻</button>
+          </div>
+        </div>
+
+        <!-- Inspector Sidebar -->
         <aside class="inspector">
-          <p class="eyebrow">configuration active</p>
-          <h2 id="config-title">Chargement</h2>
-          <p id="config-meta" class="meta"></p>
-          <p id="validation-status" class="status">Pret</p>
-          <div id="rule-table" class="rule-table" aria-label="Table de transition"></div>
+          <div class="inspector-tabs">
+            <button type="button" class="inspector-tab-btn active" data-panel="info">Infos</button>
+            <button type="button" class="inspector-tab-btn" data-panel="display">Affichage</button>
+            <button type="button" class="inspector-tab-btn" data-panel="rules">Règles</button>
+          </div>
+
+          <!-- Info Panel -->
+          <div id="info-panel" class="inspector-panel active">
+            <p class="eyebrow">Configuration active</p>
+            <h2 id="config-title">Chargement…</h2>
+            <p id="config-meta" class="meta"></p>
+            <p id="validation-status" class="status">Prêt</p>
+            <div id="rule-table" class="rule-table" aria-label="Table de transition"></div>
+          </div>
+
+          <!-- Display Panel -->
+          <div id="display-panel" class="inspector-panel display-panel">
+            <p class="eyebrow">Affichage</p>
+            <h3>Thème couleur</h3>
+            <div class="palette-selector">
+              <button type="button" class="palette-btn active" data-palette="cosmic" aria-label="Thème Cosmic">Cosmic</button>
+              <button type="button" class="palette-btn" data-palette="phosphor" aria-label="Thème Phosphor">Phosphor</button>
+              <button type="button" class="palette-btn" data-palette="thermal" aria-label="Thème Thermal">Thermal</button>
+              <button type="button" class="palette-btn" data-palette="bioluminescent" aria-label="Thème Bioluminescent">Bio</button>
+              <button type="button" class="palette-btn" data-palette="minimalist" aria-label="Thème Minimalist">Mini</button>
+              <button type="button" class="palette-btn" data-palette="cyberpunk" aria-label="Thème Cyberpunk">Cyber</button>
+              <button type="button" class="palette-btn" data-palette="neutral-tech" aria-label="Thème Neutral Tech">Tech</button>
+            </div>
+
+            <h3>Dégradé global</h3>
+            <p class="meta">Gradient appliqué aux cellules selon leur état</p>
+            <div class="gradient-editor">
+              <div class="gradient-preview" id="gradient-preview"></div>
+
+              <div class="gradient-label">
+                <span>Type de gradient</span>
+              </div>
+              <div class="gradient-type-selector">
+                <button type="button" class="gradient-type-btn active" data-gradient-type="linear" aria-label="Gradient linéaire">Linéaire</button>
+                <button type="button" class="gradient-type-btn" data-gradient-type="radial" aria-label="Gradient radial">Radial</button>
+                <button type="button" class="gradient-type-btn" data-gradient-type="conic" aria-label="Gradient conique">Conique</button>
+              </div>
+
+              <div class="gradient-label">
+                <span>Points d'arrêt couleur</span>
+              </div>
+              <div class="gradient-stops">
+                <div class="gradient-stop">
+                  <input type="color" id="grad-color-0" value="#0066ff" aria-label="Couleur dégradé 1" />
+                  <input type="range" id="grad-stop-0" min="0" max="100" value="0" aria-label="Position dégradé 1" />
+                  <div class="position-display">
+                    <span id="grad-pos-0">0</span>%
+                  </div>
+                  <button type="button" class="canvas-control-btn" id="grad-remove-0" title="Supprimer">✕</button>
+                </div>
+                <div class="gradient-stop">
+                  <input type="color" id="grad-color-1" value="#00aaff" aria-label="Couleur dégradé 2" />
+                  <input type="range" id="grad-stop-1" min="0" max="100" value="50" aria-label="Position dégradé 2" />
+                  <div class="position-display">
+                    <span id="grad-pos-1">50</span>%
+                  </div>
+                  <button type="button" class="canvas-control-btn" id="grad-remove-1" title="Supprimer">✕</button>
+                </div>
+                <div class="gradient-stop">
+                  <input type="color" id="grad-color-2" value="#ff6b35" aria-label="Couleur dégradé 3" />
+                  <input type="range" id="grad-stop-2" min="0" max="100" value="100" aria-label="Position dégradé 3" />
+                  <div class="position-display">
+                    <span id="grad-pos-2">100</span>%
+                  </div>
+                  <button type="button" class="canvas-control-btn" id="grad-remove-2" title="Supprimer">✕</button>
+                </div>
+              </div>
+
+              <div class="gradient-action-row">
+                <button type="button" id="grad-add-stop" class="canvas-control-btn">+ Ajouter arrêt</button>
+                <button type="button" id="grad-reverse" class="canvas-control-btn">↔ Inverser</button>
+              </div>
+            </div>
+
+            <h3 class="preset-gradients-title">Dégradés prédéfinis</h3>
+            <div class="preset-gradients">
+              <button type="button" class="preset-gradient-btn" data-gradient='{"type":"linear","colors":["#000000","#0066ff","#ffffff"],"positions":[0,50,100]}' title="Gradient Bleu océan">
+                <div class="preset-gradient-preview preset-ocean"></div>
+                <span>Océan</span>
+              </button>
+              <button type="button" class="preset-gradient-btn" data-gradient='{"type":"linear","colors":["#1a0033","#ff006e","#ffaa00"],"positions":[0,50,100]}' title="Gradient Coucher">
+                <div class="preset-gradient-preview preset-sunset"></div>
+                <span>Coucher</span>
+              </button>
+              <button type="button" class="preset-gradient-btn" data-gradient='{"type":"linear","colors":["#005f87","#00ffaa","#ffffff"],"positions":[0,50,100]}' title="Gradient Biolum">
+                <div class="preset-gradient-preview preset-biolum"></div>
+                <span>Biolum</span>
+              </button>
+              <button type="button" class="preset-gradient-btn" data-gradient='{"type":"linear","colors":["#001a4d","#0066ff","#ffaa00"],"positions":[0,50,100]}' title="Gradient Thermique">
+                <div class="preset-gradient-preview preset-thermal"></div>
+                <span>Thermique</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Rules Panel -->
+          <div id="rules-panel" class="inspector-panel rules-panel">
+            <p class="eyebrow">Table de transition</p>
+            <h3>Règles appliquées</h3>
+            <p class="meta">Les transitions d'état actuellement actives pour cet automate</p>
+            <div id="rule-table-detail" class="rule-table"></div>
+          </div>
         </aside>
       </section>
 
-      <section class="gallery-panel" aria-labelledby="gallery-title">
+      <!-- Gallery Panel -->
+      <section id="gallery-panel" class="gallery-panel" aria-labelledby="gallery-title">
         <div class="panel-heading inline-heading">
           <div>
-            <p class="eyebrow">galerie</p>
-            <h2 id="gallery-title">Espaces preconfigures</h2>
+            <p class="eyebrow">Galerie</p>
+            <h2 id="gallery-title">Espaces préconfigurés</h2>
           </div>
-          <button id="refresh-gallery" type="button">Regenerer</button>
+          <button id="refresh-gallery" type="button">Régénérer</button>
         </div>
-        <div id="preset-gallery" class="preset-gallery" aria-label="Galerie de presets"></div>
+        <div id="preset-gallery" class="preset-gallery" aria-label="Galerie de présets"></div>
       </section>
 
+      <!-- Configuration Laboratory -->
       <section class="config-lab" aria-label="Configuration de l'univers">
+        <!-- Universe Parameters -->
         <div class="config-panel">
           <div class="panel-heading">
-            <p class="eyebrow">parametres</p>
+            <p class="eyebrow">Paramètres</p>
             <h2>Univers</h2>
           </div>
           <div class="field-grid">
             <label>Nom<input id="config-name" type="text" /></label>
-            <label>Alphabet entree<input id="alphabet-input" type="text" placeholder="0,1,2 ou air,feu,eau" /></label>
+            <label>Alphabet entrée<input id="alphabet-input" type="text" placeholder="0,1,2 ou air,feu,eau" /></label>
             <label>Alphabet sortie<input id="alphabet-output" type="text" placeholder="0,1" /></label>
             <label>Voisinage<input id="neighborhood-size" type="number" min="1" max="9" step="2" /></label>
             <label>Canaux sortie<input id="channel-count" type="number" min="1" max="4" step="1" /></label>
             <label>Largeur<input id="grid-width" type="number" min="21" max="401" step="2" /></label>
             <label>Hauteur<input id="grid-height" type="number" min="20" max="240" step="5" /></label>
-            <label>Frontiere<select id="boundary-mode"><option value="fixe">Fixe</option><option value="circulaire">Circulaire</option></select></label>
-            <label>Etat initial<select id="initial-mode"><option value="centre">Centre</option><option value="motif">Motif</option><option value="aleatoire">Aleatoire</option></select></label>
+            <label>Frontière<select id="boundary-mode"><option value="fixe">Fixe</option><option value="circulaire">Circulaire</option></select></label>
+            <label>État initial<select id="initial-mode"><option value="centre">Centre</option><option value="motif">Motif</option><option value="aleatoire">Aléatoire</option></select></label>
             <label>Motif initial<input id="initial-values" type="text" placeholder="1,0,1,1" /></label>
-            <label>Probabilite initiale<input id="initial-probability" type="number" min="0" max="1" step="0.01" /></label>
+            <label>Probabilité initiale<input id="initial-probability" type="number" min="0" max="1" step="0.01" /></label>
             <label>Taille cellule<input id="cell-size" type="number" min="1" max="12" step="1" /></label>
           </div>
         </div>
 
+        <!-- Rules Configuration -->
         <div class="config-panel">
           <div class="panel-heading">
-            <p class="eyebrow">regles</p>
+            <p class="eyebrow">Règles</p>
             <h2>Espace de transition</h2>
           </div>
           <div class="field-grid compact-fields">
-            <label>Mode<select id="rule-mode"><option value="table">Table</option><option value="totalistique">Totalistique</option><option value="aleatoire">Aleatoire dynamique</option></select></label>
+            <label>Mode<select id="rule-mode"><option value="table">Table</option><option value="totalistique">Totalistique</option><option value="aleatoire">Aléatoire dynamique</option></select></label>
             <label>Wolfram<input id="wolfram-rule" type="number" min="0" max="255" step="1" value="90" /></label>
-            <label>Generateur<select id="rule-generator"><option value="wolfram">Wolfram</option><option value="random">Table aleatoire</option><option value="symmetric">Table symetrique</option><option value="totalistic">Totalistique</option></select></label>
-            <button id="generate-rule" type="button">Generer</button>
+            <label>Générateur<select id="rule-generator"><option value="wolfram">Wolfram</option><option value="random">Table aléatoire</option><option value="symmetric">Table symétrique</option><option value="totalistic">Totalistique</option></select></label>
+            <button id="generate-rule" type="button">Générer</button>
           </div>
-          <p class="meta">Les tables sont declaratives. Le mode totalistique calcule la sortie depuis la somme du voisinage; les autres modes materialisent une table.</p>
+          <p class="meta">Les tables sont déclaratives. Le mode totalistique calcule la sortie depuis la somme du voisinage ; les autres modes matérialisent une table.</p>
         </div>
 
+        <!-- JSON Configuration -->
         <div class="config-panel json-panel">
           <div class="panel-heading inline-heading">
             <div>
-              <p class="eyebrow">json</p>
+              <p class="eyebrow">JSON</p>
               <h2>Configuration brute</h2>
             </div>
             <div class="button-row">
@@ -93,11 +243,217 @@
               <label class="file-button">Importer<input id="import-json" type="file" accept="application/json,.json" /></label>
             </div>
           </div>
-          <textarea id="config-json" spellcheck="false"></textarea>
+          <textarea id="config-json" spellcheck="false" aria-label="Éditeur de configuration JSON"></textarea>
         </div>
       </section>
     </main>
+
     <script src="automate-core.js"></script>
     <script type="module" src="app.mjs"></script>
+    <script>
+      // Theme Toggle
+      document.getElementById('btn-theme').addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme') || 'auto';
+        const next = current === 'light' ? 'dark' : current === 'dark' ? 'auto' : 'light';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme-preference', next);
+        updateThemeIcon(next);
+      });
+
+      function updateThemeIcon(theme) {
+        const btn = document.getElementById('btn-theme');
+        if (theme === 'light') btn.textContent = '🌙';
+        else if (theme === 'dark') btn.textContent = '☀️';
+        else btn.textContent = '◐';
+      }
+
+      // Load saved theme
+      const saved = localStorage.getItem('theme-preference') || 'auto';
+      document.documentElement.setAttribute('data-theme', saved);
+      updateThemeIcon(saved);
+
+      // Palette Selector
+      document.querySelectorAll('.palette-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.palette-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          document.documentElement.setAttribute('data-palette', btn.dataset.palette);
+          localStorage.setItem('palette-preference', btn.dataset.palette);
+        });
+      });
+
+      // Load saved palette
+      const savedPalette = localStorage.getItem('palette-preference') || 'cosmic';
+      document.documentElement.setAttribute('data-palette', savedPalette);
+      document.querySelector(`[data-palette="${savedPalette}"]`)?.classList.add('active');
+
+      // Inspector Tabs
+      document.querySelectorAll('.inspector-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.inspector-tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.inspector-panel').forEach(p => p.classList.remove('active'));
+          btn.classList.add('active');
+          document.getElementById(btn.dataset.panel + '-panel').classList.add('active');
+        });
+      });
+
+      // Tab Navigation
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          // Hide/show panels based on tab
+          if (tab.id === 'tab-main') {
+            document.getElementById('main-panel').style.display = 'grid';
+            document.getElementById('gallery-panel').style.display = 'none';
+            document.querySelector('.config-lab').style.display = 'grid';
+          } else if (tab.id === 'tab-gallery') {
+            document.getElementById('main-panel').style.display = 'none';
+            document.getElementById('gallery-panel').style.display = 'block';
+            document.querySelector('.config-lab').style.display = 'none';
+          }
+        });
+      });
+
+      // Gradient Editor
+      let gradientType = 'linear';
+      const gradientPreview = document.getElementById('gradient-preview');
+      const gradColorInputs = [
+        document.getElementById('grad-color-0'),
+        document.getElementById('grad-color-1'),
+        document.getElementById('grad-color-2')
+      ];
+      const gradStopInputs = [
+        document.getElementById('grad-stop-0'),
+        document.getElementById('grad-stop-1'),
+        document.getElementById('grad-stop-2')
+      ];
+      const gradPosDisplays = [
+        document.getElementById('grad-pos-0'),
+        document.getElementById('grad-pos-1'),
+        document.getElementById('grad-pos-2')
+      ];
+
+      function updateGradientPreview() {
+        const colors = gradColorInputs.map(input => input.value);
+        const positions = gradStopInputs.map(input => input.value);
+
+        let gradient = '';
+        if (gradientType === 'linear') {
+          gradient = `linear-gradient(90deg, ${colors.map((c, i) => `${c} ${positions[i]}%`).join(', ')})`;
+        } else if (gradientType === 'radial') {
+          gradient = `radial-gradient(circle, ${colors.map((c, i) => `${c} ${positions[i]}%`).join(', ')})`;
+        } else if (gradientType === 'conic') {
+          gradient = `conic-gradient(from 0deg, ${colors.map((c, i) => `${c} ${positions[i]}%`).join(', ')})`;
+        }
+
+        gradientPreview.style.background = gradient;
+        localStorage.setItem('gradient-preference', JSON.stringify({
+          type: gradientType,
+          colors: colors,
+          positions: positions.map(Number)
+        }));
+      }
+
+      // Gradient type selector
+      document.querySelectorAll('.gradient-type-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.gradient-type-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          gradientType = btn.dataset.gradientType;
+          updateGradientPreview();
+        });
+      });
+
+      // Gradient color and position inputs
+      gradColorInputs.forEach((input, i) => {
+        input.addEventListener('input', updateGradientPreview);
+      });
+
+      gradStopInputs.forEach((input, i) => {
+        input.addEventListener('input', () => {
+          gradPosDisplays[i].textContent = input.value;
+          updateGradientPreview();
+        });
+      });
+
+      // Reverse gradient
+      document.getElementById('grad-reverse').addEventListener('click', () => {
+        const colors = gradColorInputs.map(input => input.value);
+        const positions = gradStopInputs.map(input => Number(input.value));
+
+        colors.reverse();
+        positions.reverse().forEach((pos, i) => {
+          positions[i] = 100 - pos;
+        });
+
+        gradColorInputs.forEach((input, i) => {
+          input.value = colors[i];
+        });
+        gradStopInputs.forEach((input, i) => {
+          input.value = positions[i];
+          gradPosDisplays[i].textContent = positions[i];
+        });
+
+        updateGradientPreview();
+      });
+
+      // Preset gradients
+      document.querySelectorAll('.preset-gradient-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const gradient = JSON.parse(btn.dataset.gradient);
+          gradientType = gradient.type;
+
+          document.querySelectorAll('.gradient-type-btn').forEach(b => b.classList.remove('active'));
+          document.querySelector(`[data-gradient-type="${gradientType}"]`).classList.add('active');
+
+          gradient.colors.forEach((color, i) => {
+            if (gradColorInputs[i]) {
+              gradColorInputs[i].value = color;
+            }
+          });
+
+          gradient.positions.forEach((pos, i) => {
+            if (gradStopInputs[i]) {
+              gradStopInputs[i].value = pos;
+              if (gradPosDisplays[i]) {
+                gradPosDisplays[i].textContent = pos;
+              }
+            }
+          });
+
+          updateGradientPreview();
+        });
+      });
+
+      // Initialize gradient
+      updateGradientPreview();
+
+      // Canvas Zoom Controls
+      let zoomLevel = 100;
+      document.getElementById('canvas-zoom-out').addEventListener('click', () => {
+        zoomLevel = Math.max(25, zoomLevel - 10);
+        document.getElementById('canvas-zoom-display').textContent = zoomLevel + '%';
+        // Apply zoom to canvas (integration with existing code)
+      });
+
+      document.getElementById('canvas-zoom-in').addEventListener('click', () => {
+        zoomLevel = Math.min(400, zoomLevel + 10);
+        document.getElementById('canvas-zoom-display').textContent = zoomLevel + '%';
+        // Apply zoom to canvas (integration with existing code)
+      });
+
+      document.getElementById('canvas-reset').addEventListener('click', () => {
+        zoomLevel = 100;
+        document.getElementById('canvas-zoom-display').textContent = '100%';
+        // Reset canvas (integration with existing code)
+      });
+
+      // HUD Metrics Update (placeholder for actual data)
+      setInterval(() => {
+        // These would be updated by the actual automata simulation
+        document.getElementById('hud-rule').textContent = document.getElementById('wolfram-rule').value;
+      }, 500);
+    </script>
   </body>
 </html>
