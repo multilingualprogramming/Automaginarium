@@ -28,19 +28,14 @@ function testPresetFiles() {
   }
 }
 
-function testDeployableGeneratedAssets() {
-  const required = [
-    "public/generated/automate_packed/module.wasm",
-    "public/generated/automate_packed/host_shim.mjs",
-    "public/generated/automate_packed_runtime.mjs",
-    "public/generated/automate_packed/abi_manifest.json",
-  ];
-  for (const relative of required) {
-    assert(fs.existsSync(path.join(root, relative)), `${relative} missing`);
-  }
+function testRuntimeLoaderIsCommitted() {
+  assert(fs.existsSync(path.join(root, "public/generated/automate_packed_runtime.mjs")));
+  const loader = read("public/generated/automate_packed_runtime.mjs");
+  assert(loader.includes("./automate_packed/module.wasm"));
+  assert(loader.includes("./automate_packed/host_shim.mjs"));
 }
 
 testPagesEntrypoints();
 testPresetFiles();
-testDeployableGeneratedAssets();
+testRuntimeLoaderIsCommitted();
 console.log("stage5 static ok");

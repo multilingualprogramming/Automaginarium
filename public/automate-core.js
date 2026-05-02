@@ -25,8 +25,9 @@ function normaliserConfiguration(configuration) {
     ? configuration.alphabet_sortie
     : alphabetEntree;
   let tailleVoisinage = Number(configuration.taille_voisinage || 3);
-  if (tailleVoisinage < 1) tailleVoisinage = 1;
-  if (tailleVoisinage % 2 === 0) tailleVoisinage += 1;
+  tailleVoisinage = Math.trunc(callPacked("taille_voisinage_normalisee", [tailleVoisinage], (
+    tailleVoisinage < 1 ? 1 : (tailleVoisinage % 2 === 0 ? tailleVoisinage + 1 : tailleVoisinage)
+  )));
   return {
     nom: configuration.nom || "Univers sans nom",
     alphabet_entree: alphabetEntree,
@@ -170,6 +171,26 @@ function callPacked(name, args, fallback) {
   return fallback;
 }
 
+function codeVoisinageNumerique(voisinage, tailleAlphabet) {
+  if (!voisinage.every((value) => Number.isInteger(Number(value)))) return null;
+  const values = voisinage.map(Number);
+  if (values.length === 3) {
+    return Math.trunc(callPacked(
+      "code_voisinage_3_base",
+      [values[0], values[1], values[2], tailleAlphabet],
+      values.reduce((code, value) => code * tailleAlphabet + value, 0),
+    ));
+  }
+  if (values.length === 5) {
+    return Math.trunc(callPacked(
+      "code_voisinage_5_base",
+      [values[0], values[1], values[2], values[3], values[4], tailleAlphabet],
+      values.reduce((code, value) => code * tailleAlphabet + value, 0),
+    ));
+  }
+  return values.reduce((code, value) => code * tailleAlphabet + value, 0);
+}
+
 function toutesClesVoisinage(alphabet, taille) {
   const keys = [];
   function visit(prefix, depth) {
@@ -223,4 +244,5 @@ window.AutomaginariumCore = {
   cleVoisinage,
   toutesClesVoisinage,
   validerConfiguration,
+  codeVoisinageNumerique,
 };

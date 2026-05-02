@@ -16,6 +16,7 @@ Thumbs.db
 
 # Python/cache helpers
 __pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
 .pytest_cache/
@@ -28,14 +29,15 @@ __pycache__/
 /tmp/
 /coverage/
 
+# Generated Multilingual/WASM artifacts.
+# GitHub Actions regenerates these before publishing Pages.
+/public/generated/automate_packed/
+/public/generated/automate_universel/
+/public/generated/automate_universel.py
+
 # Logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-
-# Keep deployable static artifacts for GitHub Pages.
-# public/generated contains the Multilingual/WASM browser bundle.
-!public/generated/
-!public/generated/**

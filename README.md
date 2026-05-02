@@ -59,10 +59,20 @@ https://<owner>.github.io/Automaginarium/
 
 See `docs/github-pages.md` for deployment notes.
 
+Useful docs:
+
+- `docs/quickstart.md`
+- `docs/create-universe.md`
+- `docs/gallery.md`
+- `docs/stage4-runtime.md`
+- `docs/release-checklist.md`
+
 The repository also includes GitHub Actions workflows:
 
 - `.github/workflows/deploy.yml` compiles the French Multilingual sources, validates the browser/WASM runtime, prepares a static Pages artifact, and deploys on pushes to `main`.
 - `.github/workflows/monitor-multilingual.yml` runs scheduled compatibility checks against pinned, latest, and upstream `multilingualprogramming` builds.
+
+Generated Multilingual/WASM outputs under `public/generated/automate_packed/` are intentionally ignored. GitHub Actions regenerates them before publishing Pages.
 
 Stage 3 also adds smoke tests:
 
@@ -82,6 +92,12 @@ Stage 5 adds the preset gallery and static deployment checks:
 
 ```bash
 node tests/stage5-static.js
+```
+
+Stage 6 strengthens Multilingual ownership by testing the generated Python produced from the French core:
+
+```bash
+python tests/stage6_french_core.py
 ```
 
 ## Attribution

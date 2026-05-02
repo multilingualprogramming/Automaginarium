@@ -73,7 +73,7 @@ jobs:
         run: |
           mkdir -p public/generated
           python -m multilingualprogramming compile src/automate_universel.ml > public/generated/automate_universel.py
-          python -m multilingualprogramming build-wasm-bundle src/automate_packed_wasm.ml --out-dir public/generated/automate_packed --wasm-target browser
+          python -m multilingualprogramming build-wasm-bundle src/automate_packed_wasm.ml --out-dir public/generated/automate_packed
           cp public/generated/automate_packed/host_shim.js public/generated/automate_packed/host_shim.mjs
 
       - name: Verifier la syntaxe JavaScript
@@ -85,6 +85,7 @@ jobs:
 
       - name: Valider le moteur et le WASM
         run: |
+          python tests/stage6_french_core.py
           node tests/stage3-smoke.js
           node tests/stage4-wasm.mjs
           node tests/stage5-static.js
