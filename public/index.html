@@ -22,24 +22,10 @@
     </header>
 
     <main class="app-shell">
-      <section class="hero-band" aria-labelledby="app-title">
-        <div class="hero-copy">
-          <p class="eyebrow">Laboratoire interactif</p>
-          <p class="lede">Un laboratoire de r&egrave;gles, d'alphabets et de voisinages pour faire appara&icirc;tre des univers configurables.</p>
-        </div>
-        <div class="hero-signals" aria-label="Signaux du laboratoire">
-          <div class="hero-signal-card">
-            <span class="hero-signal-label">Flux</span>
-            <strong>Param&egrave;tres -&gt; R&egrave;gles -&gt; Univers</strong>
-          </div>
-          <div class="hero-signal-card">
-            <span class="hero-signal-label">Mode</span>
-            <strong id="live-mode-text">Aper&ccedil;u temps r&eacute;el actif</strong>
-          </div>
-          <div class="hero-signal-card">
-            <span class="hero-signal-label">Impact</span>
-            <strong id="live-impact-text">Chaque ajustement recompose l'univers</strong>
-          </div>
+      <section class="hero-band minimal" aria-labelledby="app-title">
+        <div class="hero-indicator">
+          <span class="sync-pulse" id="hero-sync-dot"></span>
+          <span id="hero-status-text">Synchronisation live</span>
         </div>
       </section>
 
@@ -47,11 +33,6 @@
         <div class="canvas-wrap">
           <div class="canvas-aura" aria-hidden="true"></div>
           <canvas id="universe" width="805" height="500"></canvas>
-          <div class="canvas-story glass-panel" aria-live="polite">
-            <span class="live-badge" id="live-preview-badge">Aper&ccedil;u live</span>
-            <strong id="live-preview-origin">Univers synchronis&eacute;</strong>
-            <p id="live-preview-summary">Les param&egrave;tres et les r&egrave;gles se projettent ici en temps r&eacute;el.</p>
-          </div>
           <div class="canvas-hud">
             <div class="hud-metric">
               <strong id="hud-rule">90</strong>
@@ -85,14 +66,37 @@
 
         <aside class="inspector">
           <div class="inspector-tabs">
-            <button type="button" class="inspector-tab-btn active" data-panel="info">Infos</button>
+            <button type="button" class="inspector-tab-btn active" data-panel="univers">Univers</button>
+            <button type="button" class="inspector-tab-btn" data-panel="transition">Transition</button>
+            <button type="button" class="inspector-tab-btn" data-panel="info">Infos</button>
             <button type="button" class="inspector-tab-btn" data-panel="display">Affichage</button>
             <button type="button" class="inspector-tab-btn" data-panel="rules">R&egrave;gles</button>
             <button type="button" class="inspector-tab-btn" data-panel="analytics">Analyse</button>
             <button type="button" class="inspector-tab-btn" data-panel="advanced">Avanc&eacute;</button>
           </div>
 
-          <div id="info-panel" class="inspector-panel active">
+          <div id="univers-panel" class="inspector-panel active">
+            <p class="eyebrow">Param&egrave;tres</p>
+            <h3>Univers</h3>
+            <div class="field-grid compact-fields">
+              <label>Alphabet<input id="alphabet-input-quick" type="text" placeholder="0,1,2" /></label>
+              <label>Voisinage<input id="neighborhood-size-quick" type="number" min="1" max="9" step="1" /></label>
+              <label>Largeur<input id="grid-width-quick" type="number" min="21" max="401" step="2" value="805" /></label>
+              <label>Hauteur<input id="grid-height-quick" type="number" min="20" max="240" step="5" value="500" /></label>
+            </div>
+          </div>
+
+          <div id="transition-panel" class="inspector-panel">
+            <p class="eyebrow">R&egrave;gles</p>
+            <h3>Espace de transition</h3>
+            <div class="field-grid compact-fields">
+              <label>Mode<select id="rule-mode-quick"><option value="table">Table</option><option value="totalistique">Totalistique</option><option value="aleatoire">Al&eacute;atoire</option></select></label>
+              <label>Wolfram<input id="wolfram-rule-quick" type="number" min="0" max="255" step="1" value="90" /></label>
+              <button id="generate-rule-quick" type="button">G&eacute;n&eacute;rer</button>
+            </div>
+          </div>
+
+          <div id="info-panel" class="inspector-panel">
             <p class="eyebrow">Configuration active</p>
             <h2 id="config-title">Chargement...</h2>
             <p id="config-meta" class="meta"></p>
@@ -257,7 +261,7 @@
             <label>Nom<input id="config-name" type="text" /></label>
             <label>Alphabet entr&eacute;e<input id="alphabet-input" type="text" placeholder="0,1,2 ou air,feu,eau" /></label>
             <label>Alphabet sortie<input id="alphabet-output" type="text" placeholder="0,1" /></label>
-            <label>Voisinage<input id="neighborhood-size" type="number" min="1" max="9" step="2" /></label>
+            <label>Voisinage<input id="neighborhood-size" type="number" min="1" max="9" step="1" /></label>
             <label>Canaux sortie<input id="channel-count" type="number" min="1" max="4" step="1" /></label>
             <label>Largeur<input id="grid-width" type="number" min="21" max="401" step="2" /></label>
             <label>Hauteur<input id="grid-height" type="number" min="20" max="240" step="5" /></label>
@@ -344,6 +348,12 @@
           btn.classList.add('active');
           document.documentElement.setAttribute('data-palette', btn.dataset.palette);
           localStorage.setItem('palette-preference', btn.dataset.palette);
+          setTimeout(() => {
+            if (typeof window.updatePaletteEditor === 'function') {
+              window.updatePaletteEditor();
+            }
+            window.AutomaginariumApp?.render?.();
+          }, 0);
         });
       });
 
@@ -433,11 +443,19 @@
       document.getElementById('canvas-reset').addEventListener('click', () => {
         zoomLevel = 100;
         document.getElementById('canvas-zoom-display').textContent = '100%';
+        if (window.AutomaginariumApp?.render) {
+          window.AutomaginariumApp.render();
+        }
       });
 
-      setInterval(() => {
-        document.getElementById('hud-rule').textContent = document.getElementById('wolfram-rule').value;
-      }, 500);
+      function updateHUDRule() {
+        const ruleValue = document.getElementById('wolfram-rule')?.value || document.getElementById('wolfram-rule-quick')?.value || '90';
+        document.getElementById('hud-rule').textContent = ruleValue;
+      }
+
+      updateHUDRule();
+      document.getElementById('wolfram-rule')?.addEventListener('input', updateHUDRule);
+      document.getElementById('wolfram-rule-quick')?.addEventListener('input', updateHUDRule);
 
       let isPlaying = false;
       let simulationSpeed = 5;
@@ -451,6 +469,9 @@
         playBtn.classList.add('hidden');
         pauseBtn.classList.remove('hidden');
         document.documentElement.setAttribute('data-playing', 'true');
+        if (window.AutomaginariumApp?.render) {
+          window.AutomaginariumApp.render();
+        }
       });
 
       pauseBtn.addEventListener('click', () => {
@@ -730,6 +751,56 @@
       commandPalette.addEventListener('click', (e) => {
         if (e.target === commandPalette) closeCommandPalette();
       });
+
+      // Sync quick controls with main config fields
+      const syncPairs = [
+        { quick: 'alphabet-input-quick', main: 'alphabet-input' },
+        { quick: 'neighborhood-size-quick', main: 'neighborhood-size' },
+        { quick: 'grid-width-quick', main: 'grid-width' },
+        { quick: 'grid-height-quick', main: 'grid-height' },
+        { quick: 'rule-mode-quick', main: 'rule-mode' },
+        { quick: 'wolfram-rule-quick', main: 'wolfram-rule' }
+      ];
+
+      syncPairs.forEach(pair => {
+        const quickEl = document.getElementById(pair.quick);
+        const mainEl = document.getElementById(pair.main);
+        if (quickEl && mainEl) {
+          quickEl.addEventListener('input', () => {
+            const oldValue = mainEl.value;
+            mainEl.value = quickEl.value;
+            mainEl.dispatchEvent(new Event('input', { bubbles: true }));
+            mainEl.dispatchEvent(new Event('change', { bubbles: true }));
+
+            // When neighborhood changes, regenerate the rule table to match new structure
+            if (pair.quick === 'neighborhood-size-quick' && oldValue !== quickEl.value) {
+              const ruleGen = document.getElementById('rule-generator');
+              const newNeighborhood = Number(quickEl.value);
+
+              // If using Wolfram but neighborhood is not 3, switch to random generator
+              if (ruleGen && ruleGen.value === 'wolfram' && newNeighborhood !== 3) {
+                ruleGen.value = 'random';
+              }
+
+              // Regenerate rules for the new neighborhood
+              const generateBtnMain = document.getElementById('generate-rule');
+              if (generateBtnMain) {
+                setTimeout(() => generateBtnMain.click(), 100);
+              }
+            }
+          });
+          mainEl.addEventListener('input', () => {
+            quickEl.value = mainEl.value;
+          });
+        }
+      });
+
+      // Generate rule button sync
+      const generateBtnQuick = document.getElementById('generate-rule-quick');
+      const generateBtnMain = document.getElementById('generate-rule');
+      if (generateBtnQuick && generateBtnMain) {
+        generateBtnQuick.addEventListener('click', () => generateBtnMain.click());
+      }
     </script>
   </body>
 </html>

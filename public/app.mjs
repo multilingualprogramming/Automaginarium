@@ -248,18 +248,18 @@ function summarizeTransition(config) {
 function setSyncState(kind, text) {
   syncIndicatorDot.dataset.state = kind;
   syncIndicatorText.textContent = text;
-  livePreviewBadge.textContent = kind === "error" ? "Validation" : kind === "pending" ? "Projection..." : "Apercu live";
-  liveModeText.textContent = kind === "error" ? "Correction requise" : kind === "pending" ? "Recomposition en cours" : "Apercu temps reel actif";
+  if (livePreviewBadge) livePreviewBadge.textContent = kind === "error" ? "Validation" : kind === "pending" ? "Projection..." : "Apercu live";
+  if (liveModeText) liveModeText.textContent = kind === "error" ? "Correction requise" : kind === "pending" ? "Recomposition en cours" : "Apercu temps reel actif";
 }
 
 function updateLiveNarrative(config, source, live) {
   const sourceLabel = source || "Configuration";
   const liveLabel = live ? "Projection immediate" : "Synchronisation";
-  livePreviewOrigin.textContent = `${liveLabel} depuis ${sourceLabel}`;
-  livePreviewSummary.textContent = `${summarizeConfig(config)}. ${summarizeTransition(config)}`;
-  liveImpactText.textContent = `Impact direct: ${config.mode_regle} sur ${config.largeur} x ${config.hauteur}`;
-  universeLiveSummary.innerHTML = `<span class="live-summary-label">Projection</span><strong>${summarizeConfig(config)}</strong>`;
-  transitionLiveSummary.innerHTML = `<span class="live-summary-label">Reponse</span><strong>${summarizeTransition(config)}</strong>`;
+  if (livePreviewOrigin) livePreviewOrigin.textContent = `${liveLabel} depuis ${sourceLabel}`;
+  if (livePreviewSummary) livePreviewSummary.textContent = `${summarizeConfig(config)}. ${summarizeTransition(config)}`;
+  if (liveImpactText) liveImpactText.textContent = `Impact direct: ${config.mode_regle} sur ${config.largeur} x ${config.hauteur}`;
+  if (universeLiveSummary) universeLiveSummary.innerHTML = `<span class="live-summary-label">Projection</span><strong>${summarizeConfig(config)}</strong>`;
+  if (transitionLiveSummary) transitionLiveSummary.innerHTML = `<span class="live-summary-label">Reponse</span><strong>${summarizeTransition(config)}</strong>`;
 }
 
 function renderTransitionSignals(config) {
@@ -373,8 +373,8 @@ function applyConfig(config, { updateJson = true, updateControls = true, source 
   showStatus(validation);
   if (!validation.valid) {
     setSyncState("error", `Correction requise: ${validation.errors[0] || "configuration invalide"}`);
-    livePreviewOrigin.textContent = `Validation depuis ${source}`;
-    livePreviewSummary.textContent = validation.errors.join(" ");
+    if (livePreviewOrigin) livePreviewOrigin.textContent = `Validation depuis ${source}`;
+    if (livePreviewSummary) livePreviewSummary.textContent = validation.errors.join(" ");
     return false;
   }
   state.config = normalized;
