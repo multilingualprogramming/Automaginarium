@@ -162,7 +162,13 @@ function controlsToConfig() {
     config.etat_initial.graine = current.etat_initial?.graine ?? 42;
     config.etat_initial.probabilite = Math.max(0, Math.min(1, Number(controls.initialProbability.value || 0.28)));
   }
-  if (!config.table_transition) config.table_transition = {};
+  // Clear transition table if alphabet has changed (otherwise table keys won't match new alphabet)
+  const alphabetChanged = current.alphabet_entree && (current.alphabet_entree.length !== inputAlphabet.length || current.taille_voisinage !== neighborhood);
+  if (alphabetChanged) {
+    config.table_transition = {};
+  } else if (!config.table_transition) {
+    config.table_transition = {};
+  }
   return config;
 }
 

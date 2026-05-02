@@ -822,6 +822,13 @@
                 setTimeout(() => generateBtnMain.click(), 100);
               }
             }
+
+            // When alphabet changes, regenerate the rule table to match new alphabet
+            if (pair.quick === 'alphabet-input-quick' && oldValue !== quickEl.value) {
+              if (generateBtnMain) {
+                setTimeout(() => generateBtnMain.click(), 100);
+              }
+            }
           });
           mainEl.addEventListener('input', () => {
             quickEl.value = mainEl.value;
