@@ -454,28 +454,34 @@
 
       function updateGradientPreview() {
         const colors = gradColorInputs.map(input => input.value);
-        const positions = gradStopInputs.map(input => input.value);
+        const positions = gradStopInputs.map(input => Number(input.value));
+
+        // Sort colors and positions by position value to ensure correct gradient rendering
+        const sortedStops = positions.map((pos, i) => ({ pos, color: colors[i] }))
+          .sort((a, b) => a.pos - b.pos);
+        const sortedPositions = sortedStops.map(s => s.pos);
+        const sortedColors = sortedStops.map(s => s.color);
 
         let gradient = '';
         if (gradientType === 'linear') {
-          gradient = `linear-gradient(90deg, ${colors.map((c, i) => `${c} ${positions[i]}%`).join(', ')})`;
+          gradient = `linear-gradient(90deg, ${sortedColors.map((c, i) => `${c} ${sortedPositions[i]}%`).join(', ')})`;
         } else if (gradientType === 'radial') {
-          gradient = `radial-gradient(circle, ${colors.map((c, i) => `${c} ${positions[i]}%`).join(', ')})`;
+          gradient = `radial-gradient(circle, ${sortedColors.map((c, i) => `${c} ${sortedPositions[i]}%`).join(', ')})`;
         } else if (gradientType === 'conic') {
-          gradient = `conic-gradient(from 0deg, ${colors.map((c, i) => `${c} ${positions[i]}%`).join(', ')})`;
+          gradient = `conic-gradient(from 0deg, ${sortedColors.map((c, i) => `${c} ${sortedPositions[i]}%`).join(', ')})`;
         }
 
         gradientPreview.style.background = gradient;
         const gradientData = {
           type: gradientType,
-          colors: colors,
-          positions: positions.map(Number)
+          colors: sortedColors,
+          positions: sortedPositions
         };
         localStorage.setItem('gradient-preference', JSON.stringify(gradientData));
 
         // Apply gradient to cellular automata canvas
         if (typeof window.applyGradientToPalette === 'function') {
-          window.applyGradientToPalette(colors, gradientType, positions.map(Number));
+          window.applyGradientToPalette(sortedColors, gradientType, sortedPositions);
         }
       }
 

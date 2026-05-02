@@ -186,6 +186,7 @@ function interpolateColor(color1, color2, factor) {
 function getGradientColor(position, colors, positions) {
   if (!colors || colors.length === 0) return '#ffffff';
   if (colors.length === 1) return colors[0];
+  if (!positions || positions.length !== colors.length) return colors[0];
 
   // Normalize position to 0-1
   const t = Math.max(0, Math.min(1, position));
@@ -201,12 +202,16 @@ function getGradientColor(position, colors, positions) {
     }
   }
 
+  // Clamp to valid indices
+  startIdx = Math.min(startIdx, positions.length - 2);
+  const endIdx = Math.min(startIdx + 1, positions.length - 1);
+
   const pos1 = positions[startIdx] / 100;
-  const pos2 = positions[startIdx + 1] / 100;
+  const pos2 = positions[endIdx] / 100;
   const range = pos2 - pos1;
   const factor = range === 0 ? 0 : (t - pos1) / range;
 
-  return interpolateColor(colors[startIdx], colors[startIdx + 1], factor);
+  return interpolateColor(colors[startIdx], colors[endIdx], factor);
 }
 
 function colorFor(value, config, rowIndex, colIndex, channels) {
@@ -253,13 +258,28 @@ function colorFor(value, config, rowIndex, colIndex, channels) {
 window.applyGradientToPalette = function(colors, type, positions) {
   if (!state.config) return;
   state.config.rendu = state.config.rendu || {};
+
+  const finalColors = colors || ["#07121f", "#ff9d4d", "#53b0ff", "#f5f7ff"];
+  const finalPositions = positions || [0, 50, 100];
+
+  // Ensure colors and positions arrays have the same length
+  const length = Math.min(finalColors.length, finalPositions.length);
+  const syncedColors = finalColors.slice(0, length);
+  const syncedPositions = finalPositions.slice(0, length);
+
+  // If arrays were mismatched, pad with defaults
+  if (syncedColors.length < 2) {
+    syncedColors.push("#ff9d4d", "#f5f7ff");
+    syncedPositions.push(50, 100);
+  }
+
   state.config.rendu.gradient = {
-    colors: colors || ["#07121f", "#ff9d4d", "#53b0ff", "#f5f7ff"],
+    colors: syncedColors,
     type: type || 'linear',
-    positions: positions || [0, 50, 100]
+    positions: syncedPositions.map(Number)
   };
   // Keep palette as fallback
-  state.config.rendu.palette = colors || ["#07121f", "#ff9d4d", "#53b0ff", "#f5f7ff"];
+  state.config.rendu.palette = syncedColors;
   render();
 };
 
@@ -449,4 +469,4 @@ document.querySelector("#export-png").addEventListener("click", () => {
 document.querySelector("#refresh-gallery").addEventListener("click", renderGallery);
 
 await renderGallery();
-loadPreset("wolfram-90");
+await loadPreset("wolfram-90");
