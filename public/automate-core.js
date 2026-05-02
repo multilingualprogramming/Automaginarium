@@ -158,6 +158,97 @@ function tableWolfram(numeroRegle) {
   return table;
 }
 
+function ruleConfiguration(configuration) {
+  const s = configuration.alphabet_entree.length; // size of input alphabet
+  const k = configuration.taille_voisinage; // neighborhood size
+  const t = configuration.alphabet_sortie.length; // size of output alphabet
+  const m = configuration.nombre_canaux_sortie; // number of output channels
+  const base = Math.pow(t, m);
+  const digits = Math.pow(s, k);
+  // Use BigInt for maxRule to handle large numbers correctly
+  const baseBig = BigInt(Math.round(base));
+  const digitsBig = BigInt(Math.round(digits));
+  const maxRule = baseBig ** digitsBig;
+  return { s, k, t, m, base, digits, maxRule };
+}
+
+function neighborhoodToRuleIndex(voisinage, alphabet) {
+  const s = alphabet.length;
+  let index = 0;
+  for (let i = 0; i < voisinage.length; i += 1) {
+    const symbolIndex = alphabet.indexOf(voisinage[i]);
+    if (symbolIndex < 0) return null;
+    index = index * s + symbolIndex;
+  }
+  return index;
+}
+
+function ruleIndexToNeighborhood(index, config) {
+  const { s, k } = ruleConfiguration(config);
+  const voisinage = [];
+  let remaining = index;
+  for (let i = k - 1; i >= 0; i -= 1) {
+    const symbolIndex = Math.floor(remaining / Math.pow(s, i));
+    voisinage.push(config.alphabet_entree[symbolIndex]);
+    remaining = remaining % Math.pow(s, i);
+  }
+  return voisinage;
+}
+
+function outputToRuleDigit(output, config) {
+  const { t, m } = ruleConfiguration(config);
+  const normalized = normaliserSortie(output, config);
+  let digit = 0;
+  for (let ch = 0; ch < m; ch += 1) {
+    const symbolIndex = config.alphabet_sortie.indexOf(normalized[ch]);
+    if (symbolIndex < 0) return null;
+    digit = digit * t + symbolIndex;
+  }
+  return digit;
+}
+
+function ruleDigitToOutput(digit, config) {
+  const { t, m } = ruleConfiguration(config);
+  const output = [];
+  let remaining = digit;
+  for (let ch = m - 1; ch >= 0; ch -= 1) {
+    const symbolIndex = Math.floor(remaining / Math.pow(t, ch));
+    output.push(config.alphabet_sortie[symbolIndex]);
+    remaining = remaining % Math.pow(t, ch);
+  }
+  return output;
+}
+
+function encodeRuleNumber(transitionTable, config) {
+  const { digits, base } = ruleConfiguration(config);
+  let ruleNumber = 0n;
+  const baseBig = BigInt(base);
+  for (let index = 0; index < digits; index += 1) {
+    const voisinage = ruleIndexToNeighborhood(index, config);
+    const key = cleVoisinage(voisinage);
+    const output = transitionTable[key] ?? sortieDefaut(config);
+    const digit = outputToRuleDigit(output, config);
+    if (digit === null) return null;
+    ruleNumber = ruleNumber + (BigInt(digit) * (baseBig ** BigInt(index)));
+  }
+  return ruleNumber;
+}
+
+function decodeRuleNumber(ruleNumber, config) {
+  const { digits, base } = ruleConfiguration(config);
+  const table = {};
+  let remaining = BigInt(ruleNumber);
+  const baseBig = BigInt(base);
+  for (let index = 0; index < digits; index += 1) {
+    const digit = Number(remaining % baseBig);
+    remaining = remaining / baseBig;
+    const voisinage = ruleIndexToNeighborhood(index, config);
+    const output = ruleDigitToOutput(digit, config);
+    table[cleVoisinage(voisinage)] = output;
+  }
+  return table;
+}
+
 function callPacked(name, args, fallback) {
   const packed = window.AutomaginariumPacked;
   if (packed && typeof packed[name] === "function") {
@@ -245,4 +336,7 @@ window.AutomaginariumCore = {
   toutesClesVoisinage,
   validerConfiguration,
   codeVoisinageNumerique,
+  ruleConfiguration,
+  encodeRuleNumber,
+  decodeRuleNumber,
 };

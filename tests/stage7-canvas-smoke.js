@@ -248,4 +248,162 @@ testSkipConditionStringAlphabet();
 testExamplesInitialSorties();
 testMultiChannelRenderingEdgeCases();
 
+function testRuleConfigurationBinary3() {
+  const config = {
+    alphabet_entree: [0, 1],
+    alphabet_sortie: [0, 1],
+    taille_voisinage: 3,
+    nombre_canaux_sortie: 1,
+  };
+  const rc = AutomaginariumCore.ruleConfiguration(config);
+  assert.equal(rc.s, 2, "input alphabet size");
+  assert.equal(rc.k, 3, "neighborhood size");
+  assert.equal(rc.t, 2, "output alphabet size");
+  assert.equal(rc.m, 1, "output channels");
+  assert.equal(rc.base, 2, "base = 2^1");
+  assert.equal(rc.digits, 8, "digits = 2^3");
+  assert.equal(rc.maxRule, 256n, "max rule = 2^8");
+}
+
+function testRuleConfigurationBinary3Binary2Channel() {
+  const config = {
+    alphabet_entree: [0, 1],
+    alphabet_sortie: [0, 1],
+    taille_voisinage: 3,
+    nombre_canaux_sortie: 2,
+  };
+  const rc = AutomaginariumCore.ruleConfiguration(config);
+  assert.equal(rc.base, 4, "base = 2^2");
+  assert.equal(rc.digits, 8, "digits = 2^3");
+  // 4^8 = 65536, maxRule is the count of possible rules
+  assert.equal(rc.maxRule, 65536n, "max rule count = 4^8");
+}
+
+function testRuleConfigurationQuaternary3() {
+  const config = {
+    alphabet_entree: [0, 1, 2, 3],
+    alphabet_sortie: [0, 1, 2, 3],
+    taille_voisinage: 3,
+    nombre_canaux_sortie: 1,
+  };
+  const rc = AutomaginariumCore.ruleConfiguration(config);
+  assert.equal(rc.s, 4, "input alphabet size");
+  assert.equal(rc.base, 4, "base = 4^1");
+  assert.equal(rc.digits, 64, "digits = 4^3");
+}
+
+function testNeighborhoodToRuleIndex() {
+  const config = {
+    alphabet_entree: [0, 1],
+    alphabet_sortie: [0, 1],
+    taille_voisinage: 3,
+    nombre_canaux_sortie: 1,
+  };
+  assert.equal(AutomaginariumCore.codeVoisinageNumerique([0, 0, 0], 2), 0);
+  assert.equal(AutomaginariumCore.codeVoisinageNumerique([0, 0, 1], 2), 1);
+  assert.equal(AutomaginariumCore.codeVoisinageNumerique([0, 1, 0], 2), 2);
+  assert.equal(AutomaginariumCore.codeVoisinageNumerique([0, 1, 1], 2), 3);
+  assert.equal(AutomaginariumCore.codeVoisinageNumerique([1, 0, 0], 2), 4);
+  assert.equal(AutomaginariumCore.codeVoisinageNumerique([1, 0, 1], 2), 5);
+  assert.equal(AutomaginariumCore.codeVoisinageNumerique([1, 1, 0], 2), 6);
+  assert.equal(AutomaginariumCore.codeVoisinageNumerique([1, 1, 1], 2), 7);
+}
+
+function testWolfram30Encode() {
+  const config = {
+    alphabet_entree: [0, 1],
+    alphabet_sortie: [0, 1],
+    taille_voisinage: 3,
+    nombre_canaux_sortie: 1,
+  };
+  const table = AutomaginariumCore.tableWolfram(30);
+  const encoded = AutomaginariumCore.encodeRuleNumber(table, config);
+  assert.equal(Number(encoded), 30, "Rule 30 encodes correctly");
+}
+
+function testWolfram30Decode() {
+  const config = {
+    alphabet_entree: [0, 1],
+    alphabet_sortie: [0, 1],
+    taille_voisinage: 3,
+    nombre_canaux_sortie: 1,
+  };
+  // Rule 30 = 00011110 in binary
+  // Bit positions (index 0-7 from LSB): [0]=0, [1]=1, [2]=1, [3]=1, [4]=1, [5]=0, [6]=0, [7]=0
+  const table = AutomaginariumCore.decodeRuleNumber(30n, config);
+  assert.deepEqual(table[JSON.stringify([0, 0, 0])], [0], "000 (index 0) → 0");
+  assert.deepEqual(table[JSON.stringify([0, 0, 1])], [1], "001 (index 1) → 1");
+  assert.deepEqual(table[JSON.stringify([0, 1, 0])], [1], "010 (index 2) → 1");
+  assert.deepEqual(table[JSON.stringify([0, 1, 1])], [1], "011 (index 3) → 1");
+  assert.deepEqual(table[JSON.stringify([1, 0, 0])], [1], "100 (index 4) → 1");
+  assert.deepEqual(table[JSON.stringify([1, 0, 1])], [0], "101 (index 5) → 0");
+  assert.deepEqual(table[JSON.stringify([1, 1, 0])], [0], "110 (index 6) → 0");
+  assert.deepEqual(table[JSON.stringify([1, 1, 1])], [0], "111 (index 7) → 0");
+}
+
+function testRoundTripWolfram() {
+  const config = {
+    alphabet_entree: [0, 1],
+    alphabet_sortie: [0, 1],
+    taille_voisinage: 3,
+    nombre_canaux_sortie: 1,
+  };
+  for (const rule of [30, 110, 184]) {
+    const decoded = AutomaginariumCore.decodeRuleNumber(BigInt(rule), config);
+    const encoded = AutomaginariumCore.encodeRuleNumber(decoded, config);
+    assert.equal(Number(encoded), rule, `Rule ${rule} round-trips correctly`);
+  }
+}
+
+function testMultiChannelRuleEncode() {
+  const config = {
+    alphabet_entree: [0, 1],
+    alphabet_sortie: [0, 1, 2, 3],
+    taille_voisinage: 3,
+    nombre_canaux_sortie: 2,
+  };
+  const table = {};
+  // Simple rule: [000] → [0,1], [001] → [2,3], etc.
+  table[JSON.stringify([0, 0, 0])] = [0, 1];
+  table[JSON.stringify([0, 0, 1])] = [2, 3];
+  table[JSON.stringify([0, 1, 0])] = [1, 0];
+  table[JSON.stringify([0, 1, 1])] = [3, 2];
+  table[JSON.stringify([1, 0, 0])] = [1, 2];
+  table[JSON.stringify([1, 0, 1])] = [3, 1];
+  table[JSON.stringify([1, 1, 0])] = [2, 0];
+  table[JSON.stringify([1, 1, 1])] = [0, 3];
+  const encoded = AutomaginariumCore.encodeRuleNumber(table, config);
+  assert(typeof encoded === 'bigint', "multi-channel rule uses BigInt");
+}
+
+function testStringAlphabetRuleEncode() {
+  const config = {
+    alphabet_entree: ["sol", "graine"],
+    alphabet_sortie: ["sol", "graine", "tige", "fleur"],
+    taille_voisinage: 3,
+    nombre_canaux_sortie: 1,
+  };
+  const table = {};
+  table[JSON.stringify(["sol", "sol", "sol"])] = ["sol"];
+  table[JSON.stringify(["sol", "sol", "graine"])] = ["graine"];
+  table[JSON.stringify(["sol", "graine", "sol"])] = ["tige"];
+  table[JSON.stringify(["sol", "graine", "graine"])] = ["fleur"];
+  table[JSON.stringify(["graine", "sol", "sol"])] = ["graine"];
+  table[JSON.stringify(["graine", "sol", "graine"])] = ["tige"];
+  table[JSON.stringify(["graine", "graine", "sol"])] = ["fleur"];
+  table[JSON.stringify(["graine", "graine", "graine"])] = ["tige"];
+  const encoded = AutomaginariumCore.encodeRuleNumber(table, config);
+  assert.equal(typeof encoded, 'bigint', "string alphabet rule encodes to BigInt");
+}
+
+testRuleConfigurationBinary3();
+testRuleConfigurationBinary3Binary2Channel();
+testRuleConfigurationQuaternary3();
+testNeighborhoodToRuleIndex();
+testWolfram30Encode();
+testWolfram30Decode();
+testRoundTripWolfram();
+testMultiChannelRuleEncode();
+testStringAlphabetRuleEncode();
+
 console.log("stage7 canvas smoke ok");

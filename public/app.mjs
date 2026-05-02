@@ -422,8 +422,9 @@ function buildGeneratedRuleConfig() {
   const config = window.AutomaginariumCore.normaliserConfiguration(controlsToConfig());
   let generator = controls.ruleGenerator.value;
 
-  // Wolfram only works with neighborhood 3 and 1 output channel
-  if (generator === "wolfram" && (config.taille_voisinage !== 3 || config.nombre_canaux_sortie !== 1)) {
+  // Wolfram only works with neighborhood 3, binary alphabet, and 1 output channel
+  const isBinaryAlphabet = config.alphabet_entree.length === 2 && String(config.alphabet_entree[0]) === "0" && String(config.alphabet_entree[1]) === "1";
+  if (generator === "wolfram" && (config.taille_voisinage !== 3 || !isBinaryAlphabet || config.nombre_canaux_sortie !== 1)) {
     generator = "random";
     controls.ruleGenerator.value = "random";
   }
@@ -461,7 +462,26 @@ function queuePreview(action, delay = 180) {
 function queueConfigPreview(source = "Parametres") {
   lastPreviewSource = source;
   queuePreview(() => {
-    applyConfig(controlsToConfig(), { updateJson: false, updateControls: false, source, live: true });
+    // Auto-sync output alphabet to input alphabet if output was empty or matching old input
+    const oldOutputValue = controls.alphabetOutput.value.trim();
+    const oldInputValue = state.config ? encodeList(state.config.alphabet_entree) : "";
+    if (!oldOutputValue || oldOutputValue === oldInputValue) {
+      // Output alphabet was following input, so update it
+      controls.alphabetOutput.value = controls.alphabetInput.value;
+    }
+
+    const newConfig = controlsToConfig();
+    const oldAlphabet = state.config?.alphabet_entree;
+    const newAlphabet = newConfig.alphabet_entree;
+    const alphabetChanged = oldAlphabet && (
+      oldAlphabet.length !== newAlphabet.length ||
+      state.config?.taille_voisinage !== newConfig.taille_voisinage ||
+      state.config?.nombre_canaux_sortie !== newConfig.nombre_canaux_sortie
+    );
+    applyConfig(newConfig, { updateJson: false, updateControls: false, source, live: true });
+    if (alphabetChanged) {
+      setTimeout(() => applyGeneratedRule({ updateJson: false, updateControls: true, source: "Regles (auto)", live: true }), 50);
+    }
   });
 }
 
