@@ -35,6 +35,7 @@ function testRuntimeLoaderIsCommitted() {
   assert(loader.includes("./automate_packed/host_shim.mjs"));
   assert(loader.includes("import * as hostShim"));
   assert(loader.includes("createFallbackDomImports"));
+  assert(loader.includes("print_str"));
 }
 
 testPagesEntrypoints();

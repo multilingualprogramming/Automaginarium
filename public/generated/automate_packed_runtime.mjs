@@ -52,8 +52,26 @@ function createFallbackWasiImports(memoryRef = { current: null }, outputCallback
   };
 }
 
-function createFallbackDomImports() {
-  return { env: {} };
+function createFallbackDomImports(memoryRef = { current: null }, _exportsRef = { current: null }, outputCallback = () => {}) {
+  const readString = (ptr, len) => {
+    const memory = memoryRef.current;
+    if (!memory || ptr <= 0 || len <= 0) return "";
+    return new TextDecoder("utf-8").decode(new Uint8Array(memory.buffer, ptr, len));
+  };
+
+  return {
+    env: {
+      print_str(ptr, len) {
+        outputCallback(readString(ptr, len));
+      },
+      print_num(value) {
+        outputCallback(String(value));
+      },
+      print(value) {
+        outputCallback(String(value));
+      },
+    },
+  };
 }
 
 export async function loadAutomaginariumPacked(options = {}) {
@@ -64,7 +82,7 @@ export async function loadAutomaginariumPacked(options = {}) {
   const createDomImports = hostShim.createDomImports || createFallbackDomImports;
   const imports = {
     ...createWasiImports(memoryRef, options.outputCallback || (() => {})),
-    ...createDomImports(memoryRef, exportsRef),
+    ...createDomImports(memoryRef, exportsRef, options.outputCallback || (() => {})),
   };
 
   let instance;
