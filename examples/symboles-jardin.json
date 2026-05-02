@@ -1,0 +1,30 @@
+{
+  "nom": "Symboles jardin - alphabet nomme",
+  "alphabet_entree": ["sol", "graine"],
+  "alphabet_sortie": ["sol", "graine", "tige", "fleur"],
+  "taille_voisinage": 3,
+  "nombre_canaux_sortie": 2,
+  "mode_regle": "table",
+  "table_transition": {
+    "[\"sol\",\"sol\",\"sol\"]": ["sol", "sol"],
+    "[\"sol\",\"sol\",\"graine\"]": ["graine", "tige"],
+    "[\"sol\",\"graine\",\"sol\"]": ["tige", "fleur"],
+    "[\"sol\",\"graine\",\"graine\"]": ["fleur", "fleur"],
+    "[\"graine\",\"sol\",\"sol\"]": ["graine", "tige"],
+    "[\"graine\",\"sol\",\"graine\"]": ["tige", "fleur"],
+    "[\"graine\",\"graine\",\"sol\"]": ["fleur", "tige"],
+    "[\"graine\",\"graine\",\"graine\"]": ["sol", "fleur"]
+  },
+  "largeur": 141,
+  "hauteur": 100,
+  "frontiere": "fixe",
+  "etat_initial": {
+    "mode": "motif",
+    "valeurs": ["graine", "sol", "graine", "graine", "sol", "graine"]
+  },
+  "rendu": {
+    "taille_cellule": 5,
+    "fond": "#07110a",
+    "palette": ["#07110a", "#9be564", "#53b0ff", "#ff9d4d", "#f7f1d0"]
+  }
+}

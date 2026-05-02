@@ -3,11 +3,14 @@ import { installAutomaginariumPacked } from "./generated/automate_packed_runtime
 await installAutomaginariumPacked();
 
 const PRESETS = [
-  { id: "wolfram-30", label: "Wolfram 30" },
-  { id: "wolfram-90", label: "Wolfram 90" },
-  { id: "binaire-5-sillage", label: "Binaire 5 - Sillage" },
-  { id: "ternaire-totalistique", label: "Ternaire totalistique" },
-  { id: "multi-canal-aurore", label: "Multi-canal Aurore" },
+  { id: "wolfram-30", label: "Wolfram 30", family: "elementaire" },
+  { id: "wolfram-90", label: "Wolfram 90", family: "elementaire" },
+  { id: "wolfram-110", label: "Wolfram 110", family: "elementaire" },
+  { id: "binaire-5-sillage", label: "Binaire 5 - Sillage", family: "voisinage 5" },
+  { id: "ternaire-totalistique", label: "Ternaire totalistique", family: "ternaire" },
+  { id: "quaternaire-cristal", label: "Quaternaire cristal", family: "quaternaire" },
+  { id: "multi-canal-aurore", label: "Multi-canal Aurore", family: "multi-canal" },
+  { id: "symboles-jardin", label: "Symboles jardin", family: "custom" },
 ];
 
 const state = { config: null, universe: null, lastValidConfig: null };
@@ -18,6 +21,7 @@ const title = document.querySelector("#config-title");
 const meta = document.querySelector("#config-meta");
 const statusBox = document.querySelector("#validation-status");
 const tableView = document.querySelector("#rule-table");
+const gallery = document.querySelector("#preset-gallery");
 const controls = {
   name: document.querySelector("#config-name"),
   alphabetInput: document.querySelector("#alphabet-input"),
@@ -37,6 +41,7 @@ const controls = {
   json: document.querySelector("#config-json"),
   importJson: document.querySelector("#import-json"),
 };
+const presetCache = new Map();
 
 function parseSymbol(raw) {
   const trimmed = raw.trim();
@@ -175,6 +180,23 @@ function colorFor(value, config, rowIndex, colIndex, channels) {
   return palette[(index + drift) % palette.length] || palette[0];
 }
 
+function drawUniverseToCanvas(targetCanvas, universe, maxWidth = 240, maxHeight = 132) {
+  const { configuration, lignes, sorties } = universe;
+  const context = targetCanvas.getContext("2d");
+  const cell = Math.max(1, Math.floor(Math.min(maxWidth / configuration.largeur, maxHeight / configuration.hauteur)));
+  targetCanvas.width = configuration.largeur * cell;
+  targetCanvas.height = configuration.hauteur * cell;
+  context.fillStyle = configuration.rendu.fond || "#05070d";
+  context.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
+  lignes.forEach((ligne, y) => {
+    ligne.forEach((value, x) => {
+      if (String(value) === String(configuration.alphabet_entree[0]) && !configuration.rendu.afficher_zero) return;
+      context.fillStyle = colorFor(value, configuration, y, x, sorties?.[y]?.[x]);
+      context.fillRect(x * cell, y * cell, cell, cell);
+    });
+  });
+}
+
 function resizeCanvas(config) {
   const cell = Number(config.rendu.taille_cellule || 5);
   canvas.width = config.largeur * cell;
@@ -222,9 +244,17 @@ function applyConfig(config, { updateJson = true, updateControls = true } = {}) 
 }
 
 async function loadPreset(id) {
-  const response = await fetch(`../examples/${id}.json`);
-  const config = await response.json();
+  const config = await fetchPreset(id);
   applyConfig(config);
+}
+
+async function fetchPreset(id) {
+  if (presetCache.has(id)) return structuredClone(presetCache.get(id));
+  const response = await fetch(`../examples/${id}.json`);
+  if (!response.ok) throw new Error(`Preset introuvable: ${id}`);
+  const config = await response.json();
+  presetCache.set(id, config);
+  return structuredClone(config);
 }
 
 function applyGeneratedRule() {
@@ -258,6 +288,41 @@ function downloadText(filename, text) {
   link.href = url;
   link.click();
   URL.revokeObjectURL(url);
+}
+
+async function renderGallery() {
+  gallery.innerHTML = "";
+  for (const preset of PRESETS) {
+    const config = await fetchPreset(preset.id);
+    const previewConfig = {
+      ...config,
+      largeur: Math.min(config.largeur || 140, 140),
+      hauteur: Math.min(config.hauteur || 80, 80),
+      rendu: { ...(config.rendu || {}), taille_cellule: 2 },
+    };
+    const universe = window.AutomaginariumCore.genererUnivers(previewConfig);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "preset-card";
+    button.dataset.preset = preset.id;
+
+    const thumbnail = document.createElement("canvas");
+    thumbnail.className = "preset-thumb";
+    drawUniverseToCanvas(thumbnail, universe);
+
+    const name = document.createElement("strong");
+    name.textContent = preset.label;
+
+    const family = document.createElement("span");
+    family.textContent = preset.family;
+
+    button.append(thumbnail, name, family);
+    button.addEventListener("click", () => {
+      presetSelect.value = preset.id;
+      loadPreset(preset.id);
+    });
+    gallery.appendChild(button);
+  }
 }
 
 PRESETS.forEach((preset) => {
@@ -298,5 +363,7 @@ document.querySelector("#export-png").addEventListener("click", () => {
   link.href = canvas.toDataURL("image/png");
   link.click();
 });
+document.querySelector("#refresh-gallery").addEventListener("click", renderGallery);
 
+await renderGallery();
 loadPreset("wolfram-90");

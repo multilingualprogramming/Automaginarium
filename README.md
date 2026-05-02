@@ -78,6 +78,12 @@ Stage 4 adds a generated runtime bridge:
 node tests/stage4-wasm.mjs
 ```
 
+Stage 5 adds the preset gallery and static deployment checks:
+
+```bash
+node tests/stage5-static.js
+```
+
 ## Attribution
 
 Automaginarium is a successor to Cellcosmos and intentionally reuses its project ideas and visual direction. The initial browser metrics and rendering approach are derived from Cellcosmos concepts:

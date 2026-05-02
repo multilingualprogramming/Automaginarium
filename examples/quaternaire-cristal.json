@@ -1,0 +1,21 @@
+{
+  "nom": "Quaternaire cristal - somme modulo",
+  "alphabet_entree": [0, 1, 2, 3],
+  "alphabet_sortie": [0, 1, 2, 3],
+  "taille_voisinage": 5,
+  "nombre_canaux_sortie": 2,
+  "mode_regle": "totalistique",
+  "largeur": 150,
+  "hauteur": 105,
+  "frontiere": "circulaire",
+  "etat_initial": {
+    "mode": "motif",
+    "valeurs": [3, 0, 1, 2, 1, 0, 3, 2, 2, 1, 0, 3]
+  },
+  "rendu": {
+    "taille_cellule": 5,
+    "fond": "#04080a",
+    "afficher_zero": true,
+    "palette": ["#04080a", "#53b0ff", "#7bd88f", "#f7d154", "#ff7d7d"]
+  }
+}

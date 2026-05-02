@@ -64,6 +64,7 @@ jobs:
         run: |
           node tests/stage3-smoke.js
           node tests/stage4-wasm.mjs
+          node tests/stage5-static.js
 
       - name: Verifier la structure GitHub Pages
         run: |

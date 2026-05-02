@@ -79,6 +79,35 @@ canvas { max-width: 100%; image-rendering: pixelated; box-shadow: 0 18px 70px rg
 .rule-table { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 18px; max-height: 320px; overflow: auto; }
 .rule-table span { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 8px; color: var(--muted); overflow-wrap: anywhere; }
 .rule-table b { color: var(--text); }
+.gallery-panel { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 16px; }
+.preset-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+}
+.preset-card {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  text-align: left;
+  min-height: 0;
+  padding: 10px;
+  background: rgba(16,25,35,0.78);
+}
+.preset-card:hover, .preset-card:focus-visible {
+  border-color: rgba(83,176,255,0.68);
+  outline: none;
+}
+.preset-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  background: #03060a;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.preset-card strong { color: var(--text); font-size: 0.98rem; }
+.preset-card span { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; }
 .config-lab {
   display: grid;
   grid-template-columns: minmax(300px, 0.8fr) minmax(260px, 0.65fr) minmax(420px, 1.2fr);

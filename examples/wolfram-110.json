@@ -1,0 +1,27 @@
+{
+  "nom": "Wolfram 110 - filaments universels",
+  "alphabet_entree": [0, 1],
+  "alphabet_sortie": [0, 1],
+  "taille_voisinage": 3,
+  "nombre_canaux_sortie": 1,
+  "mode_regle": "table",
+  "table_transition": {
+    "[1,1,1]": [0],
+    "[1,1,0]": [1],
+    "[1,0,1]": [1],
+    "[1,0,0]": [0],
+    "[0,1,1]": [1],
+    "[0,1,0]": [1],
+    "[0,0,1]": [1],
+    "[0,0,0]": [0]
+  },
+  "largeur": 181,
+  "hauteur": 120,
+  "frontiere": "fixe",
+  "etat_initial": { "mode": "motif", "valeurs": [1, 1, 0, 1, 0, 0, 1] },
+  "rendu": {
+    "taille_cellule": 4,
+    "fond": "#05070d",
+    "palette": ["#05070d", "#f7d154", "#53b0ff"]
+  }
+}
