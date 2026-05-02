@@ -36,6 +36,8 @@ function testRuntimeLoaderIsCommitted() {
   assert(loader.includes("import * as hostShim"));
   assert(loader.includes("createFallbackDomImports"));
   assert(loader.includes("print_str"));
+  assert(loader.includes("WebAssembly.Module.imports"));
+  assert(loader.includes("createDefaultImport"));
 }
 
 testPagesEntrypoints();
