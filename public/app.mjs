@@ -170,15 +170,98 @@ function syncControls(config) {
   controls.json.value = JSON.stringify(config, null, 2);
 }
 
+// Interpolate between two hex colors
+function interpolateColor(color1, color2, factor) {
+  const c1 = parseInt(color1.slice(1), 16);
+  const c2 = parseInt(color2.slice(1), 16);
+  const r1 = (c1 >> 16) & 255, g1 = (c1 >> 8) & 255, b1 = c1 & 255;
+  const r2 = (c2 >> 16) & 255, g2 = (c2 >> 8) & 255, b2 = c2 & 255;
+  const r = Math.round(r1 + (r2 - r1) * factor);
+  const g = Math.round(g1 + (g2 - g1) * factor);
+  const b = Math.round(b1 + (b2 - b1) * factor);
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+}
+
+// Get color from gradient at a given position (0-1)
+function getGradientColor(position, colors, positions) {
+  if (!colors || colors.length === 0) return '#ffffff';
+  if (colors.length === 1) return colors[0];
+
+  // Normalize position to 0-1
+  const t = Math.max(0, Math.min(1, position));
+
+  // Find the two stops this position falls between
+  let startIdx = 0;
+  for (let i = 0; i < positions.length - 1; i++) {
+    const pos1 = positions[i] / 100;
+    const pos2 = positions[i + 1] / 100;
+    if (t >= pos1 && t <= pos2) {
+      startIdx = i;
+      break;
+    }
+  }
+
+  const pos1 = positions[startIdx] / 100;
+  const pos2 = positions[startIdx + 1] / 100;
+  const range = pos2 - pos1;
+  const factor = range === 0 ? 0 : (t - pos1) / range;
+
+  return interpolateColor(colors[startIdx], colors[startIdx + 1], factor);
+}
+
 function colorFor(value, config, rowIndex, colIndex, channels) {
-  const palette = config.rendu.palette || ["#07121f", "#ff9d4d", "#53b0ff", "#f5f7ff"];
   const visualValue = channels && channels.length > 1 ? channels[1] : value;
   const alphabet = config.alphabet_sortie || config.alphabet_entree || [0, 1];
   let index = alphabet.findIndex((item) => String(item) === String(visualValue));
+
+  // Use gradient if available
+  const gradient = config.rendu.gradient;
+  if (gradient && gradient.colors && gradient.colors.length > 0) {
+    let position = 0;
+    if (index >= 0) {
+      position = index / Math.max(1, alphabet.length - 1);
+    } else {
+      position = (Math.abs(Number(visualValue) || Number(value) || 0) % 100) / 100;
+    }
+
+    // Apply gradient based on type
+    if (gradient.type === 'linear') {
+      position = (colIndex / (config.largeur || 100)) * 0.5 + (rowIndex / (config.hauteur || 100)) * 0.5;
+    } else if (gradient.type === 'radial') {
+      const centerX = (config.largeur || 100) / 2;
+      const centerY = (config.hauteur || 100) / 2;
+      const dist = Math.sqrt(Math.pow(colIndex - centerX, 2) + Math.pow(rowIndex - centerY, 2));
+      const maxDist = Math.sqrt(Math.pow(centerX, 2) + Math.pow(centerY, 2));
+      position = Math.min(1, dist / maxDist);
+    } else if (gradient.type === 'conic') {
+      const centerX = (config.largeur || 100) / 2;
+      const centerY = (config.hauteur || 100) / 2;
+      const angle = Math.atan2(rowIndex - centerY, colIndex - centerX);
+      position = ((angle + Math.PI) / (2 * Math.PI));
+    }
+
+    return getGradientColor(position, gradient.colors, gradient.positions);
+  }
+
+  // Fallback to palette if no gradient
+  const palette = config.rendu.palette || ["#07121f", "#ff9d4d", "#53b0ff", "#f5f7ff"];
   if (index < 0) index = Math.abs(Number(visualValue) || Number(value) || 0) % palette.length;
   const drift = (rowIndex + colIndex) % Math.max(1, palette.length - 1);
   return palette[(index + drift) % palette.length] || palette[0];
 }
+
+window.applyGradientToPalette = function(colors, type, positions) {
+  if (!state.config) return;
+  state.config.rendu = state.config.rendu || {};
+  state.config.rendu.gradient = {
+    colors: colors || ["#07121f", "#ff9d4d", "#53b0ff", "#f5f7ff"],
+    type: type || 'linear',
+    positions: positions || [0, 50, 100]
+  };
+  // Keep palette as fallback
+  state.config.rendu.palette = colors || ["#07121f", "#ff9d4d", "#53b0ff", "#f5f7ff"];
+  render();
+};
 
 function drawUniverseToCanvas(targetCanvas, universe, maxWidth = 240, maxHeight = 132) {
   const { configuration, lignes, sorties } = universe;

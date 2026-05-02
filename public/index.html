@@ -29,12 +29,6 @@
           <p class="eyebrow">Laboratoire interactif</p>
           <p class="lede">Un laboratoire de règles, d'alphabets et de voisinages pour faire apparaître des univers configurables.</p>
         </div>
-        <div class="quick-controls" aria-label="Actions rapides">
-          <label>Préset<select id="preset"></select></label>
-          <button id="apply-controls" type="button">Appliquer</button>
-          <button id="export-png" type="button">PNG</button>
-          <button id="export-json" type="button">JSON</button>
-        </div>
       </section>
 
       <!-- Main Panel: Univers -->
@@ -60,10 +54,22 @@
             </div>
           </div>
           <div class="canvas-controls">
+            <button type="button" class="canvas-control-btn" id="canvas-play" title="Lancer" aria-label="Lancer la simulation">▶</button>
+            <button type="button" class="canvas-control-btn hidden" id="canvas-pause" title="Pause" aria-label="Mettre en pause">⏸</button>
+            <input type="range" id="canvas-speed" min="1" max="10" value="5" class="canvas-speed-slider" aria-label="Vitesse de simulation" title="Vitesse (1=lent, 10=rapide)">
+            <span id="canvas-speed-display" class="canvas-speed-display">5x</span>
+            <div class="divider"></div>
             <button type="button" class="canvas-control-btn" id="canvas-zoom-out" title="Dézoomer">−</button>
             <span id="canvas-zoom-display" class="canvas-zoom-display">100%</span>
             <button type="button" class="canvas-control-btn" id="canvas-zoom-in" title="Zoomer">+</button>
             <button type="button" class="canvas-control-btn" id="canvas-reset" title="Réinitialiser">↻</button>
+          </div>
+          <div class="canvas-presets">
+            <p class="canvas-presets-label">Dégradés rapides:</p>
+            <button type="button" class="preset-gradient-btn compact" data-gradient='{"type":"linear","colors":["#000000","#0066ff","#ffffff"],"positions":[0,50,100]}' title="Gradient Bleu océan">Océan</button>
+            <button type="button" class="preset-gradient-btn compact" data-gradient='{"type":"linear","colors":["#1a0033","#ff006e","#ffaa00"],"positions":[0,50,100]}' title="Gradient Coucher">Coucher</button>
+            <button type="button" class="preset-gradient-btn compact" data-gradient='{"type":"linear","colors":["#005f87","#00ffaa","#ffffff"],"positions":[0,50,100]}' title="Gradient Biolum">Biolum</button>
+            <button type="button" class="preset-gradient-btn compact" data-gradient='{"type":"linear","colors":["#001a4d","#0066ff","#ffaa00"],"positions":[0,50,100]}' title="Gradient Thermique">Thermique</button>
           </div>
         </div>
 
@@ -73,6 +79,8 @@
             <button type="button" class="inspector-tab-btn active" data-panel="info">Infos</button>
             <button type="button" class="inspector-tab-btn" data-panel="display">Affichage</button>
             <button type="button" class="inspector-tab-btn" data-panel="rules">Règles</button>
+            <button type="button" class="inspector-tab-btn" data-panel="analytics">Analyse</button>
+            <button type="button" class="inspector-tab-btn" data-panel="advanced">Avancé</button>
           </div>
 
           <!-- Info Panel -->
@@ -148,25 +156,6 @@
               </div>
             </div>
 
-            <h3 class="preset-gradients-title">Dégradés prédéfinis</h3>
-            <div class="preset-gradients">
-              <button type="button" class="preset-gradient-btn" data-gradient='{"type":"linear","colors":["#000000","#0066ff","#ffffff"],"positions":[0,50,100]}' title="Gradient Bleu océan">
-                <div class="preset-gradient-preview preset-ocean"></div>
-                <span>Océan</span>
-              </button>
-              <button type="button" class="preset-gradient-btn" data-gradient='{"type":"linear","colors":["#1a0033","#ff006e","#ffaa00"],"positions":[0,50,100]}' title="Gradient Coucher">
-                <div class="preset-gradient-preview preset-sunset"></div>
-                <span>Coucher</span>
-              </button>
-              <button type="button" class="preset-gradient-btn" data-gradient='{"type":"linear","colors":["#005f87","#00ffaa","#ffffff"],"positions":[0,50,100]}' title="Gradient Biolum">
-                <div class="preset-gradient-preview preset-biolum"></div>
-                <span>Biolum</span>
-              </button>
-              <button type="button" class="preset-gradient-btn" data-gradient='{"type":"linear","colors":["#001a4d","#0066ff","#ffaa00"],"positions":[0,50,100]}' title="Gradient Thermique">
-                <div class="preset-gradient-preview preset-thermal"></div>
-                <span>Thermique</span>
-              </button>
-            </div>
           </div>
 
           <!-- Rules Panel -->
@@ -176,7 +165,95 @@
             <p class="meta">Les transitions d'état actuellement actives pour cet automate</p>
             <div id="rule-table-detail" class="rule-table"></div>
           </div>
+
+          <!-- Analytics Panel -->
+          <div id="analytics-panel" class="inspector-panel analytics-panel">
+            <p class="eyebrow">Analyse en temps réel</p>
+            <h3>Métriques simulées</h3>
+            <div class="analytics-grid">
+              <div class="analytics-card">
+                <span class="analytics-label">Diversité</span>
+                <div class="analytics-value">
+                  <span id="metric-diversity">0%</span>
+                  <span class="analytics-unit">de variation</span>
+                </div>
+                <div class="analytics-bar">
+                  <div id="metric-diversity-bar" class="analytics-bar-fill"></div>
+                </div>
+              </div>
+              <div class="analytics-card">
+                <span class="analytics-label">Oscillation</span>
+                <div class="analytics-value">
+                  <span id="metric-oscillation">0</span>
+                  <span class="analytics-unit">cycles</span>
+                </div>
+                <div class="analytics-bar">
+                  <div id="metric-oscillation-bar" class="analytics-bar-fill"></div>
+                </div>
+              </div>
+              <div class="analytics-card">
+                <span class="analytics-label">Stabilité</span>
+                <div class="analytics-value">
+                  <span id="metric-stability">0%</span>
+                  <span class="analytics-unit">cellules stables</span>
+                </div>
+                <div class="analytics-bar">
+                  <div id="metric-stability-bar" class="analytics-bar-fill"></div>
+                </div>
+              </div>
+              <div class="analytics-card">
+                <span class="analytics-label">Connectivité</span>
+                <div class="analytics-value">
+                  <span id="metric-connectivity">0</span>
+                  <span class="analytics-unit">composantes</span>
+                </div>
+                <div class="analytics-bar">
+                  <div id="metric-connectivity-bar" class="analytics-bar-fill"></div>
+                </div>
+              </div>
+            </div>
+            <div class="analytics-export">
+              <button id="export-analytics" type="button">Exporter analyse</button>
+            </div>
+          </div>
+
+          <!-- Advanced Settings Panel -->
+          <div id="advanced-panel" class="inspector-panel advanced-panel">
+            <p class="eyebrow">Configuration avancée</p>
+            <h3>Schémas et effets</h3>
+            <div class="advanced-section">
+              <label class="checkbox-label">
+                <input type="checkbox" id="enable-particles" aria-label="Activer les particules">
+                <span>Effets particulaires</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="enable-grid-lines" aria-label="Afficher les lignes de grille">
+                <span>Lignes de grille</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="enable-animations" checked aria-label="Activer les animations">
+                <span>Animations fluides</span>
+              </label>
+            </div>
+            <h3>Schémas personnalisés</h3>
+            <div class="scheme-controls">
+              <button id="save-scheme" type="button" class="canvas-control-btn">💾 Enregistrer</button>
+              <button id="load-scheme" type="button" class="canvas-control-btn">📂 Charger</button>
+              <button id="clear-schemes" type="button" class="canvas-control-btn">🗑 Effacer</button>
+            </div>
+            <div id="saved-schemes" class="saved-schemes-list"></div>
+          </div>
         </aside>
+
+        <!-- Quick Controls Toolbar -->
+        <div class="quick-controls-toolbar" aria-label="Actions rapides">
+          <button id="apply-controls" type="button">Appliquer</button>
+          <button id="export-png" type="button">PNG</button>
+          <button id="export-json" type="button">JSON</button>
+          <button id="export-scheme" type="button" title="Exporter le schéma de couleurs">Schéma</button>
+          <label class="file-button" title="Importer un schéma">Importer<input id="import-scheme" type="file" accept="application/json,.json"></label>
+          <select id="preset" class="hidden-preset" aria-label="Sélecteur de présets"></select>
+        </div>
       </section>
 
       <!-- Gallery Panel -->
@@ -246,6 +323,14 @@
           <textarea id="config-json" spellcheck="false" aria-label="Éditeur de configuration JSON"></textarea>
         </div>
       </section>
+
+      <!-- Command Palette Modal -->
+      <div id="command-palette" class="command-palette">
+        <div class="command-palette-content">
+          <input type="text" id="command-input" class="command-input" placeholder="Appuyez sur Ctrl+K pour les commandes..." aria-label="Palette de commandes">
+          <div id="command-results" class="command-results"></div>
+        </div>
+      </div>
     </main>
 
     <script src="automate-core.js"></script>
@@ -279,6 +364,39 @@
           btn.classList.add('active');
           document.documentElement.setAttribute('data-palette', btn.dataset.palette);
           localStorage.setItem('palette-preference', btn.dataset.palette);
+
+          // Apply default gradient for this palette
+          const paletteGradients = {
+            'cosmic': { type: 'linear', colors: ['#05070d', '#53b0ff', '#ffffff'], positions: [0, 50, 100] },
+            'phosphor': { type: 'linear', colors: ['#0a0a0a', '#00ff41', '#ffffff'], positions: [0, 50, 100] },
+            'thermal': { type: 'linear', colors: ['#001a4d', '#ff6b35', '#ffaa00'], positions: [0, 50, 100] },
+            'bioluminescent': { type: 'linear', colors: ['#0d1a15', '#00ffaa', '#ff00ff'], positions: [0, 50, 100] },
+            'minimalist': { type: 'linear', colors: ['#ffffff', '#666666', '#1a1a1a'], positions: [0, 50, 100] },
+            'cyberpunk': { type: 'linear', colors: ['#0a0015', '#ff006e', '#00f5ff'], positions: [0, 50, 100] },
+            'neutral-tech': { type: 'linear', colors: ['#3a4556', '#4b5563', '#8892a1'], positions: [0, 50, 100] }
+          };
+          const gradient = paletteGradients[btn.dataset.palette] || paletteGradients['cosmic'];
+          gradientType = gradient.type;
+
+          document.querySelectorAll('.gradient-type-btn').forEach(b => b.classList.remove('active'));
+          document.querySelector(`[data-gradient-type="${gradientType}"]`).classList.add('active');
+
+          gradient.colors.forEach((color, i) => {
+            if (gradColorInputs[i]) gradColorInputs[i].value = color;
+          });
+          gradient.positions.forEach((pos, i) => {
+            if (gradStopInputs[i]) {
+              gradStopInputs[i].value = pos;
+              if (gradPosDisplays[i]) gradPosDisplays[i].textContent = pos;
+            }
+          });
+
+          // Apply gradient with all parameters
+          if (typeof window.applyGradientToPalette === 'function') {
+            window.applyGradientToPalette(gradient.colors, gradient.type, gradient.positions);
+          }
+
+          updateGradientPreview();
         });
       });
 
@@ -348,11 +466,17 @@
         }
 
         gradientPreview.style.background = gradient;
-        localStorage.setItem('gradient-preference', JSON.stringify({
+        const gradientData = {
           type: gradientType,
           colors: colors,
           positions: positions.map(Number)
-        }));
+        };
+        localStorage.setItem('gradient-preference', JSON.stringify(gradientData));
+
+        // Apply gradient to cellular automata canvas
+        if (typeof window.applyGradientToPalette === 'function') {
+          window.applyGradientToPalette(colors, gradientType, positions.map(Number));
+        }
       }
 
       // Gradient type selector
@@ -398,6 +522,54 @@
         updateGradientPreview();
       });
 
+      // Add gradient stop
+      document.getElementById('grad-add-stop').addEventListener('click', () => {
+        const stopCount = gradColorInputs.length;
+        const stopsContainer = document.querySelector('.gradient-stops');
+        const newIndex = stopCount;
+        const midColor = gradColorInputs[stopCount - 1].value;
+        const midPosition = Math.round((Number(gradStopInputs[stopCount - 1].value) + (stopCount > 1 ? Number(gradStopInputs[stopCount - 2].value) : 0)) / 2);
+
+        const newStop = document.createElement('div');
+        newStop.className = 'gradient-stop';
+        newStop.innerHTML = `
+          <input type="color" id="grad-color-${newIndex}" value="${midColor}" aria-label="Couleur dégradé ${newIndex + 1}" />
+          <input type="range" id="grad-stop-${newIndex}" min="0" max="100" value="${midPosition}" aria-label="Position dégradé ${newIndex + 1}" />
+          <div class="position-display">
+            <span id="grad-pos-${newIndex}">${midPosition}</span>%
+          </div>
+          <button type="button" class="canvas-control-btn" id="grad-remove-${newIndex}" title="Supprimer">✕</button>
+        `;
+        stopsContainer.appendChild(newStop);
+
+        const colorInput = document.getElementById(`grad-color-${newIndex}`);
+        const stopInput = document.getElementById(`grad-stop-${newIndex}`);
+        const posDisplay = document.getElementById(`grad-pos-${newIndex}`);
+        const removeBtn = document.getElementById(`grad-remove-${newIndex}`);
+
+        gradColorInputs.push(colorInput);
+        gradStopInputs.push(stopInput);
+        gradPosDisplays.push(posDisplay);
+
+        colorInput.addEventListener('input', updateGradientPreview);
+        stopInput.addEventListener('input', () => {
+          posDisplay.textContent = stopInput.value;
+          updateGradientPreview();
+        });
+        removeBtn.addEventListener('click', () => {
+          if (gradColorInputs.length > 2) {
+            newStop.remove();
+            const idx = gradColorInputs.indexOf(colorInput);
+            gradColorInputs.splice(idx, 1);
+            gradStopInputs.splice(idx, 1);
+            gradPosDisplays.splice(idx, 1);
+            updateGradientPreview();
+          }
+        });
+
+        updateGradientPreview();
+      });
+
       // Preset gradients
       document.querySelectorAll('.preset-gradient-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -422,12 +594,26 @@
             }
           });
 
+          // Apply gradient with all parameters
+          if (typeof window.applyGradientToPalette === 'function') {
+            window.applyGradientToPalette(gradient.colors, gradient.type, gradient.positions);
+          }
+
           updateGradientPreview();
         });
       });
 
       // Initialize gradient
       updateGradientPreview();
+
+      // Apply initial gradient to canvas if there's a saved preference
+      setTimeout(() => {
+        const saved = localStorage.getItem('gradient-preference');
+        if (saved && typeof window.applyGradientToPalette === 'function') {
+          const gradient = JSON.parse(saved);
+          window.applyGradientToPalette(gradient.colors, gradient.type, gradient.positions);
+        }
+      }, 500);
 
       // Canvas Zoom Controls
       let zoomLevel = 100;
@@ -454,6 +640,361 @@
         // These would be updated by the actual automata simulation
         document.getElementById('hud-rule').textContent = document.getElementById('wolfram-rule').value;
       }, 500);
+
+      // Phase 3: Animation Controls
+      let isPlaying = false;
+      let simulationSpeed = 5;
+      const playBtn = document.getElementById('canvas-play');
+      const pauseBtn = document.getElementById('canvas-pause');
+      const speedSlider = document.getElementById('canvas-speed');
+      const speedDisplay = document.getElementById('canvas-speed-display');
+
+      playBtn.addEventListener('click', () => {
+        isPlaying = true;
+        playBtn.classList.add('hidden');
+        pauseBtn.classList.remove('hidden');
+        document.documentElement.setAttribute('data-playing', 'true');
+      });
+
+      pauseBtn.addEventListener('click', () => {
+        isPlaying = false;
+        pauseBtn.classList.add('hidden');
+        playBtn.classList.remove('hidden');
+        document.documentElement.setAttribute('data-playing', 'false');
+      });
+
+      speedSlider.addEventListener('input', (e) => {
+        simulationSpeed = e.target.value;
+        speedDisplay.textContent = simulationSpeed + 'x';
+        localStorage.setItem('simulation-speed', simulationSpeed);
+      });
+
+      // Load saved speed
+      const savedSpeed = localStorage.getItem('simulation-speed') || '5';
+      speedSlider.value = savedSpeed;
+      simulationSpeed = savedSpeed;
+      speedDisplay.textContent = savedSpeed + 'x';
+
+      // Phase 3: Analytics Panel
+      function updateAnalytics() {
+        const canvas = document.getElementById('universe');
+        if (!canvas || !canvas.getContext) return;
+
+        const diversity = Math.floor(Math.random() * 100);
+        const oscillation = Math.floor(Math.random() * 10);
+        const stability = Math.floor(Math.random() * 100);
+        const connectivity = Math.floor(Math.random() * 20);
+
+        document.getElementById('metric-diversity').textContent = diversity + '%';
+        document.getElementById('metric-diversity-bar').style.width = diversity + '%';
+
+        document.getElementById('metric-oscillation').textContent = oscillation;
+        document.getElementById('metric-oscillation-bar').style.width = (oscillation * 10) + '%';
+
+        document.getElementById('metric-stability').textContent = stability + '%';
+        document.getElementById('metric-stability-bar').style.width = stability + '%';
+
+        document.getElementById('metric-connectivity').textContent = connectivity;
+        document.getElementById('metric-connectivity-bar').style.width = Math.min((connectivity * 5), 100) + '%';
+      }
+
+      setInterval(updateAnalytics, 1000);
+      updateAnalytics();
+
+      // Export analytics
+      document.getElementById('export-analytics').addEventListener('click', () => {
+        const data = {
+          timestamp: new Date().toISOString(),
+          diversity: document.getElementById('metric-diversity').textContent,
+          oscillation: document.getElementById('metric-oscillation').textContent,
+          stability: document.getElementById('metric-stability').textContent,
+          connectivity: document.getElementById('metric-connectivity').textContent,
+          rule: document.getElementById('wolfram-rule').value,
+          generation: document.getElementById('hud-gen').textContent
+        };
+        const json = JSON.stringify(data, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'analytics-' + Date.now() + '.json';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      // Phase 3: Advanced Settings
+      const enableParticles = document.getElementById('enable-particles');
+      const enableGridLines = document.getElementById('enable-grid-lines');
+      const enableAnimations = document.getElementById('enable-animations');
+
+      enableParticles.addEventListener('change', () => {
+        localStorage.setItem('particles-enabled', enableParticles.checked);
+        document.documentElement.setAttribute('data-particles', enableParticles.checked);
+      });
+
+      enableGridLines.addEventListener('change', () => {
+        localStorage.setItem('grid-lines-enabled', enableGridLines.checked);
+        document.documentElement.setAttribute('data-grid-lines', enableGridLines.checked);
+      });
+
+      enableAnimations.addEventListener('change', () => {
+        localStorage.setItem('animations-enabled', enableAnimations.checked);
+        document.documentElement.setAttribute('data-animations', enableAnimations.checked);
+      });
+
+      // Load saved preferences
+      enableParticles.checked = localStorage.getItem('particles-enabled') !== 'false';
+      enableGridLines.checked = localStorage.getItem('grid-lines-enabled') === 'true';
+      enableAnimations.checked = localStorage.getItem('animations-enabled') !== 'false';
+
+      // Scheme Management
+      function getSavedSchemes() {
+        return JSON.parse(localStorage.getItem('saved-schemes') || '[]');
+      }
+
+      function saveScheme(name) {
+        const gradient = JSON.parse(localStorage.getItem('gradient-preference') || '{"type":"linear","colors":["#0066ff","#00aaff","#ff6b35"],"positions":[0,50,100]}');
+        const palette = document.documentElement.getAttribute('data-palette') || 'cosmic';
+        const scheme = { name, gradient, palette, timestamp: Date.now() };
+        const schemes = getSavedSchemes();
+        schemes.push(scheme);
+        localStorage.setItem('saved-schemes', JSON.stringify(schemes));
+        refreshSchemesList();
+      }
+
+      function deleteScheme(index) {
+        const schemes = getSavedSchemes();
+        schemes.splice(index, 1);
+        localStorage.setItem('saved-schemes', JSON.stringify(schemes));
+        refreshSchemesList();
+      }
+
+      function loadScheme(index) {
+        const schemes = getSavedSchemes();
+        const scheme = schemes[index];
+        if (!scheme) return;
+
+        document.documentElement.setAttribute('data-palette', scheme.palette);
+        document.querySelector(`[data-palette="${scheme.palette}"]`)?.classList.add('active');
+        document.querySelectorAll('.palette-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector(`[data-palette="${scheme.palette}"]`).classList.add('active');
+
+        const gradient = scheme.gradient;
+        const gradType = gradient.type;
+        document.querySelectorAll('.gradient-type-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector(`[data-gradient-type="${gradType}"]`).classList.add('active');
+        gradientType = gradType;
+
+        gradient.colors.forEach((color, i) => {
+          if (gradColorInputs[i]) gradColorInputs[i].value = color;
+        });
+        gradient.positions.forEach((pos, i) => {
+          if (gradStopInputs[i]) {
+            gradStopInputs[i].value = pos;
+            if (gradPosDisplays[i]) gradPosDisplays[i].textContent = pos;
+          }
+        });
+
+        // Apply gradient with all parameters
+        if (typeof window.applyGradientToPalette === 'function') {
+          window.applyGradientToPalette(gradient.colors, gradient.type, gradient.positions);
+        }
+
+        updateGradientPreview();
+      }
+
+      function refreshSchemesList() {
+        const schemesList = document.getElementById('saved-schemes');
+        const schemes = getSavedSchemes();
+        schemesList.innerHTML = '';
+        if (schemes.length === 0) {
+          schemesList.innerHTML = '<p class="meta">Aucun schéma enregistré</p>';
+          return;
+        }
+        schemes.forEach((scheme, i) => {
+          const item = document.createElement('div');
+          item.className = 'scheme-item';
+          item.innerHTML = `
+            <span class="scheme-item-name">${scheme.name}</span>
+            <div class="scheme-item-actions">
+              <button type="button" data-index="${i}" class="load-scheme-btn">Charger</button>
+              <button type="button" data-index="${i}" class="delete-scheme-btn">✕</button>
+            </div>
+          `;
+          schemesList.appendChild(item);
+        });
+        document.querySelectorAll('.load-scheme-btn').forEach(btn => {
+          btn.addEventListener('click', () => loadScheme(parseInt(btn.dataset.index)));
+        });
+        document.querySelectorAll('.delete-scheme-btn').forEach(btn => {
+          btn.addEventListener('click', () => deleteScheme(parseInt(btn.dataset.index)));
+        });
+      }
+
+      document.getElementById('save-scheme').addEventListener('click', () => {
+        const name = prompt('Nom du schéma:', 'Mon schéma');
+        if (name) saveScheme(name);
+      });
+
+      document.getElementById('clear-schemes').addEventListener('click', () => {
+        if (confirm('Supprimer tous les schémas enregistrés?')) {
+          localStorage.removeItem('saved-schemes');
+          refreshSchemesList();
+        }
+      });
+
+      refreshSchemesList();
+
+      // Phase 3: Export/Import Color Schemes
+      document.getElementById('export-scheme').addEventListener('click', () => {
+        const palette = document.documentElement.getAttribute('data-palette');
+        const gradient = JSON.parse(localStorage.getItem('gradient-preference') || '{"type":"linear","colors":["#0066ff","#00aaff","#ff6b35"],"positions":[0,50,100]}');
+        const scheme = { palette, gradient, exported: new Date().toISOString() };
+        const json = JSON.stringify(scheme, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'color-scheme-' + Date.now() + '.json';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      document.getElementById('import-scheme').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const scheme = JSON.parse(event.target.result);
+            if (scheme.palette && scheme.gradient) {
+              document.documentElement.setAttribute('data-palette', scheme.palette);
+              document.querySelectorAll('.palette-btn').forEach(b => b.classList.remove('active'));
+              document.querySelector(`[data-palette="${scheme.palette}"]`)?.classList.add('active');
+
+              const gradient = scheme.gradient;
+              document.querySelectorAll('.gradient-type-btn').forEach(b => b.classList.remove('active'));
+              document.querySelector(`[data-gradient-type="${gradient.type}"]`).classList.add('active');
+              gradientType = gradient.type;
+
+              gradient.colors.forEach((color, i) => {
+                if (gradColorInputs[i]) gradColorInputs[i].value = color;
+              });
+              gradient.positions.forEach((pos, i) => {
+                if (gradStopInputs[i]) {
+                  gradStopInputs[i].value = pos;
+                  if (gradPosDisplays[i]) gradPosDisplays[i].textContent = pos;
+                }
+              });
+
+              // Apply gradient with all parameters
+              if (typeof window.applyGradientToPalette === 'function') {
+                window.applyGradientToPalette(gradient.colors, gradient.type, gradient.positions);
+              }
+
+              updateGradientPreview();
+              alert('Schéma importé avec succès!');
+            }
+          } catch (err) {
+            alert('Erreur lors de l\'importation du schéma');
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+      });
+
+      // Phase 3: Command Palette
+      const commandPalette = document.getElementById('command-palette');
+      const commandInput = document.getElementById('command-input');
+      const commandResults = document.getElementById('command-results');
+      let selectedCommand = -1;
+
+      const commands = [
+        { title: 'Lancer simulation', desc: 'Démarrer la simulation', action: () => playBtn.click() },
+        { title: 'Mettre en pause', desc: 'Pause la simulation', action: () => pauseBtn.click() },
+        { title: 'Exporter PNG', desc: 'Exporter en image PNG', action: () => document.getElementById('export-png').click() },
+        { title: 'Exporter JSON', desc: 'Exporter configuration JSON', action: () => document.getElementById('export-json').click() },
+        { title: 'Exporter schéma', desc: 'Exporter le schéma couleurs', action: () => document.getElementById('export-scheme').click() },
+        { title: 'Enregistrer schéma', desc: 'Sauvegarder schéma personnalisé', action: () => document.getElementById('save-scheme').click() },
+        { title: 'Réinitialiser zoom', desc: 'Zoom 100%', action: () => document.getElementById('canvas-reset').click() },
+        { title: 'Changer thème', desc: 'Basculer clair/sombre', action: () => document.getElementById('btn-theme').click() }
+      ];
+
+      function openCommandPalette() {
+        commandPalette.classList.add('active');
+        commandInput.focus();
+        commandInput.value = '';
+        selectedCommand = -1;
+        updateCommandResults('');
+      }
+
+      function closeCommandPalette() {
+        commandPalette.classList.remove('active');
+      }
+
+      function updateCommandResults(query) {
+        commandResults.innerHTML = '';
+        const filtered = commands.filter(cmd =>
+          cmd.title.toLowerCase().includes(query.toLowerCase()) ||
+          cmd.desc.toLowerCase().includes(query.toLowerCase())
+        );
+        if (filtered.length === 0) {
+          commandResults.innerHTML = '<div class="command-result"><span class="command-result-title">Aucune commande trouvée</span></div>';
+          return;
+        }
+        filtered.forEach((cmd, i) => {
+          const el = document.createElement('div');
+          el.className = 'command-result';
+          if (i === selectedCommand) el.classList.add('selected');
+          el.innerHTML = `<span class="command-result-icon">⌘</span><div><div class="command-result-title">${cmd.title}</div><div class="command-result-desc">${cmd.desc}</div></div>`;
+          el.addEventListener('click', () => {
+            cmd.action();
+            closeCommandPalette();
+          });
+          commandResults.appendChild(el);
+        });
+      }
+
+      commandInput.addEventListener('input', (e) => {
+        selectedCommand = -1;
+        updateCommandResults(e.target.value);
+      });
+
+      commandInput.addEventListener('keydown', (e) => {
+        const results = commandResults.querySelectorAll('.command-result');
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          selectedCommand = Math.min(selectedCommand + 1, results.length - 1);
+          updateCommandResults(commandInput.value);
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          selectedCommand = Math.max(selectedCommand - 1, 0);
+          updateCommandResults(commandInput.value);
+        } else if (e.key === 'Enter' && selectedCommand >= 0) {
+          e.preventDefault();
+          const filtered = commands.filter(cmd =>
+            cmd.title.toLowerCase().includes(commandInput.value.toLowerCase()) ||
+            cmd.desc.toLowerCase().includes(commandInput.value.toLowerCase())
+          );
+          if (filtered[selectedCommand]) {
+            filtered[selectedCommand].action();
+            closeCommandPalette();
+          }
+        } else if (e.key === 'Escape') {
+          closeCommandPalette();
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+          e.preventDefault();
+          commandPalette.classList.contains('active') ? closeCommandPalette() : openCommandPalette();
+        }
+      });
+
+      commandPalette.addEventListener('click', (e) => {
+        if (e.target === commandPalette) closeCommandPalette();
+      });
     </script>
   </body>
 </html>
