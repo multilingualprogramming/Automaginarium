@@ -325,8 +325,11 @@ function drawUniverseToCanvas(targetCanvas, universe, maxWidth = 240, maxHeight 
   context.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
   lignes.forEach((ligne, y) => {
     ligne.forEach((value, x) => {
-      if (String(value) === String(configuration.alphabet_entree[0]) && !configuration.rendu.afficher_zero) return;
-      context.fillStyle = colorFor(value, configuration, sorties?.[y]?.[x]);
+      const channels = sorties?.[y]?.[x];
+      const visualValue = channels && channels.length > 1 ? channels[1] : value;
+      const bgValue = configuration.alphabet_sortie?.[0] ?? configuration.alphabet_entree[0];
+      if (!configuration.rendu.afficher_zero && String(visualValue) === String(bgValue)) return;
+      context.fillStyle = colorFor(value, configuration, channels);
       context.fillRect(x * cell, y * cell, cell, cell);
     });
   });
@@ -347,8 +350,11 @@ function render() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   lignes.forEach((ligne, y) => {
     ligne.forEach((value, x) => {
-      if (String(value) === String(configuration.alphabet_entree[0]) && !configuration.rendu.afficher_zero) return;
-      ctx.fillStyle = colorFor(value, configuration, sorties?.[y]?.[x]);
+      const channels = sorties?.[y]?.[x];
+      const visualValue = channels && channels.length > 1 ? channels[1] : value;
+      const bgValue = configuration.alphabet_sortie?.[0] ?? configuration.alphabet_entree[0];
+      if (!configuration.rendu.afficher_zero && String(visualValue) === String(bgValue)) return;
+      ctx.fillStyle = colorFor(value, configuration, channels);
       ctx.fillRect(x * cell, y * cell, cell, cell);
     });
   });

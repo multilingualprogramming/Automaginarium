@@ -139,7 +139,7 @@ function genererUnivers(configurationBrute) {
   const configuration = normaliserConfiguration(configurationBrute);
   const lignes = [creerGenerationInitiale(configuration)];
   const sorties = [lignes[0].map((value) => (
-    Array.from({ length: configuration.nombre_canaux_sortie }, (_, channel) => (channel === 0 ? value : configuration.alphabet_sortie[0]))
+    Array.from({ length: configuration.nombre_canaux_sortie }, () => value)
   ))];
   for (let row = 1; row < configuration.hauteur; row += 1) {
     const next = prochaineGeneration(lignes[row - 1], configuration, row);

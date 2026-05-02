@@ -450,13 +450,37 @@
       });
 
       function updateHUDRule() {
-        const ruleValue = document.getElementById('wolfram-rule')?.value || document.getElementById('wolfram-rule-quick')?.value || '90';
-        document.getElementById('hud-rule').textContent = ruleValue;
+        const neighborhood = Number(document.getElementById('neighborhood-size')?.value || document.getElementById('neighborhood-size-quick')?.value || 3);
+        const channels = Number(document.getElementById('channel-count')?.value || document.getElementById('channel-count-quick')?.value || 1);
+        const ruleMode = document.getElementById('rule-mode')?.value || document.getElementById('rule-mode-quick')?.value || 'table';
+        const wolframRule = document.getElementById('wolfram-rule')?.value || document.getElementById('wolfram-rule-quick')?.value || '90';
+
+        let displayValue = '';
+
+        // Only show Wolfram rule number for classical elementary CA (neighborhood=3, channels=1)
+        if (neighborhood === 3 && channels === 1 && ruleMode === 'table') {
+          displayValue = wolframRule;
+        } else if (ruleMode === 'totalistique') {
+          displayValue = `Tot(${neighborhood})`;
+        } else if (ruleMode === 'aleatoire') {
+          displayValue = `Aléa(${neighborhood})`;
+        } else {
+          // Generic rule mode with extended parameters
+          displayValue = `R${neighborhood}×${channels}`;
+        }
+
+        document.getElementById('hud-rule').textContent = displayValue;
       }
 
       updateHUDRule();
       document.getElementById('wolfram-rule')?.addEventListener('input', updateHUDRule);
       document.getElementById('wolfram-rule-quick')?.addEventListener('input', updateHUDRule);
+      document.getElementById('neighborhood-size')?.addEventListener('input', updateHUDRule);
+      document.getElementById('neighborhood-size-quick')?.addEventListener('input', updateHUDRule);
+      document.getElementById('channel-count')?.addEventListener('input', updateHUDRule);
+      document.getElementById('channel-count-quick')?.addEventListener('input', updateHUDRule);
+      document.getElementById('rule-mode')?.addEventListener('input', updateHUDRule);
+      document.getElementById('rule-mode-quick')?.addEventListener('input', updateHUDRule);
 
       let isPlaying = false;
       let simulationSpeed = 5;
