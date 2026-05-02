@@ -36,6 +36,7 @@ function normaliserConfiguration(configuration) {
     nombre_canaux_sortie: Math.max(1, Number(configuration.nombre_canaux_sortie || 1)),
     mode_regle: configuration.mode_regle || "table",
     table_transition: configuration.table_transition || {},
+    numero_regle: configuration.numero_regle !== undefined ? BigInt(configuration.numero_regle) : 0n,
     frontiere: configuration.frontiere || "fixe",
     valeur_frontiere: configuration.valeur_frontiere ?? alphabetEntree[0],
     largeur: Math.max(1, Number(configuration.largeur || 161)),
@@ -75,6 +76,9 @@ function voisinageCellule(ligne, indice, configuration) {
 }
 
 function appliquerRegle(voisinage, configuration, random) {
+  if (configuration.mode_regle === "numerique") {
+    return getRuleOutput(configuration.numero_regle ?? 0n, voisinage, configuration);
+  }
   if (configuration.mode_regle === "totalistique") {
     const sum = voisinage.reduce((acc, value) => acc + Number(value), 0);
     const index = Number.isFinite(sum)
@@ -320,4 +324,5 @@ window.AutomaginariumCore = {
   codeVoisinageNumerique,
   ruleConfiguration,
   getRuleOutput,
+  mulberry32,
 };

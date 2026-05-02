@@ -369,6 +369,54 @@ function testMultiChannelGetOutput() {
   assert.deepEqual(AutomaginariumCore.getRuleOutput(1n, [1, 1, 1], config), [0, 0]);
 }
 
+function testNumeriqueModeWithRule30() {
+  const config = AutomaginariumCore.normaliserConfiguration({
+    alphabet_entree: [0, 1],
+    alphabet_sortie: [0, 1],
+    taille_voisinage: 3,
+    nombre_canaux_sortie: 1,
+    mode_regle: "numerique",
+    numero_regle: 30n,
+    largeur: 5,
+    hauteur: 2,
+    etat_initial: { mode: "centre" }
+  });
+  const universe = AutomaginariumCore.genererUnivers(config);
+  assert.equal(config.mode_regle, "numerique", "mode_regle is numerique");
+  assert.equal(config.numero_regle, 30n, "numero_regle is 30");
+  assert(universe.lignes.length >= 1, "universe generated");
+  assert(universe.sorties.length >= 1, "sorties generated");
+}
+
+function testNumeriqueModeRuleSpaceSize() {
+  const config1 = {
+    alphabet_entree: [0, 1],
+    alphabet_sortie: [0, 1],
+    taille_voisinage: 3,
+    nombre_canaux_sortie: 1,
+  };
+  const rc1 = AutomaginariumCore.ruleConfiguration(config1);
+  assert.equal(rc1.maxRule, 256n, "Binary 3-neighborhood single-channel: 256 rules");
+
+  const config2 = {
+    alphabet_entree: [0, 1],
+    alphabet_sortie: [0, 1],
+    taille_voisinage: 3,
+    nombre_canaux_sortie: 2,
+  };
+  const rc2 = AutomaginariumCore.ruleConfiguration(config2);
+  assert.equal(rc2.maxRule, 65536n, "Binary 3-neighborhood 2-channels: 65536 rules");
+
+  const config3 = {
+    alphabet_entree: [0, 1, 2],
+    alphabet_sortie: [0, 1, 2],
+    taille_voisinage: 3,
+    nombre_canaux_sortie: 1,
+  };
+  const rc3 = AutomaginariumCore.ruleConfiguration(config3);
+  assert.equal(rc3.maxRule, 7625597484987n, "Ternary 3-neighborhood: 3^27 rules");
+}
+
 testRuleConfigurationBinary3();
 testRuleConfigurationBinary3Binary2Channel();
 testRuleConfigurationQuaternary3();
@@ -376,5 +424,7 @@ testNeighborhoodToRuleIndex();
 testWolfram30GetOutput();
 testRuleOutputLargeSpace();
 testMultiChannelGetOutput();
+testNumeriqueModeWithRule30();
+testNumeriqueModeRuleSpaceSize();
 
 console.log("stage7 canvas smoke ok");

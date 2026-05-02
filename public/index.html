@@ -91,10 +91,13 @@
             <p class="eyebrow">R&egrave;gles</p>
             <h3>Espace de transition</h3>
             <div class="field-grid compact-fields">
-              <label>Mode<select id="rule-mode-quick"><option value="table">Table</option><option value="totalistique">Totalistique</option><option value="aleatoire">Al&eacute;atoire</option></select></label>
+              <label>Mode<select id="rule-mode-quick"><option value="table">Table</option><option value="totalistique">Totalistique</option><option value="aleatoire">Al&eacute;atoire</option><option value="numerique">Num&eacute;rique</option></select></label>
               <label>Wolfram<input id="wolfram-rule-quick" type="number" min="0" max="255" step="1" value="90" /></label>
+              <label>Règle N°<input id="rule-number-quick" type="text" inputmode="numeric" placeholder="0" /></label>
               <button id="generate-rule-quick" type="button">G&eacute;n&eacute;rer</button>
+              <button id="random-rule-quick" type="button">Al&eacute;atoire</button>
             </div>
+            <small id="rule-space-size-quick" class="meta"></small>
           </div>
 
           <div id="info-panel" class="inspector-panel">
@@ -288,11 +291,14 @@
             <div id="transition-signals" class="transition-signals" aria-label="Aper&ccedil;u des transitions"></div>
           </div>
           <div class="field-grid compact-fields">
-            <label>Mode<select id="rule-mode"><option value="table">Table</option><option value="totalistique">Totalistique</option><option value="aleatoire">Al&eacute;atoire dynamique</option></select></label>
+            <label>Mode<select id="rule-mode"><option value="table">Table</option><option value="totalistique">Totalistique</option><option value="aleatoire">Al&eacute;atoire dynamique</option><option value="numerique">Num&eacute;rique</option></select></label>
             <label>Wolfram<input id="wolfram-rule" type="number" min="0" max="255" step="1" value="90" /></label>
+            <label>Numéro de règle<input id="rule-number" type="text" inputmode="numeric" placeholder="0" /></label>
             <label>G&eacute;n&eacute;rateur<select id="rule-generator"><option value="wolfram">Wolfram</option><option value="random">Table al&eacute;atoire</option><option value="symmetric">Table sym&eacute;trique</option><option value="totalistic">Totalistique</option></select></label>
             <button id="generate-rule" type="button">G&eacute;n&eacute;rer</button>
+            <button id="random-rule" type="button">Règle aléatoire</button>
           </div>
+          <p id="rule-space-size" class="meta"></p>
           <p class="meta">Les tables sont d&eacute;claratives. Le mode totalistique calcule la sortie depuis la somme du voisinage ; les autres modes mat&eacute;rialisent une table.</p>
         </div>
 
@@ -785,7 +791,8 @@
         { quick: 'grid-width-quick', main: 'grid-width' },
         { quick: 'grid-height-quick', main: 'grid-height' },
         { quick: 'rule-mode-quick', main: 'rule-mode' },
-        { quick: 'wolfram-rule-quick', main: 'wolfram-rule' }
+        { quick: 'wolfram-rule-quick', main: 'wolfram-rule' },
+        { quick: 'rule-number-quick', main: 'rule-number' }
       ];
 
       syncPairs.forEach(pair => {
@@ -834,6 +841,13 @@
       const generateBtnMain = document.getElementById('generate-rule');
       if (generateBtnQuick && generateBtnMain) {
         generateBtnQuick.addEventListener('click', () => generateBtnMain.click());
+      }
+
+      // Random rule button sync
+      const randomBtnQuick = document.getElementById('random-rule-quick');
+      const randomBtnMain = document.getElementById('random-rule');
+      if (randomBtnQuick && randomBtnMain) {
+        randomBtnQuick.addEventListener('click', () => randomBtnMain.click());
       }
     </script>
   </body>

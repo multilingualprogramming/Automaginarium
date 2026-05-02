@@ -48,6 +48,9 @@ const controls = {
   cellSize: document.querySelector("#cell-size"),
   ruleMode: document.querySelector("#rule-mode"),
   wolframRule: document.querySelector("#wolfram-rule"),
+  ruleNumber: document.querySelector("#rule-number"),
+  randomRule: document.querySelector("#random-rule"),
+  ruleSpaceSize: document.querySelector("#rule-space-size"),
   ruleGenerator: document.querySelector("#rule-generator"),
   json: document.querySelector("#config-json"),
   importJson: document.querySelector("#import-json"),
@@ -70,6 +73,7 @@ const liveFieldControls = [
 const liveRuleControls = [
   controls.ruleMode,
   controls.wolframRule,
+  controls.ruleNumber,
   controls.ruleGenerator,
 ];
 
@@ -154,6 +158,7 @@ function controlsToConfig() {
     hauteur: Math.max(1, Number(controls.height.value || 100)),
     frontiere: controls.boundary.value,
     mode_regle: controls.ruleMode.value,
+    numero_regle: controls.ruleNumber.value || "0",
     etat_initial: { mode: initialMode },
     rendu: { ...(current.rendu || {}), taille_cellule: Math.max(1, Number(controls.cellSize.value || 5)) },
   };
@@ -206,7 +211,10 @@ function syncControls(config) {
   controls.initialProbability.value = config.etat_initial?.probabilite ?? 0.28;
   controls.cellSize.value = config.rendu?.taille_cellule || 5;
   controls.ruleMode.value = config.mode_regle || "table";
-  controls.json.value = JSON.stringify(config, null, 2);
+  controls.ruleNumber.value = (config.numero_regle ? String(config.numero_regle) : "0");
+  // Convert BigInt to string for JSON serialization
+  const configForJson = { ...config, numero_regle: String(config.numero_regle || 0n) };
+  controls.json.value = JSON.stringify(configForJson, null, 2);
 }
 
 const DEFAULT_PALETTES = {
@@ -379,6 +387,12 @@ function describe(config) {
   renderTransitionSignals(config);
 }
 
+function updateRuleSpaceDisplay(config) {
+  const { s, k, t, m, maxRule } = window.AutomaginariumCore.ruleConfiguration(config);
+  const ruleSpaceText = `${t}^(${m}·${s}^${k}) = ${maxRule} règles possibles`;
+  if (controls.ruleSpaceSize) controls.ruleSpaceSize.textContent = ruleSpaceText;
+}
+
 function applyConfig(config, { updateJson = true, updateControls = true, source = "Synchronisation", live = false } = {}) {
   const normalized = window.AutomaginariumCore.normaliserConfiguration(config);
   const validation = validateConfig(normalized);
@@ -393,8 +407,13 @@ function applyConfig(config, { updateJson = true, updateControls = true, source 
   state.lastValidConfig = structuredClone(normalized);
   state.universe = window.AutomaginariumCore.genererUnivers(normalized);
   if (updateControls) syncControls(normalized);
-  if (updateJson) controls.json.value = JSON.stringify(normalized, null, 2);
+  if (updateJson) {
+    // Convert BigInt to string for JSON serialization
+    const configForJson = { ...normalized, numero_regle: String(normalized.numero_regle || 0n) };
+    controls.json.value = JSON.stringify(configForJson, null, 2);
+  }
   describe(normalized);
+  updateRuleSpaceDisplay(normalized);
   render();
   updateLiveNarrative(normalized, source, live);
   setSyncState("ok", live ? "Synchronisation live active" : "Configuration synchronisee");
@@ -543,6 +562,17 @@ PRESETS.forEach((preset) => {
   presetSelect.appendChild(option);
 });
 
+function randomBigInt(max) {
+  const bits = max.toString(2).length;
+  const words = Math.ceil(bits / 32) + 1;
+  const rng = AutomaginariumCore.mulberry32(Date.now() >>> 0);
+  let n = 0n;
+  for (let i = 0; i < words; i += 1) {
+    n = (n << 32n) | BigInt(Math.floor(rng() * 0x100000000));
+  }
+  return n % max;
+}
+
 liveFieldControls.forEach((control) => {
   control.addEventListener("input", () => queueConfigPreview("Parametres"));
   control.addEventListener("change", () => queueConfigPreview("Parametres"));
@@ -565,6 +595,14 @@ document.querySelector("#apply-controls").addEventListener("click", () => {
 document.querySelector("#generate-rule").addEventListener("click", () => {
   clearTimeout(previewTimer);
   applyGeneratedRule({ updateJson: true, updateControls: true, source: "Regles", live: false });
+});
+document.querySelector("#random-rule").addEventListener("click", () => {
+  clearTimeout(previewTimer);
+  const config = AutomaginariumCore.normaliserConfiguration(controlsToConfig());
+  const { maxRule } = AutomaginariumCore.ruleConfiguration(config);
+  controls.ruleNumber.value = randomBigInt(maxRule).toString();
+  controls.ruleMode.value = "numerique";
+  applyConfig(controlsToConfig(), { updateJson: true, updateControls: true, source: "Aléatoire", live: false });
 });
 document.querySelector("#apply-json").addEventListener("click", () => {
   try {
