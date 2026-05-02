@@ -32,7 +32,8 @@ function testRuntimeLoaderIsCommitted() {
   assert(fs.existsSync(path.join(root, "public/generated/automate_packed_runtime.mjs")));
   const loader = read("public/generated/automate_packed_runtime.mjs");
   assert(loader.includes("./automate_packed/module.wasm"));
-  assert(loader.includes("./automate_packed/host_shim.mjs"));
+  assert(loader.includes("WebAssembly.Module.imports"));
+  assert(loader.includes("createImportObject"));
 }
 
 testPagesEntrypoints();
