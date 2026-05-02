@@ -67,4 +67,4 @@ if __name__ == "__main__":
     test_symmetric_table(core)
     test_detailed_universe(core)
     test_validation(core)
-    print("stage6 french core ok")
+    print("french core smoke ok")

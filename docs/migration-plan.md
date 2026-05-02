@@ -23,7 +23,7 @@
 
 ## Stage 4 - Minimal JavaScript
 
-- keep `public/app.js` focused on DOM, canvas, fetch, and events
+- keep `public/app.mjs` focused on DOM, canvas, fetch, and events
 - keep rule logic behind `window.AutomaginariumCore` or WASM exports
 - migrate Cellcosmos share URLs and gallery generation only after the core boundary is stable
 

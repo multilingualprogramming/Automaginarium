@@ -1,7 +1,7 @@
 /*
  * Automaginarium browser adapter.
  *
- * This small JavaScript mirror keeps the Stage 2 demo usable until
+ * This small JavaScript mirror keeps the browser demo usable until
  * src/automate_universel.ml is compiled through Multilingual. JavaScript
  * should remain an adapter: configuration in, generated universe out.
  */
@@ -294,7 +294,7 @@ function validerConfiguration(configurationBrute) {
   if (!Array.isArray(config.alphabet_entree) || config.alphabet_entree.length === 0) erreurs.push("alphabet_entree vide");
   if (!Array.isArray(config.alphabet_sortie) || config.alphabet_sortie.length === 0) erreurs.push("alphabet_sortie vide");
   if (config.taille_voisinage < 1 || config.taille_voisinage % 2 === 0) erreurs.push("taille_voisinage doit etre impair et positif");
-  if (!["table", "totalistique", "aleatoire"].includes(config.mode_regle)) erreurs.push("mode_regle inconnu");
+  if (!["table", "totalistique", "aleatoire", "numerique"].includes(config.mode_regle)) erreurs.push("mode_regle inconnu");
   if (config.mode_regle === "table") {
     toutesClesVoisinage(config.alphabet_entree, config.taille_voisinage).forEach((key) => {
       if (!Object.prototype.hasOwnProperty.call(config.table_transition, key)) avertissements.push(`transition absente ${key}`);

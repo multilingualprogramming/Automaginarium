@@ -4,7 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Automaginarium</title>
-    <meta name="description" content="Laboratoire configurable d'automates cellulaires en Multilingual fran&ccedil;ais." />
+    <meta
+      name="description"
+      content="Laboratoire configurable d'automates cellulaires en Multilingual fran&ccedil;ais."
+    />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -17,7 +20,6 @@
         <button type="button" class="tab active" id="tab-main">Univers</button>
         <button type="button" class="tab" id="tab-lab">Laboratoire</button>
         <button type="button" class="tab" id="tab-gallery">Galerie</button>
-        <button type="button" class="ghost-btn" id="btn-theme" aria-label="Changer de th&egrave;me" title="Basculer clair/sombre">Auto</button>
       </nav>
     </header>
 
@@ -52,15 +54,36 @@
             </div>
           </div>
           <div class="canvas-controls">
-            <button type="button" class="canvas-control-btn" id="canvas-play" title="Lancer" aria-label="Lancer la simulation">Play</button>
-            <button type="button" class="canvas-control-btn hidden" id="canvas-pause" title="Pause" aria-label="Mettre en pause">Pause</button>
-            <input type="range" id="canvas-speed" min="1" max="10" value="5" class="canvas-speed-slider" aria-label="Vitesse de simulation" title="Vitesse (1=lent, 10=rapide)">
+            <button type="button" class="canvas-control-btn" id="canvas-play" aria-label="Lancer">
+              Play
+            </button>
+            <button
+              type="button"
+              class="canvas-control-btn hidden"
+              id="canvas-pause"
+              aria-label="Mettre en pause"
+            >
+              Pause
+            </button>
+            <input
+              type="range"
+              id="canvas-speed"
+              min="1"
+              max="10"
+              value="5"
+              class="canvas-speed-slider"
+              aria-label="Vitesse de simulation"
+            />
             <span id="canvas-speed-display" class="canvas-speed-display">5x</span>
             <div class="divider"></div>
-            <button type="button" class="canvas-control-btn" id="canvas-zoom-out" title="D&eacute;zoomer">-</button>
+            <button type="button" class="canvas-control-btn" id="canvas-zoom-out" aria-label="D&eacute;zoomer">
+              -
+            </button>
             <span id="canvas-zoom-display" class="canvas-zoom-display">100%</span>
-            <button type="button" class="canvas-control-btn" id="canvas-zoom-in" title="Zoomer">+</button>
-            <button type="button" class="canvas-control-btn" id="canvas-reset" title="R&eacute;initialiser">Reset</button>
+            <button type="button" class="canvas-control-btn" id="canvas-zoom-in" aria-label="Zoomer">
+              +
+            </button>
+            <button type="button" class="canvas-control-btn" id="canvas-reset">Reset</button>
           </div>
         </div>
 
@@ -71,8 +94,6 @@
             <button type="button" class="inspector-tab-btn" data-panel="info">Infos</button>
             <button type="button" class="inspector-tab-btn" data-panel="display">Affichage</button>
             <button type="button" class="inspector-tab-btn" data-panel="rules">R&egrave;gles</button>
-            <button type="button" class="inspector-tab-btn" data-panel="analytics">Analyse</button>
-            <button type="button" class="inspector-tab-btn" data-panel="advanced">Avanc&eacute;</button>
           </div>
 
           <div id="univers-panel" class="inspector-panel active">
@@ -81,9 +102,9 @@
             <div class="field-grid compact-fields">
               <label>Alphabet<input id="alphabet-input-quick" type="text" placeholder="0,1,2" /></label>
               <label>Voisinage<input id="neighborhood-size-quick" type="number" min="1" max="9" step="2" /></label>
-              <label>Canaux sortie<input id="channel-count-quick" type="number" min="1" max="4" step="1" value="1" /></label>
-              <label>Largeur<input id="grid-width-quick" type="number" min="21" max="401" step="2" value="805" /></label>
-              <label>Hauteur<input id="grid-height-quick" type="number" min="20" max="240" step="5" value="500" /></label>
+              <label>Canaux sortie<input id="channel-count-quick" type="number" min="1" max="4" step="1" /></label>
+              <label>Largeur<input id="grid-width-quick" type="number" min="21" max="401" step="2" /></label>
+              <label>Hauteur<input id="grid-height-quick" type="number" min="20" max="240" step="5" /></label>
             </div>
           </div>
 
@@ -91,9 +112,17 @@
             <p class="eyebrow">R&egrave;gles</p>
             <h3>Espace de transition</h3>
             <div class="field-grid compact-fields">
-              <label>Mode<select id="rule-mode-quick"><option value="table">Table</option><option value="totalistique">Totalistique</option><option value="aleatoire">Al&eacute;atoire</option><option value="numerique">Num&eacute;rique</option></select></label>
+              <label>
+                Mode
+                <select id="rule-mode-quick">
+                  <option value="table">Table</option>
+                  <option value="totalistique">Totalistique</option>
+                  <option value="aleatoire">Al&eacute;atoire</option>
+                  <option value="numerique">Num&eacute;rique</option>
+                </select>
+              </label>
               <label>Wolfram<input id="wolfram-rule-quick" type="number" min="0" max="255" step="1" value="90" /></label>
-              <label>Règle N°<input id="rule-number-quick" type="text" inputmode="numeric" placeholder="0" /></label>
+              <label>R&egrave;gle N&deg;<input id="rule-number-quick" type="text" inputmode="numeric" placeholder="0" /></label>
               <button id="generate-rule-quick" type="button">G&eacute;n&eacute;rer</button>
               <button id="random-rule-quick" type="button">Al&eacute;atoire</button>
             </div>
@@ -112,13 +141,13 @@
             <p class="eyebrow">Affichage</p>
             <h3>Th&egrave;me couleur</h3>
             <div class="palette-selector">
-              <button type="button" class="palette-btn active" data-palette="cosmic" aria-label="Th&egrave;me Cosmic">Cosmic</button>
-              <button type="button" class="palette-btn" data-palette="phosphor" aria-label="Th&egrave;me Phosphor">Phosphor</button>
-              <button type="button" class="palette-btn" data-palette="thermal" aria-label="Th&egrave;me Thermal">Thermal</button>
-              <button type="button" class="palette-btn" data-palette="bioluminescent" aria-label="Th&egrave;me Bioluminescent">Bio</button>
-              <button type="button" class="palette-btn" data-palette="minimalist" aria-label="Th&egrave;me Minimalist">Mini</button>
-              <button type="button" class="palette-btn" data-palette="cyberpunk" aria-label="Th&egrave;me Cyberpunk">Cyber</button>
-              <button type="button" class="palette-btn" data-palette="neutral-tech" aria-label="Th&egrave;me Neutral Tech">Tech</button>
+              <button type="button" class="palette-btn active" data-palette="cosmic">Cosmic</button>
+              <button type="button" class="palette-btn" data-palette="phosphor">Phosphor</button>
+              <button type="button" class="palette-btn" data-palette="thermal">Thermal</button>
+              <button type="button" class="palette-btn" data-palette="bioluminescent">Bio</button>
+              <button type="button" class="palette-btn" data-palette="minimalist">Mini</button>
+              <button type="button" class="palette-btn" data-palette="cyberpunk">Cyber</button>
+              <button type="button" class="palette-btn" data-palette="neutral-tech">Tech</button>
             </div>
 
             <h3>Palette des &eacute;tats</h3>
@@ -132,82 +161,6 @@
             <p class="meta">Les transitions d'&eacute;tat actuellement actives pour cet automate</p>
             <div id="rule-table-detail" class="rule-table"></div>
           </div>
-
-          <div id="analytics-panel" class="inspector-panel analytics-panel">
-            <p class="eyebrow">Analyse en temps r&eacute;el</p>
-            <h3>M&eacute;triques simul&eacute;es</h3>
-            <div class="analytics-grid">
-              <div class="analytics-card">
-                <span class="analytics-label">Diversit&eacute;</span>
-                <div class="analytics-value">
-                  <span id="metric-diversity">0%</span>
-                  <span class="analytics-unit">de variation</span>
-                </div>
-                <div class="analytics-bar">
-                  <div id="metric-diversity-bar" class="analytics-bar-fill"></div>
-                </div>
-              </div>
-              <div class="analytics-card">
-                <span class="analytics-label">Oscillation</span>
-                <div class="analytics-value">
-                  <span id="metric-oscillation">0</span>
-                  <span class="analytics-unit">cycles</span>
-                </div>
-                <div class="analytics-bar">
-                  <div id="metric-oscillation-bar" class="analytics-bar-fill"></div>
-                </div>
-              </div>
-              <div class="analytics-card">
-                <span class="analytics-label">Stabilit&eacute;</span>
-                <div class="analytics-value">
-                  <span id="metric-stability">0%</span>
-                  <span class="analytics-unit">cellules stables</span>
-                </div>
-                <div class="analytics-bar">
-                  <div id="metric-stability-bar" class="analytics-bar-fill"></div>
-                </div>
-              </div>
-              <div class="analytics-card">
-                <span class="analytics-label">Connectivit&eacute;</span>
-                <div class="analytics-value">
-                  <span id="metric-connectivity">0</span>
-                  <span class="analytics-unit">composantes</span>
-                </div>
-                <div class="analytics-bar">
-                  <div id="metric-connectivity-bar" class="analytics-bar-fill"></div>
-                </div>
-              </div>
-            </div>
-            <div class="analytics-export">
-              <button id="export-analytics" type="button">Exporter analyse</button>
-            </div>
-          </div>
-
-          <div id="advanced-panel" class="inspector-panel advanced-panel">
-            <p class="eyebrow">Configuration avanc&eacute;e</p>
-            <h3>Sch&eacute;mas et effets</h3>
-            <div class="advanced-section">
-              <label class="checkbox-label">
-                <input type="checkbox" id="enable-particles" aria-label="Activer les particules">
-                <span>Effets particulaires</span>
-              </label>
-              <label class="checkbox-label">
-                <input type="checkbox" id="enable-grid-lines" aria-label="Afficher les lignes de grille">
-                <span>Lignes de grille</span>
-              </label>
-              <label class="checkbox-label">
-                <input type="checkbox" id="enable-animations" checked aria-label="Activer les animations">
-                <span>Animations fluides</span>
-              </label>
-            </div>
-            <h3>Sch&eacute;mas personnalis&eacute;s</h3>
-            <div class="scheme-controls">
-              <button id="save-scheme" type="button" class="canvas-control-btn">Enregistrer</button>
-              <button id="load-scheme" type="button" class="canvas-control-btn">Charger</button>
-              <button id="clear-schemes" type="button" class="canvas-control-btn">Effacer</button>
-            </div>
-            <div id="saved-schemes" class="saved-schemes-list"></div>
-          </div>
         </aside>
 
         <div class="quick-controls-toolbar" aria-label="Actions rapides">
@@ -218,8 +171,6 @@
           <button id="apply-controls" type="button">Synchroniser</button>
           <button id="export-png" type="button">PNG</button>
           <button id="export-json" type="button">JSON</button>
-          <button id="export-scheme" type="button" title="Exporter le sch&eacute;ma de couleurs">Sch&eacute;ma</button>
-          <label class="file-button" title="Importer un sch&eacute;ma">Importer<input id="import-scheme" type="file" accept="application/json,.json"></label>
           <select id="preset" class="hidden-preset" aria-label="S&eacute;lecteur de pr&eacute;sets"></select>
         </div>
       </section>
@@ -241,7 +192,10 @@
             <div>
               <p class="eyebrow">Orchestration</p>
               <h2>Du r&eacute;glage &agrave; l'univers</h2>
-              <p class="meta">Les blocs `Param&egrave;tres` et `R&egrave;gles` deviennent les sources directes du rendu. Chaque modification est projet&eacute;e sans attendre dans l'univers.</p>
+              <p class="meta">
+                Les blocs Param&egrave;tres et R&egrave;gles deviennent les sources directes du rendu.
+                Chaque modification est projet&eacute;e sans surcouche d'interface.
+              </p>
             </div>
             <div class="flow-pills" aria-label="Cha&icirc;ne de transformation">
               <span class="flow-pill">Param&egrave;tres</span>
@@ -281,7 +235,7 @@
           <div class="panel-heading">
             <p class="eyebrow">R&egrave;gles</p>
             <h2>Espace de transition</h2>
-            <p class="meta">Le moteur de transition est visualis&eacute; comme une couche active qui redistribue les &eacute;tats dans l'univers.</p>
+            <p class="meta">Le moteur de transition reste d&eacute;claratif et pilot&eacute; par la configuration.</p>
           </div>
           <div class="transition-surface">
             <div id="transition-live-summary" class="live-summary-card">
@@ -291,15 +245,31 @@
             <div id="transition-signals" class="transition-signals" aria-label="Aper&ccedil;u des transitions"></div>
           </div>
           <div class="field-grid compact-fields">
-            <label>Mode<select id="rule-mode"><option value="table">Table</option><option value="totalistique">Totalistique</option><option value="aleatoire">Al&eacute;atoire dynamique</option><option value="numerique">Num&eacute;rique</option></select></label>
+            <label>
+              Mode
+              <select id="rule-mode">
+                <option value="table">Table</option>
+                <option value="totalistique">Totalistique</option>
+                <option value="aleatoire">Al&eacute;atoire dynamique</option>
+                <option value="numerique">Num&eacute;rique</option>
+              </select>
+            </label>
             <label>Wolfram<input id="wolfram-rule" type="number" min="0" max="255" step="1" value="90" /></label>
-            <label>Numéro de règle<input id="rule-number" type="text" inputmode="numeric" placeholder="0" /></label>
-            <label>G&eacute;n&eacute;rateur<select id="rule-generator"><option value="wolfram">Wolfram</option><option value="random">Table al&eacute;atoire</option><option value="symmetric">Table sym&eacute;trique</option><option value="totalistic">Totalistique</option></select></label>
+            <label>Num&eacute;ro de r&egrave;gle<input id="rule-number" type="text" inputmode="numeric" placeholder="0" /></label>
+            <label>
+              G&eacute;n&eacute;rateur
+              <select id="rule-generator">
+                <option value="wolfram">Wolfram</option>
+                <option value="random">Table al&eacute;atoire</option>
+                <option value="symmetric">Table sym&eacute;trique</option>
+                <option value="totalistic">Totalistique</option>
+              </select>
+            </label>
             <button id="generate-rule" type="button">G&eacute;n&eacute;rer</button>
-            <button id="random-rule" type="button">Règle aléatoire</button>
+            <button id="random-rule" type="button">R&egrave;gle al&eacute;atoire</button>
           </div>
           <p id="rule-space-size" class="meta"></p>
-          <p class="meta">Les tables sont d&eacute;claratives. Le mode totalistique calcule la sortie depuis la somme du voisinage ; les autres modes mat&eacute;rialisent une table.</p>
+          <p class="meta">Les tables sont d&eacute;claratives. Le mode totalistique calcule la sortie depuis la somme du voisinage.</p>
         </div>
 
         <div class="config-panel json-panel expert-panel">
@@ -307,7 +277,7 @@
             <div>
               <p class="eyebrow">JSON</p>
               <h2>Configuration brute</h2>
-              <p class="meta">Le mode expert reste disponible pour l'&eacute;dition manuelle ou l'import avanc&eacute;, sans rompre le flux visuel principal.</p>
+              <p class="meta">Le mode expert reste disponible pour l'&eacute;dition manuelle et l'import avanc&eacute;.</p>
             </div>
             <div class="button-row">
               <button id="apply-json" type="button">Appliquer JSON</button>
@@ -318,537 +288,10 @@
           <textarea id="config-json" spellcheck="false" aria-label="&Eacute;diteur de configuration JSON"></textarea>
         </div>
       </section>
-
-      <div id="command-palette" class="command-palette">
-        <div class="command-palette-content">
-          <input type="text" id="command-input" class="command-input" placeholder="Appuyez sur Ctrl+K pour les commandes..." aria-label="Palette de commandes">
-          <div id="command-results" class="command-results"></div>
-        </div>
-      </div>
     </main>
 
     <script src="automate-core.js"></script>
     <script type="module" src="app.mjs"></script>
-    <script>
-      document.getElementById('btn-theme').addEventListener('click', () => {
-        const current = document.documentElement.getAttribute('data-theme') || 'auto';
-        const next = current === 'light' ? 'dark' : current === 'dark' ? 'auto' : 'light';
-        document.documentElement.setAttribute('data-theme', next);
-        localStorage.setItem('theme-preference', next);
-        updateThemeIcon(next);
-      });
-
-      function updateThemeIcon(theme) {
-        const btn = document.getElementById('btn-theme');
-        if (theme === 'light') btn.textContent = 'Lune';
-        else if (theme === 'dark') btn.textContent = 'Soleil';
-        else btn.textContent = 'Auto';
-      }
-
-      const saved = localStorage.getItem('theme-preference') || 'auto';
-      document.documentElement.setAttribute('data-theme', saved);
-      updateThemeIcon(saved);
-
-      document.querySelectorAll('.palette-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.palette-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          document.documentElement.setAttribute('data-palette', btn.dataset.palette);
-          localStorage.setItem('palette-preference', btn.dataset.palette);
-          setTimeout(() => {
-            if (typeof window.updatePaletteEditor === 'function') {
-              window.updatePaletteEditor();
-            }
-            window.AutomaginariumApp?.render?.();
-          }, 0);
-        });
-      });
-
-      const savedPalette = localStorage.getItem('palette-preference') || 'cosmic';
-      document.documentElement.setAttribute('data-palette', savedPalette);
-      document.querySelector(`[data-palette="${savedPalette}"]`)?.classList.add('active');
-
-      document.querySelectorAll('.inspector-tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.inspector-tab-btn').forEach(b => b.classList.remove('active'));
-          document.querySelectorAll('.inspector-panel').forEach(p => p.classList.remove('active'));
-          btn.classList.add('active');
-          document.getElementById(btn.dataset.panel + '-panel').classList.add('active');
-        });
-      });
-
-      document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-          tab.classList.add('active');
-          if (tab.id === 'tab-main' || tab.id === 'tab-lab') {
-            document.getElementById('main-panel').style.display = 'grid';
-            document.getElementById('gallery-panel').style.display = 'none';
-            document.querySelector('.config-lab').style.display = 'grid';
-          } else if (tab.id === 'tab-gallery') {
-            document.getElementById('main-panel').style.display = 'none';
-            document.getElementById('gallery-panel').style.display = 'block';
-            document.querySelector('.config-lab').style.display = 'none';
-          }
-        });
-      });
-
-      window.updatePaletteEditor = function() {
-        if (!window.AutomaginariumApp || !window.AutomaginariumApp.state || !window.AutomaginariumApp.state.config) {
-          return;
-        }
-
-        const config = window.AutomaginariumApp.state.config;
-        const alphabet = config.alphabet_sortie || config.alphabet_entree || [0, 1];
-        const palette = config.rendu.palette || window.AutomaginariumApp.getDefaultPalette(alphabet.length);
-        const editor = document.getElementById('palette-editor');
-        editor.innerHTML = '';
-
-        alphabet.forEach((symbol, index) => {
-          const colorRow = document.createElement('div');
-          colorRow.className = 'palette-color-row';
-
-          const label = document.createElement('span');
-          label.textContent = String(symbol);
-
-          const colorInput = document.createElement('input');
-          colorInput.type = 'color';
-          colorInput.value = palette[index] || '#ffffff';
-
-          colorInput.addEventListener('input', (e) => {
-            if (!window.AutomaginariumApp.state.config) return;
-            if (!window.AutomaginariumApp.state.config.rendu.palette) {
-              window.AutomaginariumApp.state.config.rendu.palette = window.AutomaginariumApp.getDefaultPalette(alphabet.length);
-            }
-            window.AutomaginariumApp.state.config.rendu.palette[index] = e.target.value;
-            window.AutomaginariumApp.render();
-          });
-
-          colorRow.appendChild(label);
-          colorRow.appendChild(colorInput);
-          editor.appendChild(colorRow);
-        });
-      };
-
-      setTimeout(() => {
-        if (typeof window.updatePaletteEditor === 'function') {
-          window.updatePaletteEditor();
-        }
-      }, 500);
-
-      let zoomLevel = 100;
-      document.getElementById('canvas-zoom-out').addEventListener('click', () => {
-        zoomLevel = Math.max(25, zoomLevel - 10);
-        document.getElementById('canvas-zoom-display').textContent = zoomLevel + '%';
-      });
-
-      document.getElementById('canvas-zoom-in').addEventListener('click', () => {
-        zoomLevel = Math.min(400, zoomLevel + 10);
-        document.getElementById('canvas-zoom-display').textContent = zoomLevel + '%';
-      });
-
-      document.getElementById('canvas-reset').addEventListener('click', () => {
-        zoomLevel = 100;
-        document.getElementById('canvas-zoom-display').textContent = '100%';
-        if (window.AutomaginariumApp?.render) {
-          window.AutomaginariumApp.render();
-        }
-      });
-
-      function updateHUDRule() {
-        const neighborhood = Number(document.getElementById('neighborhood-size')?.value || document.getElementById('neighborhood-size-quick')?.value || 3);
-        const channels = Number(document.getElementById('channel-count')?.value || document.getElementById('channel-count-quick')?.value || 1);
-        const ruleMode = document.getElementById('rule-mode')?.value || document.getElementById('rule-mode-quick')?.value || 'table';
-        const wolframRule = document.getElementById('wolfram-rule')?.value || document.getElementById('wolfram-rule-quick')?.value || '90';
-
-        let displayValue = '';
-
-        // Only show Wolfram rule number for classical elementary CA (neighborhood=3, channels=1)
-        if (neighborhood === 3 && channels === 1 && ruleMode === 'table') {
-          displayValue = wolframRule;
-        } else if (ruleMode === 'totalistique') {
-          displayValue = `Tot(${neighborhood})`;
-        } else if (ruleMode === 'aleatoire') {
-          displayValue = `Aléa(${neighborhood})`;
-        } else {
-          // Generic rule mode with extended parameters
-          displayValue = `R${neighborhood}×${channels}`;
-        }
-
-        document.getElementById('hud-rule').textContent = displayValue;
-      }
-
-      updateHUDRule();
-      document.getElementById('wolfram-rule')?.addEventListener('input', updateHUDRule);
-      document.getElementById('wolfram-rule-quick')?.addEventListener('input', updateHUDRule);
-      document.getElementById('neighborhood-size')?.addEventListener('input', updateHUDRule);
-      document.getElementById('neighborhood-size-quick')?.addEventListener('input', updateHUDRule);
-      document.getElementById('channel-count')?.addEventListener('input', updateHUDRule);
-      document.getElementById('channel-count-quick')?.addEventListener('input', updateHUDRule);
-      document.getElementById('rule-mode')?.addEventListener('input', updateHUDRule);
-      document.getElementById('rule-mode-quick')?.addEventListener('input', updateHUDRule);
-
-      let isPlaying = false;
-      let simulationSpeed = 5;
-      const playBtn = document.getElementById('canvas-play');
-      const pauseBtn = document.getElementById('canvas-pause');
-      const speedSlider = document.getElementById('canvas-speed');
-      const speedDisplay = document.getElementById('canvas-speed-display');
-
-      playBtn.addEventListener('click', () => {
-        isPlaying = true;
-        playBtn.classList.add('hidden');
-        pauseBtn.classList.remove('hidden');
-        document.documentElement.setAttribute('data-playing', 'true');
-        if (window.AutomaginariumApp?.render) {
-          window.AutomaginariumApp.render();
-        }
-      });
-
-      pauseBtn.addEventListener('click', () => {
-        isPlaying = false;
-        pauseBtn.classList.add('hidden');
-        playBtn.classList.remove('hidden');
-        document.documentElement.setAttribute('data-playing', 'false');
-      });
-
-      speedSlider.addEventListener('input', (e) => {
-        simulationSpeed = e.target.value;
-        speedDisplay.textContent = simulationSpeed + 'x';
-        localStorage.setItem('simulation-speed', simulationSpeed);
-      });
-
-      const savedSpeed = localStorage.getItem('simulation-speed') || '5';
-      speedSlider.value = savedSpeed;
-      simulationSpeed = savedSpeed;
-      speedDisplay.textContent = savedSpeed + 'x';
-
-      function updateAnalytics() {
-        const canvas = document.getElementById('universe');
-        if (!canvas || !canvas.getContext) return;
-
-        const diversity = Math.floor(Math.random() * 100);
-        const oscillation = Math.floor(Math.random() * 10);
-        const stability = Math.floor(Math.random() * 100);
-        const connectivity = Math.floor(Math.random() * 20);
-
-        document.getElementById('metric-diversity').textContent = diversity + '%';
-        document.getElementById('metric-diversity-bar').style.width = diversity + '%';
-        document.getElementById('metric-oscillation').textContent = oscillation;
-        document.getElementById('metric-oscillation-bar').style.width = (oscillation * 10) + '%';
-        document.getElementById('metric-stability').textContent = stability + '%';
-        document.getElementById('metric-stability-bar').style.width = stability + '%';
-        document.getElementById('metric-connectivity').textContent = connectivity;
-        document.getElementById('metric-connectivity-bar').style.width = Math.min((connectivity * 5), 100) + '%';
-      }
-
-      setInterval(updateAnalytics, 1000);
-      updateAnalytics();
-
-      document.getElementById('export-analytics').addEventListener('click', () => {
-        const data = {
-          timestamp: new Date().toISOString(),
-          diversity: document.getElementById('metric-diversity').textContent,
-          oscillation: document.getElementById('metric-oscillation').textContent,
-          stability: document.getElementById('metric-stability').textContent,
-          connectivity: document.getElementById('metric-connectivity').textContent,
-          rule: document.getElementById('wolfram-rule').value,
-          generation: document.getElementById('hud-gen').textContent
-        };
-        const json = JSON.stringify(data, null, 2);
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'analytics-' + Date.now() + '.json';
-        a.click();
-        URL.revokeObjectURL(url);
-      });
-
-      const enableParticles = document.getElementById('enable-particles');
-      const enableGridLines = document.getElementById('enable-grid-lines');
-      const enableAnimations = document.getElementById('enable-animations');
-
-      enableParticles.addEventListener('change', () => {
-        localStorage.setItem('particles-enabled', enableParticles.checked);
-        document.documentElement.setAttribute('data-particles', enableParticles.checked);
-      });
-      enableGridLines.addEventListener('change', () => {
-        localStorage.setItem('grid-lines-enabled', enableGridLines.checked);
-        document.documentElement.setAttribute('data-grid-lines', enableGridLines.checked);
-      });
-      enableAnimations.addEventListener('change', () => {
-        localStorage.setItem('animations-enabled', enableAnimations.checked);
-        document.documentElement.setAttribute('data-animations', enableAnimations.checked);
-      });
-
-      enableParticles.checked = localStorage.getItem('particles-enabled') !== 'false';
-      enableGridLines.checked = localStorage.getItem('grid-lines-enabled') === 'true';
-      enableAnimations.checked = localStorage.getItem('animations-enabled') !== 'false';
-
-      function getSavedSchemes() {
-        return JSON.parse(localStorage.getItem('saved-schemes') || '[]');
-      }
-
-      function saveScheme(name) {
-        const palette = document.documentElement.getAttribute('data-palette') || 'cosmic';
-        const scheme = { name, palette, timestamp: Date.now() };
-        const schemes = getSavedSchemes();
-        schemes.push(scheme);
-        localStorage.setItem('saved-schemes', JSON.stringify(schemes));
-        refreshSchemesList();
-      }
-
-      function deleteScheme(index) {
-        const schemes = getSavedSchemes();
-        schemes.splice(index, 1);
-        localStorage.setItem('saved-schemes', JSON.stringify(schemes));
-        refreshSchemesList();
-      }
-
-      function loadScheme(index) {
-        const schemes = getSavedSchemes();
-        const scheme = schemes[index];
-        if (!scheme) return;
-        document.documentElement.setAttribute('data-palette', scheme.palette);
-        document.querySelectorAll('.palette-btn').forEach(b => b.classList.remove('active'));
-        document.querySelector(`[data-palette="${scheme.palette}"]`).classList.add('active');
-      }
-
-      function refreshSchemesList() {
-        const schemesList = document.getElementById('saved-schemes');
-        const schemes = getSavedSchemes();
-        schemesList.innerHTML = '';
-        if (schemes.length === 0) {
-          schemesList.innerHTML = '<p class="meta">Aucun sch&eacute;ma enregistr&eacute;</p>';
-          return;
-        }
-        schemes.forEach((scheme, i) => {
-          const item = document.createElement('div');
-          item.className = 'scheme-item';
-          item.innerHTML = `
-            <span class="scheme-item-name">${scheme.name}</span>
-            <div class="scheme-item-actions">
-              <button type="button" data-index="${i}" class="load-scheme-btn">Charger</button>
-              <button type="button" data-index="${i}" class="delete-scheme-btn">X</button>
-            </div>
-          `;
-          schemesList.appendChild(item);
-        });
-        document.querySelectorAll('.load-scheme-btn').forEach(btn => {
-          btn.addEventListener('click', () => loadScheme(parseInt(btn.dataset.index)));
-        });
-        document.querySelectorAll('.delete-scheme-btn').forEach(btn => {
-          btn.addEventListener('click', () => deleteScheme(parseInt(btn.dataset.index)));
-        });
-      }
-
-      document.getElementById('save-scheme').addEventListener('click', () => {
-        const name = prompt('Nom du sch&eacute;ma:', 'Mon sch&eacute;ma');
-        if (name) saveScheme(name);
-      });
-
-      document.getElementById('clear-schemes').addEventListener('click', () => {
-        if (confirm('Supprimer tous les sch&eacute;mas enregistr&eacute;s ?')) {
-          localStorage.removeItem('saved-schemes');
-          refreshSchemesList();
-        }
-      });
-
-      refreshSchemesList();
-
-      document.getElementById('export-scheme').addEventListener('click', () => {
-        const palette = document.documentElement.getAttribute('data-palette');
-        const scheme = { palette, exported: new Date().toISOString() };
-        const json = JSON.stringify(scheme, null, 2);
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'color-scheme-' + Date.now() + '.json';
-        a.click();
-        URL.revokeObjectURL(url);
-      });
-
-      document.getElementById('import-scheme').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          try {
-            const scheme = JSON.parse(event.target.result);
-            if (scheme.palette) {
-              document.documentElement.setAttribute('data-palette', scheme.palette);
-              document.querySelectorAll('.palette-btn').forEach(b => b.classList.remove('active'));
-              document.querySelector(`[data-palette="${scheme.palette}"]`)?.classList.add('active');
-              alert('Sch&eacute;ma import&eacute; avec succ&egrave;s !');
-            }
-          } catch (err) {
-            alert('Erreur lors de l\'importation du sch&eacute;ma');
-          }
-        };
-        reader.readAsText(file);
-        e.target.value = '';
-      });
-
-      const commandPalette = document.getElementById('command-palette');
-      const commandInput = document.getElementById('command-input');
-      const commandResults = document.getElementById('command-results');
-      let selectedCommand = -1;
-
-      const commands = [
-        { title: 'Lancer simulation', desc: 'D&eacute;marrer la simulation', action: () => playBtn.click() },
-        { title: 'Mettre en pause', desc: 'Pause la simulation', action: () => pauseBtn.click() },
-        { title: 'Exporter PNG', desc: 'Exporter en image PNG', action: () => document.getElementById('export-png').click() },
-        { title: 'Exporter JSON', desc: 'Exporter configuration JSON', action: () => document.getElementById('export-json').click() },
-        { title: 'Exporter sch&eacute;ma', desc: 'Exporter le sch&eacute;ma couleurs', action: () => document.getElementById('export-scheme').click() },
-        { title: 'Enregistrer sch&eacute;ma', desc: 'Sauvegarder sch&eacute;ma personnalis&eacute;', action: () => document.getElementById('save-scheme').click() },
-        { title: 'R&eacute;initialiser zoom', desc: 'Zoom 100%', action: () => document.getElementById('canvas-reset').click() },
-        { title: 'Changer th&egrave;me', desc: 'Basculer clair/sombre', action: () => document.getElementById('btn-theme').click() }
-      ];
-
-      function openCommandPalette() {
-        commandPalette.classList.add('active');
-        commandInput.focus();
-        commandInput.value = '';
-        selectedCommand = -1;
-        updateCommandResults('');
-      }
-
-      function closeCommandPalette() {
-        commandPalette.classList.remove('active');
-      }
-
-      function updateCommandResults(query) {
-        commandResults.innerHTML = '';
-        const filtered = commands.filter(cmd =>
-          cmd.title.toLowerCase().includes(query.toLowerCase()) ||
-          cmd.desc.toLowerCase().includes(query.toLowerCase())
-        );
-        if (filtered.length === 0) {
-          commandResults.innerHTML = '<div class="command-result"><span class="command-result-title">Aucune commande trouv&eacute;e</span></div>';
-          return;
-        }
-        filtered.forEach((cmd, i) => {
-          const el = document.createElement('div');
-          el.className = 'command-result';
-          if (i === selectedCommand) el.classList.add('selected');
-          el.innerHTML = `<span class="command-result-icon">Cmd</span><div><div class="command-result-title">${cmd.title}</div><div class="command-result-desc">${cmd.desc}</div></div>`;
-          el.addEventListener('click', () => {
-            cmd.action();
-            closeCommandPalette();
-          });
-          commandResults.appendChild(el);
-        });
-      }
-
-      commandInput.addEventListener('input', (e) => {
-        selectedCommand = -1;
-        updateCommandResults(e.target.value);
-      });
-
-      commandInput.addEventListener('keydown', (e) => {
-        const results = commandResults.querySelectorAll('.command-result');
-        if (e.key === 'ArrowDown') {
-          e.preventDefault();
-          selectedCommand = Math.min(selectedCommand + 1, results.length - 1);
-          updateCommandResults(commandInput.value);
-        } else if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          selectedCommand = Math.max(selectedCommand - 1, 0);
-          updateCommandResults(commandInput.value);
-        } else if (e.key === 'Enter' && selectedCommand >= 0) {
-          e.preventDefault();
-          const filtered = commands.filter(cmd =>
-            cmd.title.toLowerCase().includes(commandInput.value.toLowerCase()) ||
-            cmd.desc.toLowerCase().includes(commandInput.value.toLowerCase())
-          );
-          if (filtered[selectedCommand]) {
-            filtered[selectedCommand].action();
-            closeCommandPalette();
-          }
-        } else if (e.key === 'Escape') {
-          closeCommandPalette();
-        }
-      });
-
-      document.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-          e.preventDefault();
-          commandPalette.classList.contains('active') ? closeCommandPalette() : openCommandPalette();
-        }
-      });
-
-      commandPalette.addEventListener('click', (e) => {
-        if (e.target === commandPalette) closeCommandPalette();
-      });
-
-      // Sync quick controls with main config fields
-      const syncPairs = [
-        { quick: 'alphabet-input-quick', main: 'alphabet-input' },
-        { quick: 'neighborhood-size-quick', main: 'neighborhood-size' },
-        { quick: 'channel-count-quick', main: 'channel-count' },
-        { quick: 'grid-width-quick', main: 'grid-width' },
-        { quick: 'grid-height-quick', main: 'grid-height' },
-        { quick: 'rule-mode-quick', main: 'rule-mode' },
-        { quick: 'wolfram-rule-quick', main: 'wolfram-rule' },
-        { quick: 'rule-number-quick', main: 'rule-number' }
-      ];
-
-      syncPairs.forEach(pair => {
-        const quickEl = document.getElementById(pair.quick);
-        const mainEl = document.getElementById(pair.main);
-        if (quickEl && mainEl) {
-          quickEl.addEventListener('input', () => {
-            const oldValue = mainEl.value;
-            mainEl.value = quickEl.value;
-            mainEl.dispatchEvent(new Event('input', { bubbles: true }));
-            mainEl.dispatchEvent(new Event('change', { bubbles: true }));
-
-            const generateBtnMain = document.getElementById('generate-rule');
-            const ruleGen = document.getElementById('rule-generator');
-
-            // When neighborhood changes, regenerate the rule table to match new structure
-            if (pair.quick === 'neighborhood-size-quick' && oldValue !== quickEl.value) {
-              const newNeighborhood = Number(quickEl.value);
-
-              // If using Wolfram but neighborhood is not 3, switch to random generator
-              if (ruleGen && ruleGen.value === 'wolfram' && newNeighborhood !== 3) {
-                ruleGen.value = 'random';
-              }
-
-              // Regenerate rules for the new neighborhood
-              if (generateBtnMain) {
-                setTimeout(() => generateBtnMain.click(), 100);
-              }
-            }
-
-            // When channel-count changes, regenerate the rule table to match new output structure
-            if (pair.quick === 'channel-count-quick' && oldValue !== quickEl.value) {
-              if (generateBtnMain) {
-                setTimeout(() => generateBtnMain.click(), 100);
-              }
-            }
-          });
-          mainEl.addEventListener('input', () => {
-            quickEl.value = mainEl.value;
-          });
-        }
-      });
-
-      // Generate rule button sync
-      const generateBtnQuick = document.getElementById('generate-rule-quick');
-      const generateBtnMain = document.getElementById('generate-rule');
-      if (generateBtnQuick && generateBtnMain) {
-        generateBtnQuick.addEventListener('click', () => generateBtnMain.click());
-      }
-
-      // Random rule button sync
-      const randomBtnQuick = document.getElementById('random-rule-quick');
-      const randomBtnMain = document.getElementById('random-rule');
-      if (randomBtnQuick && randomBtnMain) {
-        randomBtnQuick.addEventListener('click', () => randomBtnMain.click());
-      }
-    </script>
+    <script type="module" src="ui.mjs"></script>
   </body>
 </html>

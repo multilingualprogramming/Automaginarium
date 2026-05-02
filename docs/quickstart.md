@@ -25,14 +25,14 @@ No application server is required. The generated Multilingual/WASM bundle is ser
 ## Rebuild Generated Artifacts
 
 ```powershell
-.\scripts\build-stage4.ps1
+.\scripts\build-packed-runtime.ps1
 ```
 
 Then run:
 
 ```powershell
-python tests\stage6_french_core.py
-node tests\stage3-smoke.js
-node tests\stage4-wasm.mjs
-node tests\stage5-static.js
+python tests\french_core_smoke.py
+node tests\core_smoke.js
+node tests\packed_runtime_smoke.mjs
+node tests\static_site_smoke.js
 ```

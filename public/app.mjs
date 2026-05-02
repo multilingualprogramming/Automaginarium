@@ -215,6 +215,7 @@ function syncControls(config) {
   // Convert BigInt to string for JSON serialization
   const configForJson = { ...config, numero_regle: String(config.numero_regle || 0n) };
   controls.json.value = JSON.stringify(configForJson, null, 2);
+  window.AutomaginariumUI?.syncQuickControls?.();
 }
 
 const DEFAULT_PALETTES = {
@@ -262,6 +263,10 @@ function summarizeTransition(config) {
 function setSyncState(kind, text) {
   syncIndicatorDot.dataset.state = kind;
   syncIndicatorText.textContent = text;
+  const heroDot = document.querySelector("#hero-sync-dot");
+  const heroText = document.querySelector("#hero-status-text");
+  if (heroDot) heroDot.dataset.state = kind;
+  if (heroText) heroText.textContent = text;
   if (livePreviewBadge) livePreviewBadge.textContent = kind === "error" ? "Validation" : kind === "pending" ? "Projection..." : "Apercu live";
   if (liveModeText) liveModeText.textContent = kind === "error" ? "Correction requise" : kind === "pending" ? "Recomposition en cours" : "Apercu temps reel actif";
 }
@@ -391,6 +396,8 @@ function updateRuleSpaceDisplay(config) {
   const { s, k, t, m, maxRule } = window.AutomaginariumCore.ruleConfiguration(config);
   const ruleSpaceText = `${t}^(${m}·${s}^${k}) = ${maxRule} règles possibles`;
   if (controls.ruleSpaceSize) controls.ruleSpaceSize.textContent = ruleSpaceText;
+  const quickRuleSpace = document.querySelector("#rule-space-size-quick");
+  if (quickRuleSpace) quickRuleSpace.textContent = ruleSpaceText;
 }
 
 function applyConfig(config, { updateJson = true, updateControls = true, source = "Synchronisation", live = false } = {}) {
@@ -417,9 +424,8 @@ function applyConfig(config, { updateJson = true, updateControls = true, source 
   render();
   updateLiveNarrative(normalized, source, live);
   setSyncState("ok", live ? "Synchronisation live active" : "Configuration synchronisee");
-  if (typeof window.updatePaletteEditor === "function") {
-    window.updatePaletteEditor();
-  }
+  window.AutomaginariumUI?.updateHudRule?.();
+  window.AutomaginariumUI?.updatePaletteEditor?.();
   return true;
 }
 
@@ -621,6 +627,7 @@ window.AutomaginariumApp = {
   state,
   render,
   getDefaultPalette,
+  setPaletteColor,
 };
 
 controls.importJson.addEventListener("change", async () => {

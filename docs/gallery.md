@@ -1,6 +1,6 @@
 # Preset Gallery
 
-Stage 5 adds a browser-rendered preset gallery. Each gallery tile is generated from the same Automaginarium configuration model used by the main canvas.
+The browser-rendered preset gallery uses the same Automaginarium configuration model as the main canvas.
 
 Current preset families:
 
@@ -16,5 +16,5 @@ The gallery intentionally uses real generated thumbnails rather than static imag
 The static check is:
 
 ```powershell
-node tests\stage5-static.js
+node tests\static_site_smoke.js
 ```

@@ -5,16 +5,16 @@ Before publishing a release:
 1. Rebuild generated artifacts.
 
    ```powershell
-   .\scripts\build-stage4.ps1
+   .\scripts\build-packed-runtime.ps1
    ```
 
 2. Run all local tests.
 
    ```powershell
-   python tests\stage6_french_core.py
-   node tests\stage3-smoke.js
-   node tests\stage4-wasm.mjs
-   node tests\stage5-static.js
+   python tests\french_core_smoke.py
+   node tests\core_smoke.js
+   node tests\packed_runtime_smoke.mjs
+   node tests\static_site_smoke.js
    ```
 
 3. Serve the repository root.

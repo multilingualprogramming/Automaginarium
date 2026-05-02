@@ -2,7 +2,7 @@
 
 Automaginarium is a configurable universe generator for cellular automata. It extends the spirit of [Cellcosmos](https://github.com/multilingualprogramming/cellcosmos): instead of exploring only the 256 elementary Wolfram rules, it opens the rule space itself.
 
-The project is designed to demonstrate the expressive power of the Multilingual programming language. The canonical automata concepts are written in French Multilingual source, while JavaScript is kept as a browser layer for loading JSON configurations, drawing to canvas, and wiring interface events.
+The project is designed to demonstrate the expressive power of the Multilingual programming language. The canonical automata concepts are written in French Multilingual source, while JavaScript is kept as a thin browser layer for loading JSON configurations, drawing to canvas, and wiring only the essential interface events.
 
 ## Vision
 
@@ -27,17 +27,18 @@ docs/       Migration notes, architecture, tutorials
 scripts/    Future build helpers for Multilingual/WASM compilation
 ```
 
-## Current Stage
+## Current Shape
 
-This is the Stage 2 working skeleton. It includes:
+The repository currently includes:
 
 - a canonical French Multilingual core in `src/automate_universel.ml`
 - a small JavaScript adapter in `public/automate-core.js` that mirrors the current core until the Multilingual/WASM build pipeline is wired
-- a canvas UI in `public/app.js`
+- a canvas UI in `public/app.mjs`
+- a small progressive-enhancement layer in `public/ui.mjs`
 - copied Cellcosmos heritage references in `public/metrics.js` and `src/cellcosmos_primitives_heritage.ml`
 - example configurations and a JSON schema in `examples/`
 - migration and architecture documentation in `docs/`
-- Stage 3 canonical rule keys using JSON-array strings such as `"[0,1,0]"`
+- canonical rule keys using JSON-array strings such as `"[0,1,0]"`
 
 ## Run The Demo
 
@@ -64,7 +65,7 @@ Useful docs:
 - `docs/quickstart.md`
 - `docs/create-universe.md`
 - `docs/gallery.md`
-- `docs/stage4-runtime.md`
+- `docs/packed-runtime.md`
 - `docs/release-checklist.md`
 
 The repository also includes GitHub Actions workflows:
@@ -74,30 +75,30 @@ The repository also includes GitHub Actions workflows:
 
 Generated Multilingual/WASM outputs under `public/generated/automate_packed/` are intentionally ignored. GitHub Actions regenerates them before publishing Pages.
 
-Stage 3 also adds smoke tests:
+Smoke tests include:
 
 ```bash
-node tests/stage3-smoke.js
+node tests/core_smoke.js
 multilingual compile src/automate_universel.ml
 ```
 
-Stage 4 adds a generated runtime bridge:
+The packed runtime bridge is refreshed with:
 
 ```powershell
-.\scripts\build-stage4.ps1
-node tests/stage4-wasm.mjs
+.\scripts\build-packed-runtime.ps1
+node tests/packed_runtime_smoke.mjs
 ```
 
-Stage 5 adds the preset gallery and static deployment checks:
+Static deployment checks run with:
 
 ```bash
-node tests/stage5-static.js
+node tests/static_site_smoke.js
 ```
 
-Stage 6 strengthens Multilingual ownership by testing the generated Python produced from the French core:
+The generated Python produced from the French core is checked with:
 
 ```bash
-python tests/stage6_french_core.py
+python tests/french_core_smoke.py
 ```
 
 ## Attribution
@@ -113,7 +114,7 @@ Where source code is directly adapted, comments identify Cellcosmos as the origi
 
 ## Next Migration Steps
 
-1. Compile `src/automate_universel.ml` through the Multilingual toolchain to WebAssembly or generated JavaScript.
-2. Replace `public/automate-core.js` with generated calls into the French core.
-3. Bring over isolated Cellcosmos features: metrics, gallery thumbnails, sharing, PNG export refinements, and selected Matter Lab interactions.
+1. Compile more of `src/automate_universel.ml` through the Multilingual toolchain to WebAssembly or generated JavaScript.
+2. Replace more of `public/automate-core.js` with generated calls into the French core.
+3. Keep trimming browser-side helpers that do not strengthen the multilingual model.
 4. Add more generated rule spaces: totalistic, symmetric, genetic, stochastic, and multi-channel examples.

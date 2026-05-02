@@ -1,6 +1,6 @@
-# Stage 4 Runtime Bridge
+# Packed Runtime Bridge
 
-Stage 4 introduces a generated runtime path from French Multilingual into the browser.
+The packed runtime introduces a generated path from French Multilingual into the browser.
 
 The rich canonical engine remains:
 
@@ -32,9 +32,9 @@ The browser loads `public/generated/automate_packed_runtime.mjs`, which instanti
 Regenerate artifacts with:
 
 ```powershell
-.\scripts\build-stage4.ps1
+.\scripts\build-packed-runtime.ps1
 ```
 
 Current limitation: the full JSON/dictionary/list-rich core compiles to generated Python but does not yet produce a browser WASM bundle with the current Multilingual WAT backend. The narrow ABI module is the deliberate bridge until richer data lowering is available.
 
-The generated rich core is now exercised by `tests/stage6_french_core.py`, so CI verifies behavior that comes directly from `src/automate_universel.ml`.
+The generated rich core is exercised by `tests/french_core_smoke.py`, so CI verifies behavior that comes directly from `src/automate_universel.ml`.

@@ -15,4 +15,4 @@ assert.equal(Math.trunc(packed.cellule_totalistique_5(1, 0, 1, 1, 0, 2)), 1);
 assert.equal(Math.trunc(packed.validation_mode_regle(2)), 1);
 assert.equal(Math.trunc(packed.validation_mode_regle(9)), 0);
 
-console.log("stage4 wasm ok");
+console.log("packed runtime smoke ok");

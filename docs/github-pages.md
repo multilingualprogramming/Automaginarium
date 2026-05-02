@@ -15,6 +15,7 @@ Source files that must be committed for Pages:
 
 - `public/index.html`
 - `public/app.mjs`
+- `public/ui.mjs`
 - `public/automate-core.js`
 - `public/style.css`
 - `public/generated/automate_packed_runtime.mjs`
@@ -32,11 +33,11 @@ The `.nojekyll` file disables Jekyll processing so GitHub Pages serves static ge
 Before publishing, run:
 
 ```powershell
-.\scripts\build-stage4.ps1
-python tests\stage6_french_core.py
-node tests\stage3-smoke.js
-node tests\stage4-wasm.mjs
-node tests\stage5-static.js
+.\scripts\build-packed-runtime.ps1
+python tests\french_core_smoke.py
+node tests\core_smoke.js
+node tests\packed_runtime_smoke.mjs
+node tests\static_site_smoke.js
 ```
 
 Then serve locally from the repository root:

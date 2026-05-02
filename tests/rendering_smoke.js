@@ -427,4 +427,4 @@ testMultiChannelGetOutput();
 testNumeriqueModeWithRule30();
 testNumeriqueModeRuleSpaceSize();
 
-console.log("stage7 canvas smoke ok");
+console.log("rendering smoke ok");

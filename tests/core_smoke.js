@@ -71,4 +71,4 @@ testWolfram90();
 testBackwardCompatibility();
 testMultiChannel();
 testExamplesValidate();
-console.log("stage3 smoke ok");
+console.log("core smoke ok");
