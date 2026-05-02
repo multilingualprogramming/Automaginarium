@@ -1,12 +1,10 @@
-import { createDomImports, createWasiImports } from "./automate_packed/host_shim.mjs";
+import { createWasiImports } from "./automate_packed/host_shim.mjs";
 
 export async function loadAutomaginariumPacked(options = {}) {
   const wasmUrl = options.wasmUrl || new URL("./automate_packed/module.wasm", import.meta.url);
   const memoryRef = { current: null };
-  const exportsRef = { current: null };
   const imports = {
     ...createWasiImports(memoryRef, options.outputCallback || (() => {})),
-    ...createDomImports(memoryRef, exportsRef),
   };
 
   let instance;
@@ -23,7 +21,6 @@ export async function loadAutomaginariumPacked(options = {}) {
     instance = result.instance;
   }
 
-  exportsRef.current = instance.exports;
   memoryRef.current = instance.exports.memory || memoryRef.current;
   return instance.exports;
 }
