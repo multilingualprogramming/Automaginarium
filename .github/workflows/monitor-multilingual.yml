@@ -70,11 +70,7 @@ jobs:
           PY
 
       - name: Compiler les sources francais
-        run: |
-          mkdir -p public/generated
-          python -m multilingualprogramming compile src/automate_universel.ml > public/generated/automate_universel.py
-          python -m multilingualprogramming build-wasm-bundle src/automate_packed_wasm.ml --out-dir public/generated/automate_packed
-          cp public/generated/automate_packed/host_shim.js public/generated/automate_packed/host_shim.mjs
+        run: python scripts/build_wasm_bundle.py
 
       - name: Verifier la syntaxe JavaScript
         run: |
