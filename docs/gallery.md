@@ -1,6 +1,6 @@
 # Preset Gallery
 
-The browser-rendered preset gallery uses the same Automaginarium configuration model as the main canvas.
+The preset gallery uses the same Automaginarium configuration model as the main canvas, but it is now authored directly in `public/index.html` and wired with a minimal click handler from `public/app.mjs`.
 
 Current preset families:
 
@@ -11,7 +11,13 @@ Current preset families:
 - named-symbol table rules
 - multi-channel color examples
 
-The gallery intentionally uses real generated thumbnails rather than static images. This keeps presets honest: if an example configuration breaks, the gallery breaks visibly and the smoke tests catch the missing file.
+The gallery intentionally stays lightweight:
+
+- cards are static markup
+- labels and short descriptions are part of the document
+- clicks load the referenced JSON preset into the main laboratory
+
+This preserves discoverability without requiring client-side thumbnail generation or a separate gallery state machine.
 
 The static check is:
 

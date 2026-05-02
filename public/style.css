@@ -742,6 +742,12 @@ canvas {
   box-shadow: 0 2px 8px var(--shadow);
 }
 
+.preset-card.active {
+  border-color: var(--accent);
+  background: rgba(var(--accent), 0.12);
+  box-shadow: 0 0 0 1px rgba(var(--accent), 0.18), 0 8px 24px var(--shadow);
+}
+
 .preset-thumb {
   width: 100%;
   aspect-ratio: 16 / 9;

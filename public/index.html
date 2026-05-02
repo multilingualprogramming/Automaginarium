@@ -16,11 +16,6 @@
         <p class="eyebrow">Multilingual fran&ccedil;ais &rarr; univers configurables</p>
         <h1 id="app-title">Automaginarium</h1>
       </div>
-      <nav class="tab-nav">
-        <button type="button" class="tab active" id="tab-main">Univers</button>
-        <button type="button" class="tab" id="tab-lab">Laboratoire</button>
-        <button type="button" class="tab" id="tab-gallery">Galerie</button>
-      </nav>
     </header>
 
     <main class="app-shell">
@@ -54,136 +49,91 @@
             </div>
           </div>
           <div class="canvas-controls">
-            <button type="button" class="canvas-control-btn" id="canvas-play" aria-label="Lancer">
-              Play
-            </button>
-            <button
-              type="button"
-              class="canvas-control-btn hidden"
-              id="canvas-pause"
-              aria-label="Mettre en pause"
-            >
-              Pause
-            </button>
-            <input
-              type="range"
-              id="canvas-speed"
-              min="1"
-              max="10"
-              value="5"
-              class="canvas-speed-slider"
-              aria-label="Vitesse de simulation"
-            />
-            <span id="canvas-speed-display" class="canvas-speed-display">5x</span>
-            <div class="divider"></div>
-            <button type="button" class="canvas-control-btn" id="canvas-zoom-out" aria-label="D&eacute;zoomer">
-              -
-            </button>
-            <span id="canvas-zoom-display" class="canvas-zoom-display">100%</span>
-            <button type="button" class="canvas-control-btn" id="canvas-zoom-in" aria-label="Zoomer">
-              +
-            </button>
-            <button type="button" class="canvas-control-btn" id="canvas-reset">Reset</button>
+            <button id="apply-controls" type="button">Appliquer</button>
+            <button id="export-png" type="button">PNG</button>
+            <button id="export-json" type="button">JSON</button>
           </div>
         </div>
 
         <aside class="inspector">
-          <div class="inspector-tabs">
-            <button type="button" class="inspector-tab-btn active" data-panel="univers">Univers</button>
-            <button type="button" class="inspector-tab-btn" data-panel="transition">Transition</button>
-            <button type="button" class="inspector-tab-btn" data-panel="info">Infos</button>
-            <button type="button" class="inspector-tab-btn" data-panel="display">Affichage</button>
-            <button type="button" class="inspector-tab-btn" data-panel="rules">R&egrave;gles</button>
-          </div>
-
-          <div id="univers-panel" class="inspector-panel active">
-            <p class="eyebrow">Param&egrave;tres</p>
-            <h3>Univers</h3>
-            <div class="field-grid compact-fields">
-              <label>Alphabet<input id="alphabet-input-quick" type="text" placeholder="0,1,2" /></label>
-              <label>Voisinage<input id="neighborhood-size-quick" type="number" min="1" max="9" step="2" /></label>
-              <label>Canaux sortie<input id="channel-count-quick" type="number" min="1" max="4" step="1" /></label>
-              <label>Largeur<input id="grid-width-quick" type="number" min="21" max="401" step="2" /></label>
-              <label>Hauteur<input id="grid-height-quick" type="number" min="20" max="240" step="5" /></label>
-            </div>
-          </div>
-
-          <div id="transition-panel" class="inspector-panel">
-            <p class="eyebrow">R&egrave;gles</p>
-            <h3>Espace de transition</h3>
-            <div class="field-grid compact-fields">
-              <label>
-                Mode
-                <select id="rule-mode-quick">
-                  <option value="table">Table</option>
-                  <option value="totalistique">Totalistique</option>
-                  <option value="aleatoire">Al&eacute;atoire</option>
-                  <option value="numerique">Num&eacute;rique</option>
-                </select>
-              </label>
-              <label>Wolfram<input id="wolfram-rule-quick" type="number" min="0" max="255" step="1" value="90" /></label>
-              <label>R&egrave;gle N&deg;<input id="rule-number-quick" type="text" inputmode="numeric" placeholder="0" /></label>
-              <button id="generate-rule-quick" type="button">G&eacute;n&eacute;rer</button>
-              <button id="random-rule-quick" type="button">Al&eacute;atoire</button>
-            </div>
-            <small id="rule-space-size-quick" class="meta"></small>
-          </div>
-
-          <div id="info-panel" class="inspector-panel">
+          <div id="info-panel" class="inspector-panel active">
             <p class="eyebrow">Configuration active</p>
             <h2 id="config-title">Chargement...</h2>
             <p id="config-meta" class="meta"></p>
             <p id="validation-status" class="status">Pr&ecirc;t</p>
+            <label>
+              Pr&eacute;set
+              <select id="preset" aria-label="S&eacute;lecteur de pr&eacute;sets"></select>
+            </label>
             <div id="rule-table" class="rule-table" aria-label="Table de transition"></div>
           </div>
 
-          <div id="display-panel" class="inspector-panel display-panel">
+          <div id="display-panel" class="inspector-panel active display-panel">
             <p class="eyebrow">Affichage</p>
-            <h3>Th&egrave;me couleur</h3>
-            <div class="palette-selector">
-              <button type="button" class="palette-btn active" data-palette="cosmic">Cosmic</button>
-              <button type="button" class="palette-btn" data-palette="phosphor">Phosphor</button>
-              <button type="button" class="palette-btn" data-palette="thermal">Thermal</button>
-              <button type="button" class="palette-btn" data-palette="bioluminescent">Bio</button>
-              <button type="button" class="palette-btn" data-palette="minimalist">Mini</button>
-              <button type="button" class="palette-btn" data-palette="cyberpunk">Cyber</button>
-              <button type="button" class="palette-btn" data-palette="neutral-tech">Tech</button>
-            </div>
-
             <h3>Palette des &eacute;tats</h3>
             <p class="meta">Couleur pour chaque &eacute;tat de l'alphabet</p>
             <div class="palette-editor" id="palette-editor"></div>
           </div>
 
-          <div id="rules-panel" class="inspector-panel rules-panel">
+          <div id="rules-panel" class="inspector-panel active rules-panel">
             <p class="eyebrow">Table de transition</p>
             <h3>R&egrave;gles appliqu&eacute;es</h3>
             <p class="meta">Les transitions d'&eacute;tat actuellement actives pour cet automate</p>
             <div id="rule-table-detail" class="rule-table"></div>
           </div>
         </aside>
-
-        <div class="quick-controls-toolbar" aria-label="Actions rapides">
-          <div class="sync-indicator" aria-live="polite">
-            <span class="sync-indicator-dot" id="sync-indicator-dot"></span>
-            <span id="sync-indicator-text">Synchronisation live active</span>
-          </div>
-          <button id="apply-controls" type="button">Synchroniser</button>
-          <button id="export-png" type="button">PNG</button>
-          <button id="export-json" type="button">JSON</button>
-          <select id="preset" class="hidden-preset" aria-label="S&eacute;lecteur de pr&eacute;sets"></select>
-        </div>
       </section>
 
       <section id="gallery-panel" class="gallery-panel" aria-labelledby="gallery-title">
         <div class="panel-heading inline-heading">
           <div>
             <p class="eyebrow">Galerie</p>
-            <h2 id="gallery-title">Espaces pr&eacute;configur&eacute;s</h2>
+            <h2 id="gallery-title">Configurations remarquables</h2>
+            <p class="meta">Choisir un univers de d&eacute;part avant de l'ajuster dans le laboratoire.</p>
           </div>
-          <button id="refresh-gallery" type="button">R&eacute;g&eacute;n&eacute;rer</button>
         </div>
-        <div id="preset-gallery" class="preset-gallery" aria-label="Galerie de pr&eacute;sets"></div>
+        <div id="preset-gallery" class="preset-gallery" aria-label="Galerie de pr&eacute;sets">
+          <button type="button" class="preset-card" data-preset="wolfram-30">
+            <strong>Wolfram 30</strong>
+            <span>&eacute;l&eacute;mentaire</span>
+            <p class="meta">Turbulence binaire classique sur voisinage 3.</p>
+          </button>
+          <button type="button" class="preset-card" data-preset="wolfram-90">
+            <strong>Wolfram 90</strong>
+            <span>&eacute;l&eacute;mentaire</span>
+            <p class="meta">Structure triangulaire et sym&eacute;tries nettes.</p>
+          </button>
+          <button type="button" class="preset-card" data-preset="wolfram-110">
+            <strong>Wolfram 110</strong>
+            <span>&eacute;l&eacute;mentaire</span>
+            <p class="meta">Comportement riche, souvent montr&eacute; comme r&egrave;gle complexe.</p>
+          </button>
+          <button type="button" class="preset-card" data-preset="binaire-5-sillage">
+            <strong>Binaire 5 - Sillage</strong>
+            <span>voisinage 5</span>
+            <p class="meta">Extension binaire avec voisinage plus large et traces longues.</p>
+          </button>
+          <button type="button" class="preset-card" data-preset="ternaire-totalistique">
+            <strong>Ternaire totalistique</strong>
+            <span>ternaire</span>
+            <p class="meta">Trois symboles et r&egrave;gle guid&eacute;e par somme de voisinage.</p>
+          </button>
+          <button type="button" class="preset-card" data-preset="quaternaire-cristal">
+            <strong>Quaternaire cristal</strong>
+            <span>quaternaire</span>
+            <p class="meta">Croissance plus min&eacute;rale avec alphabet &agrave; quatre &eacute;tats.</p>
+          </button>
+          <button type="button" class="preset-card" data-preset="multi-canal-aurore">
+            <strong>Multi-canal Aurore</strong>
+            <span>multi-canal</span>
+            <p class="meta">Canaux de sortie multiples pour enrichir la lecture visuelle.</p>
+          </button>
+          <button type="button" class="preset-card" data-preset="symboles-jardin">
+            <strong>Symboles jardin</strong>
+            <span>symbolique</span>
+            <p class="meta">Alphabet nomm&eacute; pour montrer la souplesse du mod&egrave;le Multilingual.</p>
+          </button>
+        </div>
       </section>
 
       <section class="config-lab" aria-label="Configuration de l'univers">
@@ -193,8 +143,8 @@
               <p class="eyebrow">Orchestration</p>
               <h2>Du r&eacute;glage &agrave; l'univers</h2>
               <p class="meta">
-                Les blocs Param&egrave;tres et R&egrave;gles deviennent les sources directes du rendu.
-                Chaque modification est projet&eacute;e sans surcouche d'interface.
+                Les blocs Param&egrave;tres et R&egrave;gles restent les seules sources d'entr&eacute;e.
+                Le navigateur se limite au chargement, au rendu et aux actions indispensables.
               </p>
             </div>
             <div class="flow-pills" aria-label="Cha&icirc;ne de transformation">
@@ -292,6 +242,5 @@
 
     <script src="automate-core.js"></script>
     <script type="module" src="app.mjs"></script>
-    <script type="module" src="ui.mjs"></script>
   </body>
 </html>

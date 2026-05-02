@@ -9,9 +9,9 @@ function testPagesEntrypoints() {
   const rootIndex = read("index.html");
   const publicIndex = read("public/index.html");
   assert(rootIndex.includes("public/index.html"));
-  assert(publicIndex.includes("id=\"preset-gallery\""));
+  assert(publicIndex.includes("id=\"preset\""));
   assert(publicIndex.includes("type=\"module\" src=\"app.mjs\""));
-  assert(publicIndex.includes("type=\"module\" src=\"ui.mjs\""));
+  assert(!publicIndex.includes("type=\"module\" src=\"ui.mjs\""));
   assert(fs.existsSync(path.join(root, ".nojekyll")));
 }
 

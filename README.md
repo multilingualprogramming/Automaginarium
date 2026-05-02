@@ -2,7 +2,7 @@
 
 Automaginarium is a configurable universe generator for cellular automata. It extends the spirit of [Cellcosmos](https://github.com/multilingualprogramming/cellcosmos): instead of exploring only the 256 elementary Wolfram rules, it opens the rule space itself.
 
-The project is designed to demonstrate the expressive power of the Multilingual programming language. The canonical automata concepts are written in French Multilingual source, while JavaScript is kept as a thin browser layer for loading JSON configurations, drawing to canvas, and wiring only the essential interface events.
+The project is designed to demonstrate the expressive power of the Multilingual programming language. The canonical automata concepts are written in French Multilingual source, while JavaScript is kept as a thin browser layer for loading presets and JSON, drawing to canvas, generating optional rule tables, wiring the preset gallery, and handling only the essential interface events.
 
 ## Vision
 
@@ -34,7 +34,6 @@ The repository currently includes:
 - a canonical French Multilingual core in `src/automate_universel.ml`
 - a small JavaScript adapter in `public/automate-core.js` that mirrors the current core until the Multilingual/WASM build pipeline is wired
 - a canvas UI in `public/app.mjs`
-- a small progressive-enhancement layer in `public/ui.mjs`
 - copied Cellcosmos heritage references in `public/metrics.js` and `src/cellcosmos_primitives_heritage.ml`
 - example configurations and a JSON schema in `examples/`
 - migration and architecture documentation in `docs/`
@@ -116,5 +115,5 @@ Where source code is directly adapted, comments identify Cellcosmos as the origi
 
 1. Compile more of `src/automate_universel.ml` through the Multilingual toolchain to WebAssembly or generated JavaScript.
 2. Replace more of `public/automate-core.js` with generated calls into the French core.
-3. Keep trimming browser-side helpers that do not strengthen the multilingual model.
+3. Keep trimming browser-side helpers that do not strengthen the multilingual model or the static deployment story.
 4. Add more generated rule spaces: totalistic, symmetric, genetic, stochastic, and multi-channel examples.

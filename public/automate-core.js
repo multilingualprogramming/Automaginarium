@@ -128,6 +128,14 @@ function neighborhoodToRuleIndex(voisinage, alphabet) {
   return index;
 }
 
+function codeVoisinageNumerique(voisinage, base) {
+  let index = 0;
+  for (let i = 0; i < voisinage.length; i += 1) {
+    index = index * base + Number(voisinage[i]);
+  }
+  return index;
+}
+
 function ruleIndexToNeighborhood(index, config) {
   const { s, k } = ruleConfiguration(config);
   const voisinage = [];
@@ -310,6 +318,7 @@ window.AutomaginariumCore = {
   validerConfiguration,
   ruleConfiguration,
   getRuleOutput,
+  codeVoisinageNumerique,
   mulberry32,
   callPacked,
 };

@@ -6,11 +6,12 @@ Automaginarium is split into four layers:
 examples/*.json              declarative universes
 src/automate_universel.ml    canonical French Multilingual automata core
 public/automate-core.js      temporary browser adapter mirroring the core
-public/app.mjs               DOM events, canvas drawing, preset loading
-public/ui.mjs                small progressive-enhancement UI bridge
+public/app.mjs               essential DOM events, canvas drawing, preset loading
 ```
 
 The intended stable boundary is the configuration object. The UI should not know Wolfram-specific details except where it offers a preset shortcut.
+
+The browser layer is intentionally narrow: one module applies configuration objects, delegates evolution to the core bridge, renders the resulting universe, and wires a static preset gallery. Presentation-only concerns such as tab systems, mirrored form state, and client-side gallery choreography are not part of the long-term architecture.
 
 Canonical JSON-array rule keys use forms such as `"[0,1,0]"`, rather than concatenated keys such as `"010"`. The browser adapter still accepts older Cellcosmos-style keys as a compatibility fallback.
 
