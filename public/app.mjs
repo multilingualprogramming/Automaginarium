@@ -171,115 +171,43 @@ function syncControls(config) {
 }
 
 // Interpolate between two hex colors
-function interpolateColor(color1, color2, factor) {
-  const c1 = parseInt(color1.slice(1), 16);
-  const c2 = parseInt(color2.slice(1), 16);
-  const r1 = (c1 >> 16) & 255, g1 = (c1 >> 8) & 255, b1 = c1 & 255;
-  const r2 = (c2 >> 16) & 255, g2 = (c2 >> 8) & 255, b2 = c2 & 255;
-  const r = Math.round(r1 + (r2 - r1) * factor);
-  const g = Math.round(g1 + (g2 - g1) * factor);
-  const b = Math.round(b1 + (b2 - b1) * factor);
-  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+const DEFAULT_PALETTES = {
+  2: ["#0066ff", "#ff6b35"],
+  3: ["#0066ff", "#00ff41", "#ff6b35"],
+  4: ["#0066ff", "#00aaff", "#00ff41", "#ff6b35"],
+  5: ["#0066ff", "#00aaff", "#00ff41", "#ffaa00", "#ff6b35"],
+  6: ["#0066ff", "#00aaff", "#00ffaa", "#00ff41", "#ffaa00", "#ff6b35"],
+  8: ["#0066ff", "#00aaff", "#00ddff", "#00ff41", "#ffff00", "#ffaa00", "#ff6b35", "#ff0055"],
+};
+
+function getDefaultPalette(alphabetSize) {
+  return DEFAULT_PALETTES[alphabetSize] || (DEFAULT_PALETTES[alphabetSize] =
+    Array.from({ length: alphabetSize }, (_, i) => {
+      const hue = (i / alphabetSize) * 360;
+      return `hsl(${Math.round(hue)}, 100%, 50%)`;
+    })
+  );
 }
 
-// Get color from gradient at a given position (0-1)
-function getGradientColor(position, colors, positions) {
-  if (!colors || colors.length === 0) return '#ffffff';
-  if (colors.length === 1) return colors[0];
-  if (!positions || positions.length !== colors.length) return colors[0];
-
-  // Normalize position to 0-1
-  const t = Math.max(0, Math.min(1, position));
-
-  // Find the two stops this position falls between
-  let startIdx = 0;
-  for (let i = 0; i < positions.length - 1; i++) {
-    const pos1 = positions[i] / 100;
-    const pos2 = positions[i + 1] / 100;
-    if (t >= pos1 && t <= pos2) {
-      startIdx = i;
-      break;
-    }
-  }
-
-  // Clamp to valid indices
-  startIdx = Math.min(startIdx, positions.length - 2);
-  const endIdx = Math.min(startIdx + 1, positions.length - 1);
-
-  const pos1 = positions[startIdx] / 100;
-  const pos2 = positions[endIdx] / 100;
-  const range = pos2 - pos1;
-  const factor = range === 0 ? 0 : (t - pos1) / range;
-
-  return interpolateColor(colors[startIdx], colors[endIdx], factor);
-}
-
-function colorFor(value, config, rowIndex, colIndex, channels) {
+function colorFor(value, config, channels) {
   const visualValue = channels && channels.length > 1 ? channels[1] : value;
   const alphabet = config.alphabet_sortie || config.alphabet_entree || [0, 1];
   let index = alphabet.findIndex((item) => String(item) === String(visualValue));
 
-  // Use gradient if available
-  const gradient = config.rendu.gradient;
-  if (gradient && gradient.colors && gradient.colors.length > 0) {
-    let position = 0;
-    if (index >= 0) {
-      position = index / Math.max(1, alphabet.length - 1);
-    } else {
-      position = (Math.abs(Number(visualValue) || Number(value) || 0) % 100) / 100;
-    }
+  if (index < 0) index = Math.abs(Number(visualValue) || Number(value) || 0) % alphabet.length;
 
-    // Apply gradient based on type
-    if (gradient.type === 'linear') {
-      position = (colIndex / (config.largeur || 100)) * 0.5 + (rowIndex / (config.hauteur || 100)) * 0.5;
-    } else if (gradient.type === 'radial') {
-      const centerX = (config.largeur || 100) / 2;
-      const centerY = (config.hauteur || 100) / 2;
-      const dist = Math.sqrt(Math.pow(colIndex - centerX, 2) + Math.pow(rowIndex - centerY, 2));
-      const maxDist = Math.sqrt(Math.pow(centerX, 2) + Math.pow(centerY, 2));
-      position = Math.min(1, dist / maxDist);
-    } else if (gradient.type === 'conic') {
-      const centerX = (config.largeur || 100) / 2;
-      const centerY = (config.hauteur || 100) / 2;
-      const angle = Math.atan2(rowIndex - centerY, colIndex - centerX);
-      position = ((angle + Math.PI) / (2 * Math.PI));
-    }
-
-    return getGradientColor(position, gradient.colors, gradient.positions);
-  }
-
-  // Fallback to palette if no gradient
-  const palette = config.rendu.palette || ["#07121f", "#ff9d4d", "#53b0ff", "#f5f7ff"];
-  if (index < 0) index = Math.abs(Number(visualValue) || Number(value) || 0) % palette.length;
-  const drift = (rowIndex + colIndex) % Math.max(1, palette.length - 1);
-  return palette[(index + drift) % palette.length] || palette[0];
+  const palette = config.rendu.palette || getDefaultPalette(alphabet.length);
+  return palette[index % palette.length] || palette[0];
 }
 
-window.applyGradientToPalette = function(colors, type, positions) {
+window.setPaletteColor = function(alphabetIndex, color) {
   if (!state.config) return;
   state.config.rendu = state.config.rendu || {};
-
-  const finalColors = colors || ["#07121f", "#ff9d4d", "#53b0ff", "#f5f7ff"];
-  const finalPositions = positions || [0, 50, 100];
-
-  // Ensure colors and positions arrays have the same length
-  const length = Math.min(finalColors.length, finalPositions.length);
-  const syncedColors = finalColors.slice(0, length);
-  const syncedPositions = finalPositions.slice(0, length);
-
-  // If arrays were mismatched, pad with defaults
-  if (syncedColors.length < 2) {
-    syncedColors.push("#ff9d4d", "#f5f7ff");
-    syncedPositions.push(50, 100);
+  const alphabet = state.config.alphabet_sortie || state.config.alphabet_entree || [0, 1];
+  if (!state.config.rendu.palette) {
+    state.config.rendu.palette = getDefaultPalette(alphabet.length);
   }
-
-  state.config.rendu.gradient = {
-    colors: syncedColors,
-    type: type || 'linear',
-    positions: syncedPositions.map(Number)
-  };
-  // Keep palette as fallback
-  state.config.rendu.palette = syncedColors;
+  state.config.rendu.palette[alphabetIndex] = color;
   render();
 };
 
@@ -294,7 +222,7 @@ function drawUniverseToCanvas(targetCanvas, universe, maxWidth = 240, maxHeight 
   lignes.forEach((ligne, y) => {
     ligne.forEach((value, x) => {
       if (String(value) === String(configuration.alphabet_entree[0]) && !configuration.rendu.afficher_zero) return;
-      context.fillStyle = colorFor(value, configuration, y, x, sorties?.[y]?.[x]);
+      context.fillStyle = colorFor(value, configuration, sorties?.[y]?.[x]);
       context.fillRect(x * cell, y * cell, cell, cell);
     });
   });
@@ -316,7 +244,7 @@ function render() {
   lignes.forEach((ligne, y) => {
     ligne.forEach((value, x) => {
       if (String(value) === String(configuration.alphabet_entree[0]) && !configuration.rendu.afficher_zero) return;
-      ctx.fillStyle = colorFor(value, configuration, y, x, sorties?.[y]?.[x]);
+      ctx.fillStyle = colorFor(value, configuration, sorties?.[y]?.[x]);
       ctx.fillRect(x * cell, y * cell, cell, cell);
     });
   });
@@ -343,6 +271,9 @@ function applyConfig(config, { updateJson = true, updateControls = true } = {}) 
   if (updateJson) controls.json.value = JSON.stringify(normalized, null, 2);
   describe(normalized);
   render();
+  if (typeof window.updatePaletteEditor === 'function') {
+    window.updatePaletteEditor();
+  }
   return true;
 }
 
@@ -448,6 +379,13 @@ document.querySelector("#apply-json").addEventListener("click", () => {
 document.querySelector("#reset-json").addEventListener("click", () => {
   controls.json.value = JSON.stringify(state.lastValidConfig || state.config, null, 2);
 });
+
+// Expose API for palette editor
+window.AutomaginariumApp = {
+  state,
+  render,
+  getDefaultPalette,
+};
 controls.importJson.addEventListener("change", async () => {
   const file = controls.importJson.files[0];
   if (!file) return;

@@ -773,10 +773,10 @@ canvas {
   font-weight: 700;
 }
 
-/* Gradient Editor */
-.gradient-editor {
+/* Palette Editor */
+.palette-editor {
   display: grid;
-  gap: 12px;
+  gap: 8px;
   padding: 12px;
   background: rgba(var(--panel), 0.7);
   border-radius: 8px;
@@ -785,133 +785,32 @@ canvas {
   backdrop-filter: blur(8px);
 }
 
-.gradient-preview {
-  height: 48px;
-  border-radius: 6px;
-  border: 1px solid var(--line);
-  background: var(--accent-gradient);
-  box-shadow: 0 2px 8px var(--shadow);
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-
-.gradient-preview::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1));
-  pointer-events: none;
-}
-
-.gradient-label {
+.palette-color-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  font-size: 0.85rem;
-  margin: var(--space-lg) 0 var(--space-sm);
-  font-weight: 600;
+  gap: 8px;
+}
+
+.palette-color-row span {
+  min-width: 24px;
+  font-weight: 500;
   color: var(--text);
+  font-size: 0.9rem;
 }
 
-.gradient-type-selector {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-
-.gradient-type-btn {
-  flex: 1;
-  padding: 6px 8px;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  color: var(--muted);
-  border-radius: 4px;
-  font-size: 0.8rem;
+.palette-color-row input[type="color"] {
+  width: 48px;
+  height: 32px;
   cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.gradient-type-btn:hover {
-  border-color: var(--accent);
-  color: var(--text);
-}
-
-.gradient-type-btn.active {
-  background: rgba(var(--accent), 0.1);
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.gradient-stops {
-  display: grid;
-  gap: var(--space-sm);
-  margin: var(--space-md) 0;
-}
-
-.gradient-stop {
-  display: grid;
-  grid-template-columns: 40px 1fr 50px auto;
-  gap: var(--space-sm);
-  align-items: center;
-  padding: var(--space-md);
-  background: var(--bg-secondary);
-  border-radius: 6px;
-  border: 1px solid var(--line);
-  transition: all 0.2s ease;
-}
-
-.gradient-stop:hover {
-  border-color: rgba(var(--accent), 0.4);
-}
-
-.gradient-stop input[type="color"] {
-  width: 40px;
-  height: 40px;
   border: 1px solid var(--line);
   border-radius: 4px;
-  cursor: pointer;
+  transition: all 0.2s ease;
   padding: 2px;
-  transition: all 0.2s ease;
 }
 
-.gradient-stop input[type="color"]:hover {
+.palette-color-row input[type="color"]:hover {
   border-color: var(--accent);
   box-shadow: 0 0 8px rgba(var(--accent), 0.2);
-}
-
-.gradient-stop input[type="range"] {
-  cursor: pointer;
-  height: 4px;
-  accent-color: var(--accent);
-}
-
-.gradient-stop .position-display {
-  width: 50px;
-  text-align: right;
-  font-size: 0.85rem;
-  color: var(--muted);
-}
-
-.gradient-stop button {
-  padding: 4px 8px;
-  min-height: 28px;
-  font-size: 0.8rem;
-}
-
-.gradient-action-row {
-  display: flex;
-  gap: 8px;
-  justify-content: space-between;
-  border-top: 1px solid var(--line);
-  padding-top: 8px;
-}
-
-.gradient-action-row button {
-  flex: 1;
-  padding: 6px 8px;
-  min-height: 36px;
-  font-size: 0.8rem;
 }
 
 /* Canvas HUD */
@@ -1146,85 +1045,6 @@ canvas {
   color: var(--warning);
 }
 
-/* Preset Gradients */
-.preset-gradients {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  margin: 12px 0;
-}
-
-.preset-gradients-compact {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
-  margin: 8px 0;
-}
-
-.preset-gradient-btn {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-  align-items: center;
-  padding: var(--space-md);
-  background: var(--panel);
-  border: 2px solid transparent;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.preset-gradient-btn.compact {
-  padding: 6px 12px;
-  flex-direction: row;
-  justify-content: center;
-  gap: 0;
-  font-size: 0.75rem;
-  min-height: 32px;
-  background: rgba(10, 15, 25, 0.85);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(83, 176, 255, 0.3);
-  color: var(--accent);
-  font-weight: 500;
-}
-
-.canvas-presets-label {
-  font-size: 0.75rem;
-  color: var(--muted);
-  margin: 0;
-  white-space: nowrap;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.preset-gradient-btn:hover {
-  border-color: var(--accent);
-  background: rgba(var(--accent), 0.08);
-}
-
-.preset-gradient-btn:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.preset-gradient-btn span {
-  font-size: 0.75rem;
-  color: var(--muted);
-  text-align: center;
-}
-
-.preset-gradient-btn.compact span {
-  font-size: 0.8rem;
-}
-
-.preset-gradient-preview {
-  width: 100%;
-  height: 24px;
-  border-radius: 4px;
-  border: 1px solid var(--line);
-}
 
 .preset-ocean {
   background: linear-gradient(90deg, #000000 0%, #0066ff 50%, #ffffff 100%);

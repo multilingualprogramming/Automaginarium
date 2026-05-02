@@ -64,13 +64,6 @@
             <button type="button" class="canvas-control-btn" id="canvas-zoom-in" title="Zoomer">+</button>
             <button type="button" class="canvas-control-btn" id="canvas-reset" title="Réinitialiser">↻</button>
           </div>
-          <div class="canvas-presets">
-            <p class="canvas-presets-label">Dégradés rapides:</p>
-            <button type="button" class="preset-gradient-btn compact" data-gradient='{"type":"linear","colors":["#000000","#0066ff","#ffffff"],"positions":[0,50,100]}' title="Gradient Bleu océan">Océan</button>
-            <button type="button" class="preset-gradient-btn compact" data-gradient='{"type":"linear","colors":["#1a0033","#ff006e","#ffaa00"],"positions":[0,50,100]}' title="Gradient Coucher">Coucher</button>
-            <button type="button" class="preset-gradient-btn compact" data-gradient='{"type":"linear","colors":["#005f87","#00ffaa","#ffffff"],"positions":[0,50,100]}' title="Gradient Biolum">Biolum</button>
-            <button type="button" class="preset-gradient-btn compact" data-gradient='{"type":"linear","colors":["#001a4d","#0066ff","#ffaa00"],"positions":[0,50,100]}' title="Gradient Thermique">Thermique</button>
-          </div>
         </div>
 
         <!-- Inspector Sidebar -->
@@ -106,55 +99,9 @@
               <button type="button" class="palette-btn" data-palette="neutral-tech" aria-label="Thème Neutral Tech">Tech</button>
             </div>
 
-            <h3>Dégradé global</h3>
-            <p class="meta">Gradient appliqué aux cellules selon leur état</p>
-            <div class="gradient-editor">
-              <div class="gradient-preview" id="gradient-preview"></div>
-
-              <div class="gradient-label">
-                <span>Type de gradient</span>
-              </div>
-              <div class="gradient-type-selector">
-                <button type="button" class="gradient-type-btn active" data-gradient-type="linear" aria-label="Gradient linéaire">Linéaire</button>
-                <button type="button" class="gradient-type-btn" data-gradient-type="radial" aria-label="Gradient radial">Radial</button>
-                <button type="button" class="gradient-type-btn" data-gradient-type="conic" aria-label="Gradient conique">Conique</button>
-              </div>
-
-              <div class="gradient-label">
-                <span>Points d'arrêt couleur</span>
-              </div>
-              <div class="gradient-stops">
-                <div class="gradient-stop">
-                  <input type="color" id="grad-color-0" value="#0066ff" aria-label="Couleur dégradé 1" />
-                  <input type="range" id="grad-stop-0" min="0" max="100" value="0" aria-label="Position dégradé 1" />
-                  <div class="position-display">
-                    <span id="grad-pos-0">0</span>%
-                  </div>
-                  <button type="button" class="canvas-control-btn" id="grad-remove-0" title="Supprimer">✕</button>
-                </div>
-                <div class="gradient-stop">
-                  <input type="color" id="grad-color-1" value="#00aaff" aria-label="Couleur dégradé 2" />
-                  <input type="range" id="grad-stop-1" min="0" max="100" value="50" aria-label="Position dégradé 2" />
-                  <div class="position-display">
-                    <span id="grad-pos-1">50</span>%
-                  </div>
-                  <button type="button" class="canvas-control-btn" id="grad-remove-1" title="Supprimer">✕</button>
-                </div>
-                <div class="gradient-stop">
-                  <input type="color" id="grad-color-2" value="#ff6b35" aria-label="Couleur dégradé 3" />
-                  <input type="range" id="grad-stop-2" min="0" max="100" value="100" aria-label="Position dégradé 3" />
-                  <div class="position-display">
-                    <span id="grad-pos-2">100</span>%
-                  </div>
-                  <button type="button" class="canvas-control-btn" id="grad-remove-2" title="Supprimer">✕</button>
-                </div>
-              </div>
-
-              <div class="gradient-action-row">
-                <button type="button" id="grad-add-stop" class="canvas-control-btn">+ Ajouter arrêt</button>
-                <button type="button" id="grad-reverse" class="canvas-control-btn">↔ Inverser</button>
-              </div>
-            </div>
+            <h3>Palette des états</h3>
+            <p class="meta">Couleur pour chaque état de l'alphabet</p>
+            <div class="palette-editor" id="palette-editor"></div>
 
           </div>
 
@@ -364,39 +311,6 @@
           btn.classList.add('active');
           document.documentElement.setAttribute('data-palette', btn.dataset.palette);
           localStorage.setItem('palette-preference', btn.dataset.palette);
-
-          // Apply default gradient for this palette
-          const paletteGradients = {
-            'cosmic': { type: 'linear', colors: ['#05070d', '#53b0ff', '#ffffff'], positions: [0, 50, 100] },
-            'phosphor': { type: 'linear', colors: ['#0a0a0a', '#00ff41', '#ffffff'], positions: [0, 50, 100] },
-            'thermal': { type: 'linear', colors: ['#001a4d', '#ff6b35', '#ffaa00'], positions: [0, 50, 100] },
-            'bioluminescent': { type: 'linear', colors: ['#0d1a15', '#00ffaa', '#ff00ff'], positions: [0, 50, 100] },
-            'minimalist': { type: 'linear', colors: ['#ffffff', '#666666', '#1a1a1a'], positions: [0, 50, 100] },
-            'cyberpunk': { type: 'linear', colors: ['#0a0015', '#ff006e', '#00f5ff'], positions: [0, 50, 100] },
-            'neutral-tech': { type: 'linear', colors: ['#3a4556', '#4b5563', '#8892a1'], positions: [0, 50, 100] }
-          };
-          const gradient = paletteGradients[btn.dataset.palette] || paletteGradients['cosmic'];
-          gradientType = gradient.type;
-
-          document.querySelectorAll('.gradient-type-btn').forEach(b => b.classList.remove('active'));
-          document.querySelector(`[data-gradient-type="${gradientType}"]`).classList.add('active');
-
-          gradient.colors.forEach((color, i) => {
-            if (gradColorInputs[i]) gradColorInputs[i].value = color;
-          });
-          gradient.positions.forEach((pos, i) => {
-            if (gradStopInputs[i]) {
-              gradStopInputs[i].value = pos;
-              if (gradPosDisplays[i]) gradPosDisplays[i].textContent = pos;
-            }
-          });
-
-          // Apply gradient with all parameters
-          if (typeof window.applyGradientToPalette === 'function') {
-            window.applyGradientToPalette(gradient.colors, gradient.type, gradient.positions);
-          }
-
-          updateGradientPreview();
         });
       });
 
@@ -433,191 +347,60 @@
         });
       });
 
-      // Gradient Editor
-      let gradientType = 'linear';
-      const gradientPreview = document.getElementById('gradient-preview');
-      const gradColorInputs = [
-        document.getElementById('grad-color-0'),
-        document.getElementById('grad-color-1'),
-        document.getElementById('grad-color-2')
-      ];
-      const gradStopInputs = [
-        document.getElementById('grad-stop-0'),
-        document.getElementById('grad-stop-1'),
-        document.getElementById('grad-stop-2')
-      ];
-      const gradPosDisplays = [
-        document.getElementById('grad-pos-0'),
-        document.getElementById('grad-pos-1'),
-        document.getElementById('grad-pos-2')
-      ];
-
-      function updateGradientPreview() {
-        const colors = gradColorInputs.map(input => input.value);
-        const positions = gradStopInputs.map(input => Number(input.value));
-
-        // Sort colors and positions by position value to ensure correct gradient rendering
-        const sortedStops = positions.map((pos, i) => ({ pos, color: colors[i] }))
-          .sort((a, b) => a.pos - b.pos);
-        const sortedPositions = sortedStops.map(s => s.pos);
-        const sortedColors = sortedStops.map(s => s.color);
-
-        let gradient = '';
-        if (gradientType === 'linear') {
-          gradient = `linear-gradient(90deg, ${sortedColors.map((c, i) => `${c} ${sortedPositions[i]}%`).join(', ')})`;
-        } else if (gradientType === 'radial') {
-          gradient = `radial-gradient(circle, ${sortedColors.map((c, i) => `${c} ${sortedPositions[i]}%`).join(', ')})`;
-        } else if (gradientType === 'conic') {
-          gradient = `conic-gradient(from 0deg, ${sortedColors.map((c, i) => `${c} ${sortedPositions[i]}%`).join(', ')})`;
+      // Palette Editor - Dynamic color picker for each alphabet state
+      window.updatePaletteEditor = function() {
+        if (!window.AutomaginariumApp || !window.AutomaginariumApp.state || !window.AutomaginariumApp.state.config) {
+          return;
         }
 
-        gradientPreview.style.background = gradient;
-        const gradientData = {
-          type: gradientType,
-          colors: sortedColors,
-          positions: sortedPositions
-        };
-        localStorage.setItem('gradient-preference', JSON.stringify(gradientData));
+        const config = window.AutomaginariumApp.state.config;
+        const alphabet = config.alphabet_sortie || config.alphabet_entree || [0, 1];
+        const palette = config.rendu.palette || window.AutomaginariumApp.getDefaultPalette(alphabet.length);
 
-        // Apply gradient to cellular automata canvas
-        if (typeof window.applyGradientToPalette === 'function') {
-          window.applyGradientToPalette(sortedColors, gradientType, sortedPositions);
-        }
-      }
+        const editor = document.getElementById('palette-editor');
+        editor.innerHTML = '';
 
-      // Gradient type selector
-      document.querySelectorAll('.gradient-type-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.gradient-type-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          gradientType = btn.dataset.gradientType;
-          updateGradientPreview();
-        });
-      });
+        alphabet.forEach((symbol, index) => {
+          const colorRow = document.createElement('div');
+          colorRow.className = 'palette-color-row';
+          colorRow.style.display = 'flex';
+          colorRow.style.alignItems = 'center';
+          colorRow.style.gap = '8px';
+          colorRow.style.marginBottom = '8px';
 
-      // Gradient color and position inputs
-      gradColorInputs.forEach((input, i) => {
-        input.addEventListener('input', updateGradientPreview);
-      });
+          const label = document.createElement('span');
+          label.textContent = String(symbol);
+          label.style.minWidth = '24px';
+          label.style.fontWeight = '500';
 
-      gradStopInputs.forEach((input, i) => {
-        input.addEventListener('input', () => {
-          gradPosDisplays[i].textContent = input.value;
-          updateGradientPreview();
-        });
-      });
+          const colorInput = document.createElement('input');
+          colorInput.type = 'color';
+          colorInput.value = palette[index] || '#ffffff';
+          colorInput.style.width = '48px';
+          colorInput.style.height = '32px';
+          colorInput.style.cursor = 'pointer';
+          colorInput.style.border = '1px solid #444';
+          colorInput.style.borderRadius = '4px';
 
-      // Reverse gradient
-      document.getElementById('grad-reverse').addEventListener('click', () => {
-        const colors = gradColorInputs.map(input => input.value);
-        const positions = gradStopInputs.map(input => Number(input.value));
-
-        colors.reverse();
-        positions.reverse().forEach((pos, i) => {
-          positions[i] = 100 - pos;
-        });
-
-        gradColorInputs.forEach((input, i) => {
-          input.value = colors[i];
-        });
-        gradStopInputs.forEach((input, i) => {
-          input.value = positions[i];
-          gradPosDisplays[i].textContent = positions[i];
-        });
-
-        updateGradientPreview();
-      });
-
-      // Add gradient stop
-      document.getElementById('grad-add-stop').addEventListener('click', () => {
-        const stopCount = gradColorInputs.length;
-        const stopsContainer = document.querySelector('.gradient-stops');
-        const newIndex = stopCount;
-        const midColor = gradColorInputs[stopCount - 1].value;
-        const midPosition = Math.round((Number(gradStopInputs[stopCount - 1].value) + (stopCount > 1 ? Number(gradStopInputs[stopCount - 2].value) : 0)) / 2);
-
-        const newStop = document.createElement('div');
-        newStop.className = 'gradient-stop';
-        newStop.innerHTML = `
-          <input type="color" id="grad-color-${newIndex}" value="${midColor}" aria-label="Couleur dégradé ${newIndex + 1}" />
-          <input type="range" id="grad-stop-${newIndex}" min="0" max="100" value="${midPosition}" aria-label="Position dégradé ${newIndex + 1}" />
-          <div class="position-display">
-            <span id="grad-pos-${newIndex}">${midPosition}</span>%
-          </div>
-          <button type="button" class="canvas-control-btn" id="grad-remove-${newIndex}" title="Supprimer">✕</button>
-        `;
-        stopsContainer.appendChild(newStop);
-
-        const colorInput = document.getElementById(`grad-color-${newIndex}`);
-        const stopInput = document.getElementById(`grad-stop-${newIndex}`);
-        const posDisplay = document.getElementById(`grad-pos-${newIndex}`);
-        const removeBtn = document.getElementById(`grad-remove-${newIndex}`);
-
-        gradColorInputs.push(colorInput);
-        gradStopInputs.push(stopInput);
-        gradPosDisplays.push(posDisplay);
-
-        colorInput.addEventListener('input', updateGradientPreview);
-        stopInput.addEventListener('input', () => {
-          posDisplay.textContent = stopInput.value;
-          updateGradientPreview();
-        });
-        removeBtn.addEventListener('click', () => {
-          if (gradColorInputs.length > 2) {
-            newStop.remove();
-            const idx = gradColorInputs.indexOf(colorInput);
-            gradColorInputs.splice(idx, 1);
-            gradStopInputs.splice(idx, 1);
-            gradPosDisplays.splice(idx, 1);
-            updateGradientPreview();
-          }
-        });
-
-        updateGradientPreview();
-      });
-
-      // Preset gradients
-      document.querySelectorAll('.preset-gradient-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const gradient = JSON.parse(btn.dataset.gradient);
-          gradientType = gradient.type;
-
-          document.querySelectorAll('.gradient-type-btn').forEach(b => b.classList.remove('active'));
-          document.querySelector(`[data-gradient-type="${gradientType}"]`).classList.add('active');
-
-          gradient.colors.forEach((color, i) => {
-            if (gradColorInputs[i]) {
-              gradColorInputs[i].value = color;
+          colorInput.addEventListener('input', (e) => {
+            if (!window.AutomaginariumApp.state.config) return;
+            if (!window.AutomaginariumApp.state.config.rendu.palette) {
+              window.AutomaginariumApp.state.config.rendu.palette = window.AutomaginariumApp.getDefaultPalette(alphabet.length);
             }
+            window.AutomaginariumApp.state.config.rendu.palette[index] = e.target.value;
+            window.AutomaginariumApp.render();
           });
 
-          gradient.positions.forEach((pos, i) => {
-            if (gradStopInputs[i]) {
-              gradStopInputs[i].value = pos;
-              if (gradPosDisplays[i]) {
-                gradPosDisplays[i].textContent = pos;
-              }
-            }
-          });
-
-          // Apply gradient with all parameters
-          if (typeof window.applyGradientToPalette === 'function') {
-            window.applyGradientToPalette(gradient.colors, gradient.type, gradient.positions);
-          }
-
-          updateGradientPreview();
+          colorRow.appendChild(label);
+          colorRow.appendChild(colorInput);
+          editor.appendChild(colorRow);
         });
-      });
+      };
 
-      // Initialize gradient
-      updateGradientPreview();
-
-      // Apply initial gradient to canvas if there's a saved preference
+      // Initialize palette editor when config loads
       setTimeout(() => {
-        const saved = localStorage.getItem('gradient-preference');
-        if (saved && typeof window.applyGradientToPalette === 'function') {
-          const gradient = JSON.parse(saved);
-          window.applyGradientToPalette(gradient.colors, gradient.type, gradient.positions);
+        if (typeof window.updatePaletteEditor === 'function') {
+          window.updatePaletteEditor();
         }
       }, 500);
 
@@ -759,9 +542,8 @@
       }
 
       function saveScheme(name) {
-        const gradient = JSON.parse(localStorage.getItem('gradient-preference') || '{"type":"linear","colors":["#0066ff","#00aaff","#ff6b35"],"positions":[0,50,100]}');
         const palette = document.documentElement.getAttribute('data-palette') || 'cosmic';
-        const scheme = { name, gradient, palette, timestamp: Date.now() };
+        const scheme = { name, palette, timestamp: Date.now() };
         const schemes = getSavedSchemes();
         schemes.push(scheme);
         localStorage.setItem('saved-schemes', JSON.stringify(schemes));
@@ -781,32 +563,8 @@
         if (!scheme) return;
 
         document.documentElement.setAttribute('data-palette', scheme.palette);
-        document.querySelector(`[data-palette="${scheme.palette}"]`)?.classList.add('active');
         document.querySelectorAll('.palette-btn').forEach(b => b.classList.remove('active'));
         document.querySelector(`[data-palette="${scheme.palette}"]`).classList.add('active');
-
-        const gradient = scheme.gradient;
-        const gradType = gradient.type;
-        document.querySelectorAll('.gradient-type-btn').forEach(b => b.classList.remove('active'));
-        document.querySelector(`[data-gradient-type="${gradType}"]`).classList.add('active');
-        gradientType = gradType;
-
-        gradient.colors.forEach((color, i) => {
-          if (gradColorInputs[i]) gradColorInputs[i].value = color;
-        });
-        gradient.positions.forEach((pos, i) => {
-          if (gradStopInputs[i]) {
-            gradStopInputs[i].value = pos;
-            if (gradPosDisplays[i]) gradPosDisplays[i].textContent = pos;
-          }
-        });
-
-        // Apply gradient with all parameters
-        if (typeof window.applyGradientToPalette === 'function') {
-          window.applyGradientToPalette(gradient.colors, gradient.type, gradient.positions);
-        }
-
-        updateGradientPreview();
       }
 
       function refreshSchemesList() {
@@ -851,11 +609,10 @@
 
       refreshSchemesList();
 
-      // Phase 3: Export/Import Color Schemes
+      // Export/Import Color Schemes
       document.getElementById('export-scheme').addEventListener('click', () => {
         const palette = document.documentElement.getAttribute('data-palette');
-        const gradient = JSON.parse(localStorage.getItem('gradient-preference') || '{"type":"linear","colors":["#0066ff","#00aaff","#ff6b35"],"positions":[0,50,100]}');
-        const scheme = { palette, gradient, exported: new Date().toISOString() };
+        const scheme = { palette, exported: new Date().toISOString() };
         const json = JSON.stringify(scheme, null, 2);
         const blob = new Blob([json], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -873,32 +630,10 @@
         reader.onload = (event) => {
           try {
             const scheme = JSON.parse(event.target.result);
-            if (scheme.palette && scheme.gradient) {
+            if (scheme.palette) {
               document.documentElement.setAttribute('data-palette', scheme.palette);
               document.querySelectorAll('.palette-btn').forEach(b => b.classList.remove('active'));
               document.querySelector(`[data-palette="${scheme.palette}"]`)?.classList.add('active');
-
-              const gradient = scheme.gradient;
-              document.querySelectorAll('.gradient-type-btn').forEach(b => b.classList.remove('active'));
-              document.querySelector(`[data-gradient-type="${gradient.type}"]`).classList.add('active');
-              gradientType = gradient.type;
-
-              gradient.colors.forEach((color, i) => {
-                if (gradColorInputs[i]) gradColorInputs[i].value = color;
-              });
-              gradient.positions.forEach((pos, i) => {
-                if (gradStopInputs[i]) {
-                  gradStopInputs[i].value = pos;
-                  if (gradPosDisplays[i]) gradPosDisplays[i].textContent = pos;
-                }
-              });
-
-              // Apply gradient with all parameters
-              if (typeof window.applyGradientToPalette === 'function') {
-                window.applyGradientToPalette(gradient.colors, gradient.type, gradient.positions);
-              }
-
-              updateGradientPreview();
               alert('Schéma importé avec succès!');
             }
           } catch (err) {
