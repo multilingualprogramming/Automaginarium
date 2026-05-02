@@ -4,49 +4,66 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Automaginarium</title>
-    <meta name="description" content="Laboratoire configurable d'automates cellulaires en Multilingual français." />
+    <meta name="description" content="Laboratoire configurable d'automates cellulaires en Multilingual fran&ccedil;ais." />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <!-- Top Navigation -->
     <header class="topbar">
       <div class="brand-lockup">
-        <p class="eyebrow">Multilingual français → univers configurables</p>
+        <p class="eyebrow">Multilingual fran&ccedil;ais &rarr; univers configurables</p>
         <h1 id="app-title">Automaginarium</h1>
       </div>
       <nav class="tab-nav">
         <button type="button" class="tab active" id="tab-main">Univers</button>
         <button type="button" class="tab" id="tab-lab">Laboratoire</button>
         <button type="button" class="tab" id="tab-gallery">Galerie</button>
-        <button type="button" class="ghost-btn" id="btn-theme" aria-label="Changer de thème" title="Basculer clair/sombre">☀️</button>
+        <button type="button" class="ghost-btn" id="btn-theme" aria-label="Changer de th&egrave;me" title="Basculer clair/sombre">Auto</button>
       </nav>
     </header>
 
     <main class="app-shell">
-      <!-- Hero Section -->
       <section class="hero-band" aria-labelledby="app-title">
-        <div>
+        <div class="hero-copy">
           <p class="eyebrow">Laboratoire interactif</p>
-          <p class="lede">Un laboratoire de règles, d'alphabets et de voisinages pour faire apparaître des univers configurables.</p>
+          <p class="lede">Un laboratoire de r&egrave;gles, d'alphabets et de voisinages pour faire appara&icirc;tre des univers configurables.</p>
+        </div>
+        <div class="hero-signals" aria-label="Signaux du laboratoire">
+          <div class="hero-signal-card">
+            <span class="hero-signal-label">Flux</span>
+            <strong>Param&egrave;tres -&gt; R&egrave;gles -&gt; Univers</strong>
+          </div>
+          <div class="hero-signal-card">
+            <span class="hero-signal-label">Mode</span>
+            <strong id="live-mode-text">Aper&ccedil;u temps r&eacute;el actif</strong>
+          </div>
+          <div class="hero-signal-card">
+            <span class="hero-signal-label">Impact</span>
+            <strong id="live-impact-text">Chaque ajustement recompose l'univers</strong>
+          </div>
         </div>
       </section>
 
-      <!-- Main Panel: Univers -->
-      <section id="main-panel" class="workspace" aria-label="Univers généré">
+      <section id="main-panel" class="workspace" aria-label="Univers g&eacute;n&eacute;r&eacute;">
         <div class="canvas-wrap">
+          <div class="canvas-aura" aria-hidden="true"></div>
           <canvas id="universe" width="805" height="500"></canvas>
+          <div class="canvas-story glass-panel" aria-live="polite">
+            <span class="live-badge" id="live-preview-badge">Aper&ccedil;u live</span>
+            <strong id="live-preview-origin">Univers synchronis&eacute;</strong>
+            <p id="live-preview-summary">Les param&egrave;tres et les r&egrave;gles se projettent ici en temps r&eacute;el.</p>
+          </div>
           <div class="canvas-hud">
             <div class="hud-metric">
               <strong id="hud-rule">90</strong>
-              <span>règle</span>
+              <span>r&egrave;gle</span>
             </div>
             <div class="hud-metric">
               <strong id="hud-gen">0</strong>
-              <span>générations</span>
+              <span>g&eacute;n&eacute;rations</span>
             </div>
             <div class="hud-metric">
               <strong id="hud-density">0%</strong>
-              <span>densité</span>
+              <span>densit&eacute;</span>
             </div>
             <div class="hud-metric">
               <strong id="hud-entropy">0.00</strong>
@@ -54,72 +71,66 @@
             </div>
           </div>
           <div class="canvas-controls">
-            <button type="button" class="canvas-control-btn" id="canvas-play" title="Lancer" aria-label="Lancer la simulation">▶</button>
-            <button type="button" class="canvas-control-btn hidden" id="canvas-pause" title="Pause" aria-label="Mettre en pause">⏸</button>
+            <button type="button" class="canvas-control-btn" id="canvas-play" title="Lancer" aria-label="Lancer la simulation">Play</button>
+            <button type="button" class="canvas-control-btn hidden" id="canvas-pause" title="Pause" aria-label="Mettre en pause">Pause</button>
             <input type="range" id="canvas-speed" min="1" max="10" value="5" class="canvas-speed-slider" aria-label="Vitesse de simulation" title="Vitesse (1=lent, 10=rapide)">
             <span id="canvas-speed-display" class="canvas-speed-display">5x</span>
             <div class="divider"></div>
-            <button type="button" class="canvas-control-btn" id="canvas-zoom-out" title="Dézoomer">−</button>
+            <button type="button" class="canvas-control-btn" id="canvas-zoom-out" title="D&eacute;zoomer">-</button>
             <span id="canvas-zoom-display" class="canvas-zoom-display">100%</span>
             <button type="button" class="canvas-control-btn" id="canvas-zoom-in" title="Zoomer">+</button>
-            <button type="button" class="canvas-control-btn" id="canvas-reset" title="Réinitialiser">↻</button>
+            <button type="button" class="canvas-control-btn" id="canvas-reset" title="R&eacute;initialiser">Reset</button>
           </div>
         </div>
 
-        <!-- Inspector Sidebar -->
         <aside class="inspector">
           <div class="inspector-tabs">
             <button type="button" class="inspector-tab-btn active" data-panel="info">Infos</button>
             <button type="button" class="inspector-tab-btn" data-panel="display">Affichage</button>
-            <button type="button" class="inspector-tab-btn" data-panel="rules">Règles</button>
+            <button type="button" class="inspector-tab-btn" data-panel="rules">R&egrave;gles</button>
             <button type="button" class="inspector-tab-btn" data-panel="analytics">Analyse</button>
-            <button type="button" class="inspector-tab-btn" data-panel="advanced">Avancé</button>
+            <button type="button" class="inspector-tab-btn" data-panel="advanced">Avanc&eacute;</button>
           </div>
 
-          <!-- Info Panel -->
           <div id="info-panel" class="inspector-panel active">
             <p class="eyebrow">Configuration active</p>
-            <h2 id="config-title">Chargement…</h2>
+            <h2 id="config-title">Chargement...</h2>
             <p id="config-meta" class="meta"></p>
-            <p id="validation-status" class="status">Prêt</p>
+            <p id="validation-status" class="status">Pr&ecirc;t</p>
             <div id="rule-table" class="rule-table" aria-label="Table de transition"></div>
           </div>
 
-          <!-- Display Panel -->
           <div id="display-panel" class="inspector-panel display-panel">
             <p class="eyebrow">Affichage</p>
-            <h3>Thème couleur</h3>
+            <h3>Th&egrave;me couleur</h3>
             <div class="palette-selector">
-              <button type="button" class="palette-btn active" data-palette="cosmic" aria-label="Thème Cosmic">Cosmic</button>
-              <button type="button" class="palette-btn" data-palette="phosphor" aria-label="Thème Phosphor">Phosphor</button>
-              <button type="button" class="palette-btn" data-palette="thermal" aria-label="Thème Thermal">Thermal</button>
-              <button type="button" class="palette-btn" data-palette="bioluminescent" aria-label="Thème Bioluminescent">Bio</button>
-              <button type="button" class="palette-btn" data-palette="minimalist" aria-label="Thème Minimalist">Mini</button>
-              <button type="button" class="palette-btn" data-palette="cyberpunk" aria-label="Thème Cyberpunk">Cyber</button>
-              <button type="button" class="palette-btn" data-palette="neutral-tech" aria-label="Thème Neutral Tech">Tech</button>
+              <button type="button" class="palette-btn active" data-palette="cosmic" aria-label="Th&egrave;me Cosmic">Cosmic</button>
+              <button type="button" class="palette-btn" data-palette="phosphor" aria-label="Th&egrave;me Phosphor">Phosphor</button>
+              <button type="button" class="palette-btn" data-palette="thermal" aria-label="Th&egrave;me Thermal">Thermal</button>
+              <button type="button" class="palette-btn" data-palette="bioluminescent" aria-label="Th&egrave;me Bioluminescent">Bio</button>
+              <button type="button" class="palette-btn" data-palette="minimalist" aria-label="Th&egrave;me Minimalist">Mini</button>
+              <button type="button" class="palette-btn" data-palette="cyberpunk" aria-label="Th&egrave;me Cyberpunk">Cyber</button>
+              <button type="button" class="palette-btn" data-palette="neutral-tech" aria-label="Th&egrave;me Neutral Tech">Tech</button>
             </div>
 
-            <h3>Palette des états</h3>
-            <p class="meta">Couleur pour chaque état de l'alphabet</p>
+            <h3>Palette des &eacute;tats</h3>
+            <p class="meta">Couleur pour chaque &eacute;tat de l'alphabet</p>
             <div class="palette-editor" id="palette-editor"></div>
-
           </div>
 
-          <!-- Rules Panel -->
           <div id="rules-panel" class="inspector-panel rules-panel">
             <p class="eyebrow">Table de transition</p>
-            <h3>Règles appliquées</h3>
-            <p class="meta">Les transitions d'état actuellement actives pour cet automate</p>
+            <h3>R&egrave;gles appliqu&eacute;es</h3>
+            <p class="meta">Les transitions d'&eacute;tat actuellement actives pour cet automate</p>
             <div id="rule-table-detail" class="rule-table"></div>
           </div>
 
-          <!-- Analytics Panel -->
           <div id="analytics-panel" class="inspector-panel analytics-panel">
-            <p class="eyebrow">Analyse en temps réel</p>
-            <h3>Métriques simulées</h3>
+            <p class="eyebrow">Analyse en temps r&eacute;el</p>
+            <h3>M&eacute;triques simul&eacute;es</h3>
             <div class="analytics-grid">
               <div class="analytics-card">
-                <span class="analytics-label">Diversité</span>
+                <span class="analytics-label">Diversit&eacute;</span>
                 <div class="analytics-value">
                   <span id="metric-diversity">0%</span>
                   <span class="analytics-unit">de variation</span>
@@ -139,7 +150,7 @@
                 </div>
               </div>
               <div class="analytics-card">
-                <span class="analytics-label">Stabilité</span>
+                <span class="analytics-label">Stabilit&eacute;</span>
                 <div class="analytics-value">
                   <span id="metric-stability">0%</span>
                   <span class="analytics-unit">cellules stables</span>
@@ -149,7 +160,7 @@
                 </div>
               </div>
               <div class="analytics-card">
-                <span class="analytics-label">Connectivité</span>
+                <span class="analytics-label">Connectivit&eacute;</span>
                 <div class="analytics-value">
                   <span id="metric-connectivity">0</span>
                   <span class="analytics-unit">composantes</span>
@@ -164,10 +175,9 @@
             </div>
           </div>
 
-          <!-- Advanced Settings Panel -->
           <div id="advanced-panel" class="inspector-panel advanced-panel">
-            <p class="eyebrow">Configuration avancée</p>
-            <h3>Schémas et effets</h3>
+            <p class="eyebrow">Configuration avanc&eacute;e</p>
+            <h3>Sch&eacute;mas et effets</h3>
             <div class="advanced-section">
               <label class="checkbox-label">
                 <input type="checkbox" id="enable-particles" aria-label="Activer les particules">
@@ -182,84 +192,111 @@
                 <span>Animations fluides</span>
               </label>
             </div>
-            <h3>Schémas personnalisés</h3>
+            <h3>Sch&eacute;mas personnalis&eacute;s</h3>
             <div class="scheme-controls">
-              <button id="save-scheme" type="button" class="canvas-control-btn">💾 Enregistrer</button>
-              <button id="load-scheme" type="button" class="canvas-control-btn">📂 Charger</button>
-              <button id="clear-schemes" type="button" class="canvas-control-btn">🗑 Effacer</button>
+              <button id="save-scheme" type="button" class="canvas-control-btn">Enregistrer</button>
+              <button id="load-scheme" type="button" class="canvas-control-btn">Charger</button>
+              <button id="clear-schemes" type="button" class="canvas-control-btn">Effacer</button>
             </div>
             <div id="saved-schemes" class="saved-schemes-list"></div>
           </div>
         </aside>
 
-        <!-- Quick Controls Toolbar -->
         <div class="quick-controls-toolbar" aria-label="Actions rapides">
-          <button id="apply-controls" type="button">Appliquer</button>
+          <div class="sync-indicator" aria-live="polite">
+            <span class="sync-indicator-dot" id="sync-indicator-dot"></span>
+            <span id="sync-indicator-text">Synchronisation live active</span>
+          </div>
+          <button id="apply-controls" type="button">Synchroniser</button>
           <button id="export-png" type="button">PNG</button>
           <button id="export-json" type="button">JSON</button>
-          <button id="export-scheme" type="button" title="Exporter le schéma de couleurs">Schéma</button>
-          <label class="file-button" title="Importer un schéma">Importer<input id="import-scheme" type="file" accept="application/json,.json"></label>
-          <select id="preset" class="hidden-preset" aria-label="Sélecteur de présets"></select>
+          <button id="export-scheme" type="button" title="Exporter le sch&eacute;ma de couleurs">Sch&eacute;ma</button>
+          <label class="file-button" title="Importer un sch&eacute;ma">Importer<input id="import-scheme" type="file" accept="application/json,.json"></label>
+          <select id="preset" class="hidden-preset" aria-label="S&eacute;lecteur de pr&eacute;sets"></select>
         </div>
       </section>
 
-      <!-- Gallery Panel -->
       <section id="gallery-panel" class="gallery-panel" aria-labelledby="gallery-title">
         <div class="panel-heading inline-heading">
           <div>
             <p class="eyebrow">Galerie</p>
-            <h2 id="gallery-title">Espaces préconfigurés</h2>
+            <h2 id="gallery-title">Espaces pr&eacute;configur&eacute;s</h2>
           </div>
-          <button id="refresh-gallery" type="button">Régénérer</button>
+          <button id="refresh-gallery" type="button">R&eacute;g&eacute;n&eacute;rer</button>
         </div>
-        <div id="preset-gallery" class="preset-gallery" aria-label="Galerie de présets"></div>
+        <div id="preset-gallery" class="preset-gallery" aria-label="Galerie de pr&eacute;sets"></div>
       </section>
 
-      <!-- Configuration Laboratory -->
       <section class="config-lab" aria-label="Configuration de l'univers">
-        <!-- Universe Parameters -->
-        <div class="config-panel">
+        <div class="lab-intro config-panel">
+          <div class="panel-heading inline-heading">
+            <div>
+              <p class="eyebrow">Orchestration</p>
+              <h2>Du r&eacute;glage &agrave; l'univers</h2>
+              <p class="meta">Les blocs `Param&egrave;tres` et `R&egrave;gles` deviennent les sources directes du rendu. Chaque modification est projet&eacute;e sans attendre dans l'univers.</p>
+            </div>
+            <div class="flow-pills" aria-label="Cha&icirc;ne de transformation">
+              <span class="flow-pill">Param&egrave;tres</span>
+              <span class="flow-pill">Transition</span>
+              <span class="flow-pill">Univers</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="config-panel source-panel source-panel-universe">
           <div class="panel-heading">
-            <p class="eyebrow">Paramètres</p>
+            <p class="eyebrow">Param&egrave;tres</p>
             <h2>Univers</h2>
+            <p class="meta">G&eacute;om&eacute;trie, alphabets et conditions initiales d&eacute;finissent la mati&egrave;re premi&egrave;re de l'univers.</p>
+          </div>
+          <div id="universe-live-summary" class="live-summary-card">
+            <span class="live-summary-label">Projection</span>
+            <strong>Pr&eacute;paration de l'univers en cours</strong>
           </div>
           <div class="field-grid">
             <label>Nom<input id="config-name" type="text" /></label>
-            <label>Alphabet entrée<input id="alphabet-input" type="text" placeholder="0,1,2 ou air,feu,eau" /></label>
+            <label>Alphabet entr&eacute;e<input id="alphabet-input" type="text" placeholder="0,1,2 ou air,feu,eau" /></label>
             <label>Alphabet sortie<input id="alphabet-output" type="text" placeholder="0,1" /></label>
             <label>Voisinage<input id="neighborhood-size" type="number" min="1" max="9" step="2" /></label>
             <label>Canaux sortie<input id="channel-count" type="number" min="1" max="4" step="1" /></label>
             <label>Largeur<input id="grid-width" type="number" min="21" max="401" step="2" /></label>
             <label>Hauteur<input id="grid-height" type="number" min="20" max="240" step="5" /></label>
-            <label>Frontière<select id="boundary-mode"><option value="fixe">Fixe</option><option value="circulaire">Circulaire</option></select></label>
-            <label>État initial<select id="initial-mode"><option value="centre">Centre</option><option value="motif">Motif</option><option value="aleatoire">Aléatoire</option></select></label>
+            <label>Fronti&egrave;re<select id="boundary-mode"><option value="fixe">Fixe</option><option value="circulaire">Circulaire</option></select></label>
+            <label>&Eacute;tat initial<select id="initial-mode"><option value="centre">Centre</option><option value="motif">Motif</option><option value="aleatoire">Al&eacute;atoire</option></select></label>
             <label>Motif initial<input id="initial-values" type="text" placeholder="1,0,1,1" /></label>
-            <label>Probabilité initiale<input id="initial-probability" type="number" min="0" max="1" step="0.01" /></label>
+            <label>Probabilit&eacute; initiale<input id="initial-probability" type="number" min="0" max="1" step="0.01" /></label>
             <label>Taille cellule<input id="cell-size" type="number" min="1" max="12" step="1" /></label>
           </div>
         </div>
 
-        <!-- Rules Configuration -->
-        <div class="config-panel">
+        <div class="config-panel source-panel source-panel-rules">
           <div class="panel-heading">
-            <p class="eyebrow">Règles</p>
+            <p class="eyebrow">R&egrave;gles</p>
             <h2>Espace de transition</h2>
+            <p class="meta">Le moteur de transition est visualis&eacute; comme une couche active qui redistribue les &eacute;tats dans l'univers.</p>
+          </div>
+          <div class="transition-surface">
+            <div id="transition-live-summary" class="live-summary-card">
+              <span class="live-summary-label">R&eacute;ponse</span>
+              <strong>Les r&egrave;gles pilotent la prochaine g&eacute;n&eacute;ration</strong>
+            </div>
+            <div id="transition-signals" class="transition-signals" aria-label="Aper&ccedil;u des transitions"></div>
           </div>
           <div class="field-grid compact-fields">
-            <label>Mode<select id="rule-mode"><option value="table">Table</option><option value="totalistique">Totalistique</option><option value="aleatoire">Aléatoire dynamique</option></select></label>
+            <label>Mode<select id="rule-mode"><option value="table">Table</option><option value="totalistique">Totalistique</option><option value="aleatoire">Al&eacute;atoire dynamique</option></select></label>
             <label>Wolfram<input id="wolfram-rule" type="number" min="0" max="255" step="1" value="90" /></label>
-            <label>Générateur<select id="rule-generator"><option value="wolfram">Wolfram</option><option value="random">Table aléatoire</option><option value="symmetric">Table symétrique</option><option value="totalistic">Totalistique</option></select></label>
-            <button id="generate-rule" type="button">Générer</button>
+            <label>G&eacute;n&eacute;rateur<select id="rule-generator"><option value="wolfram">Wolfram</option><option value="random">Table al&eacute;atoire</option><option value="symmetric">Table sym&eacute;trique</option><option value="totalistic">Totalistique</option></select></label>
+            <button id="generate-rule" type="button">G&eacute;n&eacute;rer</button>
           </div>
-          <p class="meta">Les tables sont déclaratives. Le mode totalistique calcule la sortie depuis la somme du voisinage ; les autres modes matérialisent une table.</p>
+          <p class="meta">Les tables sont d&eacute;claratives. Le mode totalistique calcule la sortie depuis la somme du voisinage ; les autres modes mat&eacute;rialisent une table.</p>
         </div>
 
-        <!-- JSON Configuration -->
-        <div class="config-panel json-panel">
+        <div class="config-panel json-panel expert-panel">
           <div class="panel-heading inline-heading">
             <div>
               <p class="eyebrow">JSON</p>
               <h2>Configuration brute</h2>
+              <p class="meta">Le mode expert reste disponible pour l'&eacute;dition manuelle ou l'import avanc&eacute;, sans rompre le flux visuel principal.</p>
             </div>
             <div class="button-row">
               <button id="apply-json" type="button">Appliquer JSON</button>
@@ -267,11 +304,10 @@
               <label class="file-button">Importer<input id="import-json" type="file" accept="application/json,.json" /></label>
             </div>
           </div>
-          <textarea id="config-json" spellcheck="false" aria-label="Éditeur de configuration JSON"></textarea>
+          <textarea id="config-json" spellcheck="false" aria-label="&Eacute;diteur de configuration JSON"></textarea>
         </div>
       </section>
 
-      <!-- Command Palette Modal -->
       <div id="command-palette" class="command-palette">
         <div class="command-palette-content">
           <input type="text" id="command-input" class="command-input" placeholder="Appuyez sur Ctrl+K pour les commandes..." aria-label="Palette de commandes">
@@ -283,7 +319,6 @@
     <script src="automate-core.js"></script>
     <script type="module" src="app.mjs"></script>
     <script>
-      // Theme Toggle
       document.getElementById('btn-theme').addEventListener('click', () => {
         const current = document.documentElement.getAttribute('data-theme') || 'auto';
         const next = current === 'light' ? 'dark' : current === 'dark' ? 'auto' : 'light';
@@ -294,17 +329,15 @@
 
       function updateThemeIcon(theme) {
         const btn = document.getElementById('btn-theme');
-        if (theme === 'light') btn.textContent = '🌙';
-        else if (theme === 'dark') btn.textContent = '☀️';
-        else btn.textContent = '◐';
+        if (theme === 'light') btn.textContent = 'Lune';
+        else if (theme === 'dark') btn.textContent = 'Soleil';
+        else btn.textContent = 'Auto';
       }
 
-      // Load saved theme
       const saved = localStorage.getItem('theme-preference') || 'auto';
       document.documentElement.setAttribute('data-theme', saved);
       updateThemeIcon(saved);
 
-      // Palette Selector
       document.querySelectorAll('.palette-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           document.querySelectorAll('.palette-btn').forEach(b => b.classList.remove('active'));
@@ -314,12 +347,10 @@
         });
       });
 
-      // Load saved palette
       const savedPalette = localStorage.getItem('palette-preference') || 'cosmic';
       document.documentElement.setAttribute('data-palette', savedPalette);
       document.querySelector(`[data-palette="${savedPalette}"]`)?.classList.add('active');
 
-      // Inspector Tabs
       document.querySelectorAll('.inspector-tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           document.querySelectorAll('.inspector-tab-btn').forEach(b => b.classList.remove('active'));
@@ -329,13 +360,11 @@
         });
       });
 
-      // Tab Navigation
       document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', () => {
           document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
           tab.classList.add('active');
-          // Hide/show panels based on tab
-          if (tab.id === 'tab-main') {
+          if (tab.id === 'tab-main' || tab.id === 'tab-lab') {
             document.getElementById('main-panel').style.display = 'grid';
             document.getElementById('gallery-panel').style.display = 'none';
             document.querySelector('.config-lab').style.display = 'grid';
@@ -347,7 +376,6 @@
         });
       });
 
-      // Palette Editor - Dynamic color picker for each alphabet state
       window.updatePaletteEditor = function() {
         if (!window.AutomaginariumApp || !window.AutomaginariumApp.state || !window.AutomaginariumApp.state.config) {
           return;
@@ -356,31 +384,19 @@
         const config = window.AutomaginariumApp.state.config;
         const alphabet = config.alphabet_sortie || config.alphabet_entree || [0, 1];
         const palette = config.rendu.palette || window.AutomaginariumApp.getDefaultPalette(alphabet.length);
-
         const editor = document.getElementById('palette-editor');
         editor.innerHTML = '';
 
         alphabet.forEach((symbol, index) => {
           const colorRow = document.createElement('div');
           colorRow.className = 'palette-color-row';
-          colorRow.style.display = 'flex';
-          colorRow.style.alignItems = 'center';
-          colorRow.style.gap = '8px';
-          colorRow.style.marginBottom = '8px';
 
           const label = document.createElement('span');
           label.textContent = String(symbol);
-          label.style.minWidth = '24px';
-          label.style.fontWeight = '500';
 
           const colorInput = document.createElement('input');
           colorInput.type = 'color';
           colorInput.value = palette[index] || '#ffffff';
-          colorInput.style.width = '48px';
-          colorInput.style.height = '32px';
-          colorInput.style.cursor = 'pointer';
-          colorInput.style.border = '1px solid #444';
-          colorInput.style.borderRadius = '4px';
 
           colorInput.addEventListener('input', (e) => {
             if (!window.AutomaginariumApp.state.config) return;
@@ -397,40 +413,32 @@
         });
       };
 
-      // Initialize palette editor when config loads
       setTimeout(() => {
         if (typeof window.updatePaletteEditor === 'function') {
           window.updatePaletteEditor();
         }
       }, 500);
 
-      // Canvas Zoom Controls
       let zoomLevel = 100;
       document.getElementById('canvas-zoom-out').addEventListener('click', () => {
         zoomLevel = Math.max(25, zoomLevel - 10);
         document.getElementById('canvas-zoom-display').textContent = zoomLevel + '%';
-        // Apply zoom to canvas (integration with existing code)
       });
 
       document.getElementById('canvas-zoom-in').addEventListener('click', () => {
         zoomLevel = Math.min(400, zoomLevel + 10);
         document.getElementById('canvas-zoom-display').textContent = zoomLevel + '%';
-        // Apply zoom to canvas (integration with existing code)
       });
 
       document.getElementById('canvas-reset').addEventListener('click', () => {
         zoomLevel = 100;
         document.getElementById('canvas-zoom-display').textContent = '100%';
-        // Reset canvas (integration with existing code)
       });
 
-      // HUD Metrics Update (placeholder for actual data)
       setInterval(() => {
-        // These would be updated by the actual automata simulation
         document.getElementById('hud-rule').textContent = document.getElementById('wolfram-rule').value;
       }, 500);
 
-      // Phase 3: Animation Controls
       let isPlaying = false;
       let simulationSpeed = 5;
       const playBtn = document.getElementById('canvas-play');
@@ -458,13 +466,11 @@
         localStorage.setItem('simulation-speed', simulationSpeed);
       });
 
-      // Load saved speed
       const savedSpeed = localStorage.getItem('simulation-speed') || '5';
       speedSlider.value = savedSpeed;
       simulationSpeed = savedSpeed;
       speedDisplay.textContent = savedSpeed + 'x';
 
-      // Phase 3: Analytics Panel
       function updateAnalytics() {
         const canvas = document.getElementById('universe');
         if (!canvas || !canvas.getContext) return;
@@ -476,13 +482,10 @@
 
         document.getElementById('metric-diversity').textContent = diversity + '%';
         document.getElementById('metric-diversity-bar').style.width = diversity + '%';
-
         document.getElementById('metric-oscillation').textContent = oscillation;
         document.getElementById('metric-oscillation-bar').style.width = (oscillation * 10) + '%';
-
         document.getElementById('metric-stability').textContent = stability + '%';
         document.getElementById('metric-stability-bar').style.width = stability + '%';
-
         document.getElementById('metric-connectivity').textContent = connectivity;
         document.getElementById('metric-connectivity-bar').style.width = Math.min((connectivity * 5), 100) + '%';
       }
@@ -490,7 +493,6 @@
       setInterval(updateAnalytics, 1000);
       updateAnalytics();
 
-      // Export analytics
       document.getElementById('export-analytics').addEventListener('click', () => {
         const data = {
           timestamp: new Date().toISOString(),
@@ -511,7 +513,6 @@
         URL.revokeObjectURL(url);
       });
 
-      // Phase 3: Advanced Settings
       const enableParticles = document.getElementById('enable-particles');
       const enableGridLines = document.getElementById('enable-grid-lines');
       const enableAnimations = document.getElementById('enable-animations');
@@ -520,23 +521,19 @@
         localStorage.setItem('particles-enabled', enableParticles.checked);
         document.documentElement.setAttribute('data-particles', enableParticles.checked);
       });
-
       enableGridLines.addEventListener('change', () => {
         localStorage.setItem('grid-lines-enabled', enableGridLines.checked);
         document.documentElement.setAttribute('data-grid-lines', enableGridLines.checked);
       });
-
       enableAnimations.addEventListener('change', () => {
         localStorage.setItem('animations-enabled', enableAnimations.checked);
         document.documentElement.setAttribute('data-animations', enableAnimations.checked);
       });
 
-      // Load saved preferences
       enableParticles.checked = localStorage.getItem('particles-enabled') !== 'false';
       enableGridLines.checked = localStorage.getItem('grid-lines-enabled') === 'true';
       enableAnimations.checked = localStorage.getItem('animations-enabled') !== 'false';
 
-      // Scheme Management
       function getSavedSchemes() {
         return JSON.parse(localStorage.getItem('saved-schemes') || '[]');
       }
@@ -561,7 +558,6 @@
         const schemes = getSavedSchemes();
         const scheme = schemes[index];
         if (!scheme) return;
-
         document.documentElement.setAttribute('data-palette', scheme.palette);
         document.querySelectorAll('.palette-btn').forEach(b => b.classList.remove('active'));
         document.querySelector(`[data-palette="${scheme.palette}"]`).classList.add('active');
@@ -572,7 +568,7 @@
         const schemes = getSavedSchemes();
         schemesList.innerHTML = '';
         if (schemes.length === 0) {
-          schemesList.innerHTML = '<p class="meta">Aucun schéma enregistré</p>';
+          schemesList.innerHTML = '<p class="meta">Aucun sch&eacute;ma enregistr&eacute;</p>';
           return;
         }
         schemes.forEach((scheme, i) => {
@@ -582,7 +578,7 @@
             <span class="scheme-item-name">${scheme.name}</span>
             <div class="scheme-item-actions">
               <button type="button" data-index="${i}" class="load-scheme-btn">Charger</button>
-              <button type="button" data-index="${i}" class="delete-scheme-btn">✕</button>
+              <button type="button" data-index="${i}" class="delete-scheme-btn">X</button>
             </div>
           `;
           schemesList.appendChild(item);
@@ -596,12 +592,12 @@
       }
 
       document.getElementById('save-scheme').addEventListener('click', () => {
-        const name = prompt('Nom du schéma:', 'Mon schéma');
+        const name = prompt('Nom du sch&eacute;ma:', 'Mon sch&eacute;ma');
         if (name) saveScheme(name);
       });
 
       document.getElementById('clear-schemes').addEventListener('click', () => {
-        if (confirm('Supprimer tous les schémas enregistrés?')) {
+        if (confirm('Supprimer tous les sch&eacute;mas enregistr&eacute;s ?')) {
           localStorage.removeItem('saved-schemes');
           refreshSchemesList();
         }
@@ -609,7 +605,6 @@
 
       refreshSchemesList();
 
-      // Export/Import Color Schemes
       document.getElementById('export-scheme').addEventListener('click', () => {
         const palette = document.documentElement.getAttribute('data-palette');
         const scheme = { palette, exported: new Date().toISOString() };
@@ -634,31 +629,30 @@
               document.documentElement.setAttribute('data-palette', scheme.palette);
               document.querySelectorAll('.palette-btn').forEach(b => b.classList.remove('active'));
               document.querySelector(`[data-palette="${scheme.palette}"]`)?.classList.add('active');
-              alert('Schéma importé avec succès!');
+              alert('Sch&eacute;ma import&eacute; avec succ&egrave;s !');
             }
           } catch (err) {
-            alert('Erreur lors de l\'importation du schéma');
+            alert('Erreur lors de l\'importation du sch&eacute;ma');
           }
         };
         reader.readAsText(file);
         e.target.value = '';
       });
 
-      // Phase 3: Command Palette
       const commandPalette = document.getElementById('command-palette');
       const commandInput = document.getElementById('command-input');
       const commandResults = document.getElementById('command-results');
       let selectedCommand = -1;
 
       const commands = [
-        { title: 'Lancer simulation', desc: 'Démarrer la simulation', action: () => playBtn.click() },
+        { title: 'Lancer simulation', desc: 'D&eacute;marrer la simulation', action: () => playBtn.click() },
         { title: 'Mettre en pause', desc: 'Pause la simulation', action: () => pauseBtn.click() },
         { title: 'Exporter PNG', desc: 'Exporter en image PNG', action: () => document.getElementById('export-png').click() },
         { title: 'Exporter JSON', desc: 'Exporter configuration JSON', action: () => document.getElementById('export-json').click() },
-        { title: 'Exporter schéma', desc: 'Exporter le schéma couleurs', action: () => document.getElementById('export-scheme').click() },
-        { title: 'Enregistrer schéma', desc: 'Sauvegarder schéma personnalisé', action: () => document.getElementById('save-scheme').click() },
-        { title: 'Réinitialiser zoom', desc: 'Zoom 100%', action: () => document.getElementById('canvas-reset').click() },
-        { title: 'Changer thème', desc: 'Basculer clair/sombre', action: () => document.getElementById('btn-theme').click() }
+        { title: 'Exporter sch&eacute;ma', desc: 'Exporter le sch&eacute;ma couleurs', action: () => document.getElementById('export-scheme').click() },
+        { title: 'Enregistrer sch&eacute;ma', desc: 'Sauvegarder sch&eacute;ma personnalis&eacute;', action: () => document.getElementById('save-scheme').click() },
+        { title: 'R&eacute;initialiser zoom', desc: 'Zoom 100%', action: () => document.getElementById('canvas-reset').click() },
+        { title: 'Changer th&egrave;me', desc: 'Basculer clair/sombre', action: () => document.getElementById('btn-theme').click() }
       ];
 
       function openCommandPalette() {
@@ -680,14 +674,14 @@
           cmd.desc.toLowerCase().includes(query.toLowerCase())
         );
         if (filtered.length === 0) {
-          commandResults.innerHTML = '<div class="command-result"><span class="command-result-title">Aucune commande trouvée</span></div>';
+          commandResults.innerHTML = '<div class="command-result"><span class="command-result-title">Aucune commande trouv&eacute;e</span></div>';
           return;
         }
         filtered.forEach((cmd, i) => {
           const el = document.createElement('div');
           el.className = 'command-result';
           if (i === selectedCommand) el.classList.add('selected');
-          el.innerHTML = `<span class="command-result-icon">⌘</span><div><div class="command-result-title">${cmd.title}</div><div class="command-result-desc">${cmd.desc}</div></div>`;
+          el.innerHTML = `<span class="command-result-icon">Cmd</span><div><div class="command-result-title">${cmd.title}</div><div class="command-result-desc">${cmd.desc}</div></div>`;
           el.addEventListener('click', () => {
             cmd.action();
             closeCommandPalette();

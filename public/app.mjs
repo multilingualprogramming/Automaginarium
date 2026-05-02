@@ -21,7 +21,18 @@ const title = document.querySelector("#config-title");
 const meta = document.querySelector("#config-meta");
 const statusBox = document.querySelector("#validation-status");
 const tableView = document.querySelector("#rule-table");
+const ruleDetailView = document.querySelector("#rule-table-detail");
 const gallery = document.querySelector("#preset-gallery");
+const liveModeText = document.querySelector("#live-mode-text");
+const liveImpactText = document.querySelector("#live-impact-text");
+const livePreviewBadge = document.querySelector("#live-preview-badge");
+const livePreviewOrigin = document.querySelector("#live-preview-origin");
+const livePreviewSummary = document.querySelector("#live-preview-summary");
+const syncIndicatorDot = document.querySelector("#sync-indicator-dot");
+const syncIndicatorText = document.querySelector("#sync-indicator-text");
+const universeLiveSummary = document.querySelector("#universe-live-summary");
+const transitionLiveSummary = document.querySelector("#transition-live-summary");
+const transitionSignals = document.querySelector("#transition-signals");
 const controls = {
   name: document.querySelector("#config-name"),
   alphabetInput: document.querySelector("#alphabet-input"),
@@ -42,6 +53,28 @@ const controls = {
   importJson: document.querySelector("#import-json"),
 };
 const presetCache = new Map();
+const liveFieldControls = [
+  controls.name,
+  controls.alphabetInput,
+  controls.alphabetOutput,
+  controls.neighborhood,
+  controls.channels,
+  controls.width,
+  controls.height,
+  controls.boundary,
+  controls.initialMode,
+  controls.initialValues,
+  controls.initialProbability,
+  controls.cellSize,
+];
+const liveRuleControls = [
+  controls.ruleMode,
+  controls.wolframRule,
+  controls.ruleGenerator,
+];
+
+let previewTimer = null;
+let lastPreviewSource = "Initialisation";
 
 function parseSymbol(raw) {
   const trimmed = raw.trim();
@@ -170,7 +203,6 @@ function syncControls(config) {
   controls.json.value = JSON.stringify(config, null, 2);
 }
 
-// Interpolate between two hex colors
 const DEFAULT_PALETTES = {
   2: ["#0066ff", "#ff6b35"],
   3: ["#0066ff", "#00ff41", "#ff6b35"],
@@ -193,11 +225,83 @@ function colorFor(value, config, channels) {
   const visualValue = channels && channels.length > 1 ? channels[1] : value;
   const alphabet = config.alphabet_sortie || config.alphabet_entree || [0, 1];
   let index = alphabet.findIndex((item) => String(item) === String(visualValue));
-
   if (index < 0) index = Math.abs(Number(visualValue) || Number(value) || 0) % alphabet.length;
-
   const palette = config.rendu.palette || getDefaultPalette(alphabet.length);
   return palette[index % palette.length] || palette[0];
+}
+
+function summarizeConfig(config) {
+  return `${config.largeur} x ${config.hauteur} cellules, ${config.alphabet_sortie.length} etat(s) visibles, voisinage ${config.taille_voisinage}, depart ${config.etat_initial?.mode || "centre"}`;
+}
+
+function summarizeTransition(config) {
+  const entries = Object.entries(config.table_transition || {});
+  if (config.mode_regle === "totalistique") {
+    return `Mode totalistique avec ${config.alphabet_sortie.length} etat(s) de sortie distribues par somme de voisinage.`;
+  }
+  if (entries.length === 0) {
+    return `Mode ${config.mode_regle} pilote par le noyau sans table explicite exposee.`;
+  }
+  return `${entries.length} transition(s) actives dans la table en cours.`;
+}
+
+function setSyncState(kind, text) {
+  syncIndicatorDot.dataset.state = kind;
+  syncIndicatorText.textContent = text;
+  livePreviewBadge.textContent = kind === "error" ? "Validation" : kind === "pending" ? "Projection..." : "Apercu live";
+  liveModeText.textContent = kind === "error" ? "Correction requise" : kind === "pending" ? "Recomposition en cours" : "Apercu temps reel actif";
+}
+
+function updateLiveNarrative(config, source, live) {
+  const sourceLabel = source || "Configuration";
+  const liveLabel = live ? "Projection immediate" : "Synchronisation";
+  livePreviewOrigin.textContent = `${liveLabel} depuis ${sourceLabel}`;
+  livePreviewSummary.textContent = `${summarizeConfig(config)}. ${summarizeTransition(config)}`;
+  liveImpactText.textContent = `Impact direct: ${config.mode_regle} sur ${config.largeur} x ${config.hauteur}`;
+  universeLiveSummary.innerHTML = `<span class="live-summary-label">Projection</span><strong>${summarizeConfig(config)}</strong>`;
+  transitionLiveSummary.innerHTML = `<span class="live-summary-label">Reponse</span><strong>${summarizeTransition(config)}</strong>`;
+}
+
+function renderTransitionSignals(config) {
+  const entries = Object.entries(config.table_transition || {}).slice(0, 6);
+  transitionSignals.innerHTML = "";
+  if (entries.length === 0) {
+    const card = document.createElement("div");
+    card.className = "transition-signal-card";
+    card.innerHTML = `<span class="transition-signal-label">${config.mode_regle}</span><strong>Noyau dynamique</strong><p>Les sorties sont derivees sans table visible.</p>`;
+    transitionSignals.appendChild(card);
+    return;
+  }
+  entries.forEach(([key, value], index) => {
+    const card = document.createElement("div");
+    card.className = "transition-signal-card";
+    card.innerHTML = `
+      <span class="transition-signal-label">Transition ${index + 1}</span>
+      <strong>${key}</strong>
+      <p>${JSON.stringify(value)}</p>
+    `;
+    transitionSignals.appendChild(card);
+  });
+}
+
+function updateHudMetrics(universe) {
+  const { configuration, lignes } = universe;
+  const totalCells = Math.max(1, configuration.largeur * configuration.hauteur);
+  const activeCells = lignes.flat().filter((value) => String(value) !== String(configuration.alphabet_entree[0])).length;
+  const density = Math.round((activeCells / totalCells) * 100);
+  const counts = new Map();
+  lignes.flat().forEach((value) => {
+    const key = String(value);
+    counts.set(key, (counts.get(key) || 0) + 1);
+  });
+  let entropy = 0;
+  counts.forEach((count) => {
+    const p = count / totalCells;
+    entropy -= p > 0 ? p * Math.log2(p) : 0;
+  });
+  document.querySelector("#hud-gen").textContent = String(configuration.hauteur);
+  document.querySelector("#hud-density").textContent = `${density}%`;
+  document.querySelector("#hud-entropy").textContent = entropy.toFixed(2);
 }
 
 window.setPaletteColor = function(alphabetIndex, color) {
@@ -248,22 +352,31 @@ function render() {
       ctx.fillRect(x * cell, y * cell, cell, cell);
     });
   });
+  updateHudMetrics(state.universe);
 }
 
 function describe(config) {
   title.textContent = config.nom;
   meta.textContent = `${config.alphabet_entree.length} symbole(s) entree | ${config.alphabet_sortie.length} sortie | voisinage ${config.taille_voisinage} | ${config.nombre_canaux_sortie} canal(aux) | ${config.mode_regle}`;
   const entries = Object.entries(config.table_transition || {}).slice(0, 24);
-  tableView.innerHTML = entries.length > 0
+  const content = entries.length > 0
     ? entries.map(([key, value]) => `<span><b>${key}</b> -> ${JSON.stringify(value)}</span>`).join("")
     : `<span><b>${config.mode_regle}</b> -> genere par le noyau</span>`;
+  tableView.innerHTML = content;
+  ruleDetailView.innerHTML = content;
+  renderTransitionSignals(config);
 }
 
-function applyConfig(config, { updateJson = true, updateControls = true } = {}) {
+function applyConfig(config, { updateJson = true, updateControls = true, source = "Synchronisation", live = false } = {}) {
   const normalized = window.AutomaginariumCore.normaliserConfiguration(config);
   const validation = validateConfig(normalized);
   showStatus(validation);
-  if (!validation.valid) return false;
+  if (!validation.valid) {
+    setSyncState("error", `Correction requise: ${validation.errors[0] || "configuration invalide"}`);
+    livePreviewOrigin.textContent = `Validation depuis ${source}`;
+    livePreviewSummary.textContent = validation.errors.join(" ");
+    return false;
+  }
   state.config = normalized;
   state.lastValidConfig = structuredClone(normalized);
   state.universe = window.AutomaginariumCore.genererUnivers(normalized);
@@ -271,7 +384,9 @@ function applyConfig(config, { updateJson = true, updateControls = true } = {}) 
   if (updateJson) controls.json.value = JSON.stringify(normalized, null, 2);
   describe(normalized);
   render();
-  if (typeof window.updatePaletteEditor === 'function') {
+  updateLiveNarrative(normalized, source, live);
+  setSyncState("ok", live ? "Synchronisation live active" : "Configuration synchronisee");
+  if (typeof window.updatePaletteEditor === "function") {
     window.updatePaletteEditor();
   }
   return true;
@@ -279,7 +394,7 @@ function applyConfig(config, { updateJson = true, updateControls = true } = {}) 
 
 async function loadPreset(id) {
   const config = await fetchPreset(id);
-  applyConfig(config);
+  applyConfig(config, { updateJson: true, updateControls: true, source: `Preset ${id}`, live: false });
 }
 
 async function fetchPreset(id) {
@@ -291,7 +406,7 @@ async function fetchPreset(id) {
   return structuredClone(config);
 }
 
-function applyGeneratedRule() {
+function buildGeneratedRuleConfig() {
   const config = window.AutomaginariumCore.normaliserConfiguration(controlsToConfig());
   const generator = controls.ruleGenerator.value;
   if (generator === "wolfram") {
@@ -311,7 +426,31 @@ function applyGeneratedRule() {
     config.mode_regle = "totalistique";
     config.table_transition = generateTotalisticTable(config);
   }
-  applyConfig(config);
+  return config;
+}
+
+function applyGeneratedRule({ updateJson = true, updateControls = true, source = "Regles", live = false } = {}) {
+  return applyConfig(buildGeneratedRuleConfig(), { updateJson, updateControls, source, live });
+}
+
+function queuePreview(action, delay = 180) {
+  clearTimeout(previewTimer);
+  setSyncState("pending", "Projection en cours...");
+  previewTimer = window.setTimeout(action, delay);
+}
+
+function queueConfigPreview(source = "Parametres") {
+  lastPreviewSource = source;
+  queuePreview(() => {
+    applyConfig(controlsToConfig(), { updateJson: false, updateControls: false, source, live: true });
+  });
+}
+
+function queueRulePreview(source = "Regles") {
+  lastPreviewSource = source;
+  queuePreview(() => {
+    applyGeneratedRule({ updateJson: false, updateControls: true, source, live: true });
+  });
 }
 
 function downloadText(filename, text) {
@@ -346,7 +485,6 @@ async function renderGallery() {
 
     const name = document.createElement("strong");
     name.textContent = preset.label;
-
     const family = document.createElement("span");
     family.textContent = preset.family;
 
@@ -366,33 +504,57 @@ PRESETS.forEach((preset) => {
   presetSelect.appendChild(option);
 });
 
+liveFieldControls.forEach((control) => {
+  control.addEventListener("input", () => queueConfigPreview("Parametres"));
+  control.addEventListener("change", () => queueConfigPreview("Parametres"));
+});
+
+liveRuleControls.forEach((control) => {
+  control.addEventListener("input", () => queueRulePreview("Regles"));
+  control.addEventListener("change", () => queueRulePreview("Regles"));
+});
+
 presetSelect.addEventListener("change", () => loadPreset(presetSelect.value));
-document.querySelector("#apply-controls").addEventListener("click", () => applyConfig(controlsToConfig()));
-document.querySelector("#generate-rule").addEventListener("click", applyGeneratedRule);
+document.querySelector("#apply-controls").addEventListener("click", () => {
+  clearTimeout(previewTimer);
+  if (lastPreviewSource === "Regles") {
+    applyGeneratedRule({ updateJson: true, updateControls: true, source: "Synchronisation manuelle", live: false });
+  } else {
+    applyConfig(controlsToConfig(), { updateJson: true, updateControls: true, source: "Synchronisation manuelle", live: false });
+  }
+});
+document.querySelector("#generate-rule").addEventListener("click", () => {
+  clearTimeout(previewTimer);
+  applyGeneratedRule({ updateJson: true, updateControls: true, source: "Regles", live: false });
+});
 document.querySelector("#apply-json").addEventListener("click", () => {
   try {
-    applyConfig(JSON.parse(controls.json.value), { updateJson: true, updateControls: true });
+    clearTimeout(previewTimer);
+    applyConfig(JSON.parse(controls.json.value), { updateJson: true, updateControls: true, source: "JSON", live: false });
   } catch (error) {
     showStatus({ valid: false, errors: [`JSON invalide: ${error.message}`], warnings: [] });
+    setSyncState("error", "JSON invalide");
   }
 });
 document.querySelector("#reset-json").addEventListener("click", () => {
   controls.json.value = JSON.stringify(state.lastValidConfig || state.config, null, 2);
 });
 
-// Expose API for palette editor
 window.AutomaginariumApp = {
   state,
   render,
   getDefaultPalette,
 };
+
 controls.importJson.addEventListener("change", async () => {
   const file = controls.importJson.files[0];
   if (!file) return;
   try {
-    applyConfig(JSON.parse(await file.text()));
+    clearTimeout(previewTimer);
+    applyConfig(JSON.parse(await file.text()), { updateJson: true, updateControls: true, source: "Import JSON", live: false });
   } catch (error) {
     showStatus({ valid: false, errors: [`Import impossible: ${error.message}`], warnings: [] });
+    setSyncState("error", "Import JSON impossible");
   }
 });
 document.querySelector("#export-json").addEventListener("click", () => {
@@ -406,5 +568,6 @@ document.querySelector("#export-png").addEventListener("click", () => {
 });
 document.querySelector("#refresh-gallery").addEventListener("click", renderGallery);
 
+setSyncState("pending", "Initialisation du laboratoire...");
 await renderGallery();
 await loadPreset("wolfram-90");
