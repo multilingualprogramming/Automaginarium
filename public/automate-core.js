@@ -219,34 +219,16 @@ function ruleDigitToOutput(digit, config) {
   return output;
 }
 
-function encodeRuleNumber(transitionTable, config) {
-  const { digits, base } = ruleConfiguration(config);
-  let ruleNumber = 0n;
-  const baseBig = BigInt(base);
-  for (let index = 0; index < digits; index += 1) {
-    const voisinage = ruleIndexToNeighborhood(index, config);
-    const key = cleVoisinage(voisinage);
-    const output = transitionTable[key] ?? sortieDefaut(config);
-    const digit = outputToRuleDigit(output, config);
-    if (digit === null) return null;
-    ruleNumber = ruleNumber + (BigInt(digit) * (baseBig ** BigInt(index)));
-  }
-  return ruleNumber;
-}
+function getRuleOutput(ruleNumber, voisinage, config) {
+  const index = neighborhoodToRuleIndex(voisinage, config.alphabet_entree);
+  if (index === null) return sortieDefaut(config);
 
-function decodeRuleNumber(ruleNumber, config) {
-  const { digits, base } = ruleConfiguration(config);
-  const table = {};
-  let remaining = BigInt(ruleNumber);
+  const { base } = ruleConfiguration(config);
   const baseBig = BigInt(base);
-  for (let index = 0; index < digits; index += 1) {
-    const digit = Number(remaining % baseBig);
-    remaining = remaining / baseBig;
-    const voisinage = ruleIndexToNeighborhood(index, config);
-    const output = ruleDigitToOutput(digit, config);
-    table[cleVoisinage(voisinage)] = output;
-  }
-  return table;
+  const ruleNumberBig = BigInt(ruleNumber);
+
+  const digit = Number((ruleNumberBig / (baseBig ** BigInt(index))) % baseBig);
+  return ruleDigitToOutput(digit, config);
 }
 
 function callPacked(name, args, fallback) {
@@ -337,6 +319,5 @@ window.AutomaginariumCore = {
   validerConfiguration,
   codeVoisinageNumerique,
   ruleConfiguration,
-  encodeRuleNumber,
-  decodeRuleNumber,
+  getRuleOutput,
 };
