@@ -1,9 +1,13 @@
 /*
- * Automaginarium browser adapter.
+ * Automaginarium browser bridge.
  *
- * This small JavaScript mirror keeps the browser demo usable until
- * src/automate_universel.ml is compiled through Multilingual. JavaScript
- * should remain an adapter: configuration in, generated universe out.
+ * This adapter forwards calls to the compiled French Multilingual core.
+ * All domain logic (cellular automata, rules, generation) is canonical in
+ * src/automate_universel.ml. These functions are temporary fallbacks/mirrors
+ * until the Multilingual→WASM compilation pipeline is live.
+ *
+ * JavaScript serves only: canvas rendering, DOM, interface events.
+ * All cellular automata logic belongs in src/.
  */
 
 function mulberry32(seed) {
@@ -15,6 +19,43 @@ function mulberry32(seed) {
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
+}
+
+function callPacked(name, args, fallback) {
+  const packed = window.AutomaginariumPacked;
+  if (packed && typeof packed[name] === "function") {
+    try {
+      const value = Number(packed[name](...args));
+      if (Number.isFinite(value)) return value;
+    } catch (error) {
+      console.warn(`Automaginarium: WASM export ${name} failed; using fallback.`, error);
+    }
+  }
+  return fallback;
+}
+
+// ============================================================================
+// TEMPORARY: These functions are duplicated from src/automate_universel.ml.
+// They are fallbacks until the ML is compiled to WASM/JS.
+// DO NOT ADD NEW LOGIC HERE. Update src/automate_universel.ml instead.
+// ============================================================================
+
+function cleVoisinage(voisinage) {
+  return JSON.stringify(voisinage);
+}
+
+function ancienneCleVoisinage(voisinage) {
+  return voisinage.map(String).join("");
+}
+
+function sortieDefaut(configuration) {
+  return Array.from({ length: configuration.nombre_canaux_sortie }, () => configuration.alphabet_sortie[0] ?? 0);
+}
+
+function normaliserSortie(sortie, configuration) {
+  const valeurs = Array.isArray(sortie) ? [...sortie] : [sortie];
+  while (valeurs.length < configuration.nombre_canaux_sortie) valeurs.push(valeurs[0] ?? configuration.alphabet_sortie[0]);
+  return valeurs.slice(0, configuration.nombre_canaux_sortie);
 }
 
 function normaliserConfiguration(configuration) {
@@ -46,18 +87,6 @@ function normaliserConfiguration(configuration) {
   };
 }
 
-function cleVoisinage(voisinage) {
-  return JSON.stringify(voisinage);
-}
-
-function ancienneCleVoisinage(voisinage) {
-  return voisinage.map(String).join("");
-}
-
-function sortieDefaut(configuration) {
-  return Array.from({ length: configuration.nombre_canaux_sortie }, () => configuration.alphabet_sortie[0] ?? 0);
-}
-
 function lireCellule(ligne, indice, configuration) {
   if (indice >= 0 && indice < ligne.length) return ligne[indice];
   if (configuration.frontiere === "circulaire" && ligne.length > 0) {
@@ -73,6 +102,76 @@ function voisinageCellule(ligne, indice, configuration) {
     voisinage.push(lireCellule(ligne, indice + decalage, configuration));
   }
   return voisinage;
+}
+
+function ruleConfiguration(configuration) {
+  const s = configuration.alphabet_entree.length;
+  const k = configuration.taille_voisinage;
+  const t = configuration.alphabet_sortie.length;
+  const m = configuration.nombre_canaux_sortie;
+  const base = Math.pow(t, m);
+  const digits = Math.pow(s, k);
+  const baseBig = BigInt(Math.round(base));
+  const digitsBig = BigInt(Math.round(digits));
+  const maxRule = baseBig ** digitsBig;
+  return { s, k, t, m, base, digits, maxRule };
+}
+
+function neighborhoodToRuleIndex(voisinage, alphabet) {
+  const s = alphabet.length;
+  let index = 0;
+  for (let i = 0; i < voisinage.length; i += 1) {
+    const symbolIndex = alphabet.indexOf(voisinage[i]);
+    if (symbolIndex < 0) return null;
+    index = index * s + symbolIndex;
+  }
+  return index;
+}
+
+function ruleIndexToNeighborhood(index, config) {
+  const { s, k } = ruleConfiguration(config);
+  const voisinage = [];
+  let remaining = index;
+  for (let i = k - 1; i >= 0; i -= 1) {
+    const symbolIndex = Math.floor(remaining / Math.pow(s, i));
+    voisinage.push(config.alphabet_entree[symbolIndex]);
+    remaining = remaining % Math.pow(s, i);
+  }
+  return voisinage;
+}
+
+function outputToRuleDigit(output, config) {
+  const { t, m } = ruleConfiguration(config);
+  const normalized = normaliserSortie(output, config);
+  let digit = 0;
+  for (let ch = 0; ch < m; ch += 1) {
+    const symbolIndex = config.alphabet_sortie.indexOf(normalized[ch]);
+    if (symbolIndex < 0) return null;
+    digit = digit * t + symbolIndex;
+  }
+  return digit;
+}
+
+function ruleDigitToOutput(digit, config) {
+  const { t, m } = ruleConfiguration(config);
+  const output = [];
+  let remaining = digit;
+  for (let ch = m - 1; ch >= 0; ch -= 1) {
+    const symbolIndex = Math.floor(remaining / Math.pow(t, ch));
+    output.push(config.alphabet_sortie[symbolIndex]);
+    remaining = remaining % Math.pow(t, ch);
+  }
+  return output;
+}
+
+function getRuleOutput(ruleNumber, voisinage, config) {
+  const index = neighborhoodToRuleIndex(voisinage, config.alphabet_entree);
+  if (index === null) return sortieDefaut(config);
+  const { base } = ruleConfiguration(config);
+  const baseBig = BigInt(base);
+  const ruleNumberBig = BigInt(ruleNumber);
+  const digit = Number((ruleNumberBig / (baseBig ** BigInt(index))) % baseBig);
+  return ruleDigitToOutput(digit, config);
 }
 
 function appliquerRegle(voisinage, configuration, random) {
@@ -162,112 +261,6 @@ function tableWolfram(numeroRegle) {
   return table;
 }
 
-function ruleConfiguration(configuration) {
-  const s = configuration.alphabet_entree.length; // size of input alphabet
-  const k = configuration.taille_voisinage; // neighborhood size
-  const t = configuration.alphabet_sortie.length; // size of output alphabet
-  const m = configuration.nombre_canaux_sortie; // number of output channels
-  const base = Math.pow(t, m);
-  const digits = Math.pow(s, k);
-  // Use BigInt for maxRule to handle large numbers correctly
-  const baseBig = BigInt(Math.round(base));
-  const digitsBig = BigInt(Math.round(digits));
-  const maxRule = baseBig ** digitsBig;
-  return { s, k, t, m, base, digits, maxRule };
-}
-
-function neighborhoodToRuleIndex(voisinage, alphabet) {
-  const s = alphabet.length;
-  let index = 0;
-  for (let i = 0; i < voisinage.length; i += 1) {
-    const symbolIndex = alphabet.indexOf(voisinage[i]);
-    if (symbolIndex < 0) return null;
-    index = index * s + symbolIndex;
-  }
-  return index;
-}
-
-function ruleIndexToNeighborhood(index, config) {
-  const { s, k } = ruleConfiguration(config);
-  const voisinage = [];
-  let remaining = index;
-  for (let i = k - 1; i >= 0; i -= 1) {
-    const symbolIndex = Math.floor(remaining / Math.pow(s, i));
-    voisinage.push(config.alphabet_entree[symbolIndex]);
-    remaining = remaining % Math.pow(s, i);
-  }
-  return voisinage;
-}
-
-function outputToRuleDigit(output, config) {
-  const { t, m } = ruleConfiguration(config);
-  const normalized = normaliserSortie(output, config);
-  let digit = 0;
-  for (let ch = 0; ch < m; ch += 1) {
-    const symbolIndex = config.alphabet_sortie.indexOf(normalized[ch]);
-    if (symbolIndex < 0) return null;
-    digit = digit * t + symbolIndex;
-  }
-  return digit;
-}
-
-function ruleDigitToOutput(digit, config) {
-  const { t, m } = ruleConfiguration(config);
-  const output = [];
-  let remaining = digit;
-  for (let ch = m - 1; ch >= 0; ch -= 1) {
-    const symbolIndex = Math.floor(remaining / Math.pow(t, ch));
-    output.push(config.alphabet_sortie[symbolIndex]);
-    remaining = remaining % Math.pow(t, ch);
-  }
-  return output;
-}
-
-function getRuleOutput(ruleNumber, voisinage, config) {
-  const index = neighborhoodToRuleIndex(voisinage, config.alphabet_entree);
-  if (index === null) return sortieDefaut(config);
-
-  const { base } = ruleConfiguration(config);
-  const baseBig = BigInt(base);
-  const ruleNumberBig = BigInt(ruleNumber);
-
-  const digit = Number((ruleNumberBig / (baseBig ** BigInt(index))) % baseBig);
-  return ruleDigitToOutput(digit, config);
-}
-
-function callPacked(name, args, fallback) {
-  const packed = window.AutomaginariumPacked;
-  if (packed && typeof packed[name] === "function") {
-    try {
-      const value = Number(packed[name](...args));
-      if (Number.isFinite(value)) return value;
-    } catch (error) {
-      console.warn(`Automaginarium: WASM export ${name} failed; using fallback.`, error);
-    }
-  }
-  return fallback;
-}
-
-function codeVoisinageNumerique(voisinage, tailleAlphabet) {
-  if (!voisinage.every((value) => Number.isInteger(Number(value)))) return null;
-  const values = voisinage.map(Number);
-  if (values.length === 3) {
-    return Math.trunc(callPacked(
-      "code_voisinage_3_base",
-      [values[0], values[1], values[2], tailleAlphabet],
-      values.reduce((code, value) => code * tailleAlphabet + value, 0),
-    ));
-  }
-  if (values.length === 5) {
-    return Math.trunc(callPacked(
-      "code_voisinage_5_base",
-      [values[0], values[1], values[2], values[3], values[4], tailleAlphabet],
-      values.reduce((code, value) => code * tailleAlphabet + value, 0),
-    ));
-  }
-  return values.reduce((code, value) => code * tailleAlphabet + value, 0);
-}
-
 function toutesClesVoisinage(alphabet, taille) {
   const keys = [];
   function visit(prefix, depth) {
@@ -279,12 +272,6 @@ function toutesClesVoisinage(alphabet, taille) {
   }
   visit([], 0);
   return keys;
-}
-
-function normaliserSortie(sortie, configuration) {
-  const valeurs = Array.isArray(sortie) ? [...sortie] : [sortie];
-  while (valeurs.length < configuration.nombre_canaux_sortie) valeurs.push(valeurs[0] ?? configuration.alphabet_sortie[0]);
-  return valeurs.slice(0, configuration.nombre_canaux_sortie);
 }
 
 function validerConfiguration(configurationBrute) {
@@ -321,8 +308,8 @@ window.AutomaginariumCore = {
   cleVoisinage,
   toutesClesVoisinage,
   validerConfiguration,
-  codeVoisinageNumerique,
   ruleConfiguration,
   getRuleOutput,
   mulberry32,
+  callPacked,
 };

@@ -182,7 +182,7 @@ def valider_configuration(configuration):
         erreurs.append("taille_voisinage doit etre impair et positif")
     si config["nombre_canaux_sortie"] < 1:
         erreurs.append("nombre_canaux_sortie doit etre positif")
-    si config["mode_regle"] non dans ["table", "totalistique", "aleatoire"]:
+    si config["mode_regle"] non dans ["table", "totalistique", "aleatoire", "numerique"]:
         erreurs.append("mode_regle inconnu")
 
     si config["mode_regle"] == "table":
@@ -209,6 +209,9 @@ def appliquer_regle(voisinage, configuration, generateur):
         retour transition_totalistique(voisinage, configuration)
     si mode == "aleatoire":
         retour transition_aleatoire(voisinage, configuration, generateur)
+    si mode == "numerique":
+        soit numero_regle = configuration.get("numero_regle", 0)
+        retour sortie_regle_numerique(voisinage, numero_regle, configuration)
     retour transition_table(voisinage, configuration)
 
 
@@ -292,3 +295,80 @@ def generer_univers_detaille(configuration_brute):
         lignes.append(detail["generation"])
         sorties.append(detail["sorties"])
     retour {"configuration": configuration, "lignes": lignes, "sorties": sorties}
+
+
+# Fonctions pour les regles numeriques: les regles sont encodees comme des grands entiers
+# plutot que des tables de transition explicites.
+
+def configuration_regle(configuration):
+    soit s = len(configuration["alphabet_entree"])
+    soit k = configuration["taille_voisinage"]
+    soit t = len(configuration["alphabet_sortie"])
+    soit m = configuration["nombre_canaux_sortie"]
+    soit base = t ** m
+    soit chiffres = s ** k
+    retour {
+        "s": s,
+        "k": k,
+        "t": t,
+        "m": m,
+        "base": base,
+        "chiffres": chiffres,
+    }
+
+
+def voisinage_vers_index(voisinage, alphabet):
+    soit s = len(alphabet)
+    soit index = 0
+    pour valeur dans voisinage:
+        soit indice_symbole = alphabet.index(valeur) si valeur dans alphabet sinon 0
+        index = index * s + indice_symbole
+    retour index
+
+
+def index_vers_voisinage(index, configuration):
+    soit spec = configuration_regle(configuration)
+    soit s = spec["s"]
+    soit k = spec["k"]
+    soit voisinage = []
+    soit restant = index
+    pour i dans range(k - 1, -1, -1):
+        soit indice_symbole = restant // (s ** i)
+        voisinage.append(configuration["alphabet_entree"][indice_symbole])
+        restant = restant % (s ** i)
+    retour voisinage
+
+
+def sortie_vers_chiffre_regle(sortie, configuration):
+    soit spec = configuration_regle(configuration)
+    soit t = spec["t"]
+    soit m = spec["m"]
+    soit chiffre = 0
+    soit valeurs = sortie si isinstance(sortie, list) sinon [sortie]
+    pour canal dans range(m):
+        soit valeur = valeurs[canal] si canal < len(valeurs) sinon valeurs[0] si len(valeurs) > 0 sinon configuration["alphabet_sortie"][0]
+        soit indice_symbole = configuration["alphabet_sortie"].index(valeur) si valeur dans configuration["alphabet_sortie"] sinon 0
+        chiffre = chiffre * t + indice_symbole
+    retour chiffre
+
+
+def chiffre_regle_vers_sortie(chiffre, configuration):
+    soit spec = configuration_regle(configuration)
+    soit t = spec["t"]
+    soit m = spec["m"]
+    soit sortie = []
+    soit restant = chiffre
+    pour canal dans range(m - 1, -1, -1):
+        soit indice_symbole = restant // (t ** canal)
+        sortie.append(configuration["alphabet_sortie"][indice_symbole])
+        restant = restant % (t ** canal)
+    sortie.reverse()
+    retour sortie
+
+
+def sortie_regle_numerique(voisinage, numero_regle, configuration):
+    soit index = voisinage_vers_index(voisinage, configuration["alphabet_entree"])
+    soit spec = configuration_regle(configuration)
+    soit base = spec["base"]
+    soit chiffre = (numero_regle // (base ** index)) % base
+    retour chiffre_regle_vers_sortie(chiffre, configuration)

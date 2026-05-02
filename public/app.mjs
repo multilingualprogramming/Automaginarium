@@ -1,4 +1,5 @@
 import { installAutomaginariumPacked } from "./generated/automate_packed_runtime.mjs";
+import { generateRandomTable, generateSymmetricTable, generateTotalisticTable } from "./rule-generation.mjs";
 
 await installAutomaginariumPacked();
 
@@ -96,49 +97,10 @@ function encodeList(values) {
   return (values || []).join(",");
 }
 
-function allNeighborhoodKeys(alphabet, size) {
-  return window.AutomaginariumCore.toutesClesVoisinage(alphabet, size);
-}
 
-function parseNeighborhoodKey(key) {
-  try {
-    const parsed = JSON.parse(key);
-    return Array.isArray(parsed) ? parsed : key.split("");
-  } catch (error) {
-    return key.split("");
-  }
-}
-
-function randomOutput(config) {
-  return Array.from(
-    { length: config.nombre_canaux_sortie },
-    () => config.alphabet_sortie[Math.floor(Math.random() * config.alphabet_sortie.length)],
-  );
-}
-
-function generateRandomTable(config) {
-  return Object.fromEntries(allNeighborhoodKeys(config.alphabet_entree, config.taille_voisinage).map((key) => [key, randomOutput(config)]));
-}
-
-function generateSymmetricTable(config) {
-  const table = {};
-  allNeighborhoodKeys(config.alphabet_entree, config.taille_voisinage).forEach((key) => {
-    const mirror = JSON.stringify(parseNeighborhoodKey(key).reverse());
-    if (table[key]) return;
-    const output = randomOutput(config);
-    table[key] = output;
-    table[mirror] = output;
-  });
-  return table;
-}
-
-function generateTotalisticTable(config) {
-  return Object.fromEntries(allNeighborhoodKeys(config.alphabet_entree, config.taille_voisinage).map((key) => {
-    const sum = parseNeighborhoodKey(key).reduce((acc, value) => acc + Number(value), 0);
-    const index = Number.isFinite(sum) ? Math.abs(sum) % config.alphabet_sortie.length : key.length % config.alphabet_sortie.length;
-    return [key, Array.from({ length: config.nombre_canaux_sortie }, (_, channel) => config.alphabet_sortie[(index + channel) % config.alphabet_sortie.length])];
-  }));
-}
+// Rule generation moved to rule-generation.mjs
+// These functions are temporary and will eventually call compiled ML functions.
+// See rule-generation.mjs for details.
 
 function controlsToConfig() {
   const inputAlphabet = parseList(controls.alphabetInput.value, [0, 1]);
