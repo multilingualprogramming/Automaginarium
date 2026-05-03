@@ -45,6 +45,103 @@ def normaliser_configuration(configuration):
     }
 
 
+def parser_symbole(brut):
+    soit texte = str(brut).strip()
+    si texte == "":
+        retour None
+    essayer:
+        soit numerique = float(texte)
+        si numerique.is_integer():
+            soit entier = int(numerique)
+            si str(entier) == texte:
+                retour entier
+    sauf:
+        rien
+    retour texte
+
+
+def parser_liste_virgules(valeur, repli):
+    soit elements = [parser_symbole(fragment) pour fragment dans str(valeur).split(",")]
+    soit filtres = [element pour element dans elements si element is not None]
+    retour filtres si len(filtres) > 0 sinon repli
+
+
+def encoder_liste(valeurs):
+    retour ",".join([str(valeur) pour valeur dans (valeurs ou [])])
+
+
+def etat_formulaire_vers_configuration(etat_formulaire, configuration_courante=None):
+    si configuration_courante is None:
+        configuration_courante = {}
+    soit alphabet_entree = parser_liste_virgules(etat_formulaire.get("alphabetInput", ""), [0, 1])
+    soit alphabet_sortie = parser_liste_virgules(etat_formulaire.get("alphabetOutput", ""), alphabet_entree)
+    soit voisinage = int(etat_formulaire.get("neighborhood", 3))
+    si voisinage % 2 == 0:
+        voisinage = voisinage + 1
+    soit mode_initial = etat_formulaire.get("initialMode", "centre")
+    soit configuration = dict(configuration_courante)
+    configuration["nom"] = str(etat_formulaire.get("name", "")).strip() or "Univers sans nom"
+    configuration["alphabet_entree"] = alphabet_entree
+    configuration["alphabet_sortie"] = alphabet_sortie
+    configuration["taille_voisinage"] = max(1, voisinage)
+    configuration["nombre_canaux_sortie"] = max(1, int(etat_formulaire.get("channels", 1)))
+    configuration["largeur"] = max(1, int(etat_formulaire.get("width", 161)))
+    configuration["hauteur"] = max(1, int(etat_formulaire.get("height", 100)))
+    configuration["frontiere"] = etat_formulaire.get("boundary", "fixe")
+    configuration["mode_regle"] = etat_formulaire.get("ruleMode", "table")
+    configuration["numero_regle"] = etat_formulaire.get("ruleNumber", "0")
+    configuration["etat_initial"] = {"mode": mode_initial}
+    soit rendu = dict(configuration_courante.get("rendu", {}))
+    rendu["taille_cellule"] = max(1, int(etat_formulaire.get("cellSize", 5)))
+    configuration["rendu"] = rendu
+
+    si mode_initial == "motif":
+        configuration["etat_initial"]["valeurs"] = parser_liste_virgules(
+            etat_formulaire.get("initialValues", ""),
+            [alphabet_sortie[1] si len(alphabet_sortie) > 1 sinon alphabet_sortie[0]],
+        )
+    si mode_initial == "aleatoire":
+        configuration["etat_initial"]["graine"] = configuration_courante.get("etat_initial", {}).get("graine", 42)
+        configuration["etat_initial"]["probabilite"] = max(
+            0.0,
+            min(1.0, float(etat_formulaire.get("initialProbability", 0.28))),
+        )
+
+    soit alphabet_change = False
+    si "alphabet_entree" dans configuration_courante:
+        si len(configuration_courante["alphabet_entree"]) != len(alphabet_entree):
+            alphabet_change = True
+        si configuration_courante.get("taille_voisinage") != voisinage:
+            alphabet_change = True
+        si configuration_courante.get("nombre_canaux_sortie") != configuration["nombre_canaux_sortie"]:
+            alphabet_change = True
+    si alphabet_change:
+        configuration["table_transition"] = {}
+    si "table_transition" non dans configuration:
+        configuration["table_transition"] = {}
+    retour configuration
+
+
+def configuration_vers_etat_formulaire(configuration):
+    soit config = normaliser_configuration(configuration)
+    retour {
+        "name": config["nom"],
+        "alphabetInput": encoder_liste(config["alphabet_entree"]),
+        "alphabetOutput": encoder_liste(config["alphabet_sortie"]),
+        "neighborhood": str(config["taille_voisinage"]),
+        "channels": str(config["nombre_canaux_sortie"]),
+        "width": str(config["largeur"]),
+        "height": str(config["hauteur"]),
+        "boundary": config["frontiere"],
+        "initialMode": config.get("etat_initial", {}).get("mode", "centre"),
+        "initialValues": encoder_liste(config.get("etat_initial", {}).get("valeurs", [])),
+        "initialProbability": str(config.get("etat_initial", {}).get("probabilite", 0.28)),
+        "cellSize": str(config.get("rendu", {}).get("taille_cellule", 5)),
+        "ruleMode": config["mode_regle"],
+        "ruleNumber": str(config.get("numero_regle", 0)),
+    }
+
+
 def cle_voisinage(voisinage):
     retour json.dumps(voisinage).replace(", ", ",")
 
@@ -187,6 +284,57 @@ def table_symetrique(configuration, graine=42):
         table[cle] = sortie
         table[cle_miroir] = sortie
     retour table
+
+
+def assurer_configuration_rendable(configuration):
+    soit config = normaliser_configuration(configuration)
+    si len(config.get("table_transition", {})) == 0:
+        soit cles = toutes_cles_voisinage(config["alphabet_entree"], config["taille_voisinage"])
+        config["table_transition"] = {}
+        pour cle dans cles[: min(5, len(cles))]:
+            config["table_transition"][cle] = [config["alphabet_sortie"][0]]
+    retour config
+
+
+def construire_configuration_regle_generee(configuration, generateur, regle_wolfram):
+    soit config = normaliser_configuration(configuration)
+    soit generateur_effectif = generateur
+    soit binaire = False
+    si len(config["alphabet_entree"]) == 2:
+        si str(config["alphabet_entree"][0]) == "0":
+            si str(config["alphabet_entree"][1]) == "1":
+                binaire = True
+    soit wolfram_invalide = False
+    si config["taille_voisinage"] != 3:
+        wolfram_invalide = True
+    si non binaire:
+        wolfram_invalide = True
+    si config["nombre_canaux_sortie"] != 1:
+        wolfram_invalide = True
+    si generateur_effectif == "wolfram" et wolfram_invalide:
+        generateur_effectif = "random"
+
+    si generateur_effectif == "wolfram":
+        config["alphabet_entree"] = [0, 1]
+        config["alphabet_sortie"] = [0, 1]
+        config["taille_voisinage"] = 3
+        config["nombre_canaux_sortie"] = 1
+        config["mode_regle"] = "table"
+        config["table_transition"] = table_wolfram(int(regle_wolfram))
+    si generateur_effectif == "random":
+        config["mode_regle"] = "table"
+        config["table_transition"] = table_aleatoire(config)
+    si generateur_effectif == "symmetric":
+        config["mode_regle"] = "table"
+        config["table_transition"] = table_symetrique(config)
+    si generateur_effectif == "totalistic":
+        config["mode_regle"] = "totalistique"
+        config["table_transition"] = table_totalistique(config)
+
+    retour {
+        "config": config,
+        "effectiveGenerator": generateur_effectif,
+    }
 
 
 def valider_configuration(configuration):
@@ -335,6 +483,12 @@ def configuration_regle(configuration):
         "base": base,
         "chiffres": chiffres,
     }
+
+
+def etiquette_espace_regles(configuration):
+    soit spec = configuration_regle(normaliser_configuration(configuration))
+    soit max_regle = spec["base"] ** spec["chiffres"]
+    retour str(spec["t"]) + "^(" + str(spec["m"]) + "·" + str(spec["s"]) + "^" + str(spec["k"]) + ") = " + str(max_regle) + " regles possibles"
 
 
 def voisinage_vers_index(voisinage, alphabet):
@@ -580,6 +734,80 @@ def preset_fitness_croissance():
 def preset_fitness_oscillant():
     """Preset: medium entropy + strong oscillation + symmetry."""
     retour [4, 5, 3, 9, 5, 1]
+
+
+def etiquette_regle_hud(etat_regle):
+    soit voisinage = int(etat_regle.get("neighborhood", 3))
+    soit canaux = int(etat_regle.get("channels", 1))
+    soit mode_regle = etat_regle.get("ruleMode", "table")
+    soit regle_wolfram = etat_regle.get("wolframRule", "90")
+    si mode_regle == "totalistique":
+        retour "Tot(" + str(voisinage) + ")"
+    si mode_regle == "aleatoire":
+        retour "Alea(" + str(voisinage) + ")"
+    si mode_regle == "numerique":
+        retour "R" + str(voisinage) + "x" + str(canaux)
+    si mode_regle == "table":
+        retour "T" + str(voisinage) + "x" + str(canaux)
+    retour str(regle_wolfram)
+
+
+def resumer_configuration(configuration):
+    soit config = normaliser_configuration(configuration)
+    soit resume = str(config["largeur"]) + " x " + str(config["hauteur"]) + " cellules, "
+    resume = resume + str(len(config["alphabet_sortie"])) + " etat(s) visibles, voisinage "
+    resume = resume + str(config["taille_voisinage"]) + ", depart "
+    resume = resume + str(config.get("etat_initial", {}).get("mode", "centre"))
+    retour resume
+
+
+def resumer_transition(configuration):
+    soit config = normaliser_configuration(configuration)
+    soit entrees = list(config.get("table_transition", {}).items())
+    si config["mode_regle"] == "totalistique":
+        retour "Mode totalistique avec " + str(len(config["alphabet_sortie"])) + " etat(s) de sortie."
+    si len(entrees) == 0:
+        retour "Mode " + str(config["mode_regle"]) + " pilote par le noyau sans table explicite."
+    retour str(len(entrees)) + " transition(s) actives dans la table en cours."
+
+
+def decrire_configuration(configuration):
+    soit config = normaliser_configuration(configuration)
+    soit entrees = list(config.get("table_transition", {}).items())[:24]
+    soit html = "<span><b>" + str(config["mode_regle"]) + "</b> -> genere par le noyau</span>"
+    si len(entrees) > 0:
+        html = "".join(["<span><b>" + cle + "</b> -> " + json.dumps(valeur) + "</span>" pour cle, valeur dans entrees])
+    soit meta = str(len(config["alphabet_entree"])) + " symbole(s) entree | "
+    meta = meta + str(len(config["alphabet_sortie"])) + " sortie | voisinage "
+    meta = meta + str(config["taille_voisinage"]) + " | "
+    meta = meta + str(config["nombre_canaux_sortie"]) + " canal(aux) | "
+    meta = meta + str(config["mode_regle"])
+    retour {
+        "title": config["nom"],
+        "metaText": meta,
+        "ruleTableHtml": html,
+    }
+
+
+def signaux_transition(configuration, limite=6):
+    soit config = normaliser_configuration(configuration)
+    soit entrees = list(config.get("table_transition", {}).items())[:limite]
+    si len(entrees) == 0:
+        retour [{
+            "label": config["mode_regle"],
+            "title": "Noyau dynamique",
+            "body": "Les sorties sont derivees sans table visible.",
+        }]
+    soit signaux = []
+    pour indice in range(len(entrees)):
+        soit cle = entrees[indice][0]
+        soit valeur = entrees[indice][1]
+        signaux.append({
+            "label": "Transition " + str(indice + 1),
+            "title": cle,
+            "body": json.dumps(valeur),
+        })
+    retour signaux
 
 
 # ============================================================================

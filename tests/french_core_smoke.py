@@ -71,6 +71,66 @@ def test_deterministic_random_helper(core):
     assert all(0 <= value < 4 for value in first)
 
 
+def test_form_and_summary_helpers(core):
+    config = core.etat_formulaire_vers_configuration({
+        "name": "Formulaire",
+        "alphabetInput": "0,1,2",
+        "alphabetOutput": "0,1,2",
+        "neighborhood": "4",
+        "channels": "2",
+        "width": "31",
+        "height": "12",
+        "boundary": "circulaire",
+        "initialMode": "motif",
+        "initialValues": "1,2,1",
+        "cellSize": "6",
+        "ruleMode": "table",
+        "ruleNumber": "17",
+    })
+    assert config["taille_voisinage"] == 5
+    assert config["etat_initial"]["valeurs"] == [1, 2, 1]
+    form_state = core.configuration_vers_etat_formulaire(config)
+    assert form_state["alphabetInput"] == "0,1,2"
+    assert form_state["cellSize"] == "6"
+
+    summary = core.resumer_configuration(config)
+    assert "31 x 12 cellules" in summary
+    transition = core.resumer_transition(config)
+    assert "0 transition" in transition or "Mode table" in transition
+    hud = core.etiquette_regle_hud({
+        "neighborhood": "5",
+        "channels": "2",
+        "ruleMode": "numerique",
+        "wolframRule": "90",
+    })
+    assert hud == "R5x2"
+
+    built = core.construire_configuration_regle_generee({
+        "alphabet_entree": [0, 1],
+        "alphabet_sortie": [0, 1],
+        "taille_voisinage": 3,
+        "nombre_canaux_sortie": 1,
+        "mode_regle": "table",
+    }, "wolfram", 90)
+    assert built["effectiveGenerator"] == "wolfram"
+    assert built["config"]["table_transition"]["[1,1,0]"] == [1]
+
+    ensured = core.assurer_configuration_rendable({
+        "alphabet_entree": [0, 1],
+        "alphabet_sortie": [0, 1],
+        "taille_voisinage": 3,
+        "nombre_canaux_sortie": 1,
+        "mode_regle": "table",
+    })
+    assert len(ensured["table_transition"]) > 0
+
+    desc = core.decrire_configuration(ensured)
+    assert "title" in desc and "ruleTableHtml" in desc
+    signals = core.signaux_transition(ensured)
+    assert len(signals) > 0
+    assert "regles possibles" in core.etiquette_espace_regles(ensured)
+
+
 if __name__ == "__main__":
     core = load_core()
     test_wolfram_table(core)
@@ -78,4 +138,5 @@ if __name__ == "__main__":
     test_detailed_universe(core)
     test_validation(core)
     test_deterministic_random_helper(core)
+    test_form_and_summary_helpers(core)
     print("french core smoke ok")
