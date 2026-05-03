@@ -475,6 +475,27 @@ function resizeCanvas(config) {
   canvas.height = config.hauteur * cell;
 }
 
+function canvasBackgroundFor(configuration) {
+  const cssBackground = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
+  const theme = document.documentElement.dataset.theme || "dark";
+  const configuredBackground = configuration.rendu.fond;
+  if (!configuredBackground) return cssBackground || "#05070d";
+  if (theme === "light") {
+    const darkPresetBackgrounds = new Set([
+      "#020b12",
+      "#04080a",
+      "#05070d",
+      "#06050a",
+      "#07110a",
+      "#07111a",
+    ]);
+    if (darkPresetBackgrounds.has(String(configuredBackground).toLowerCase())) {
+      return cssBackground || "#ffffff";
+    }
+  }
+  return configuredBackground;
+}
+
 function render() {
   if (!state.universe) return;
   const { configuration, lignes, sorties } = state.universe;
@@ -483,7 +504,7 @@ function render() {
     featureModules.perturb.onConfigApplied(configuration);
   }
   const cell = Number(configuration.rendu.taille_cellule || 5);
-  ctx.fillStyle = configuration.rendu.fond || "#05070d";
+  ctx.fillStyle = canvasBackgroundFor(configuration);
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   const gridHeight = lignes.length;
   const gridWidth = lignes.length > 0 ? lignes[0].length : 1;

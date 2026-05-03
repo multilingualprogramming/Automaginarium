@@ -7,6 +7,14 @@
     <title>À propos — Automaginarium</title>
     <meta name="description"
       content="Découvrez Automaginarium, un laboratoire configurable d'automates cellulaires en Multilingual français." />
+    <script>
+      (() => {
+        const storedTheme = localStorage.getItem("automaginarium-theme");
+        const theme = storedTheme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+      })();
+    </script>
     <link rel="stylesheet" href="style.css" />
     <style>
       body {
@@ -86,7 +94,7 @@
 
       .tech-card {
         padding: 20px;
-        background: rgba(var(--panel), 0.5);
+        background: rgb(var(--panel-rgb) / 0.5);
         border: 1px solid var(--line);
         border-radius: 8px;
         -webkit-backdrop-filter: blur(10px);
@@ -145,7 +153,7 @@
       .attribution {
         margin-top: 48px;
         padding: 24px;
-        background: rgba(var(--panel), 0.3);
+        background: rgb(var(--panel-rgb) / 0.3);
         border-left: 3px solid var(--accent);
         border-radius: 4px;
         font-size: 0.9rem;
@@ -161,6 +169,7 @@
         <h1 id="app-title">Automaginarium</h1>
       </div>
       <nav class="header-links">
+        <button type="button" class="ghost-btn theme-toggle" data-theme-toggle>Mode sombre</button>
         <a href="index.html" title="Retour à l'application">Application</a>
         <a href="https://github.com/multilingualprogramming/Automaginarium" title="GitHub" target="_blank"
           rel="noopener noreferrer">GitHub</a>
@@ -296,6 +305,8 @@
         <a href="index.html">Retour à l'Application</a>
       </div>
     </main>
+    <script src="theme.js"></script>
   </body>
 
 </html>
+

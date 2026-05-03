@@ -8,6 +8,14 @@
       name="description"
       content="Laboratoire configurable d'automates cellulaires en Multilingual fran&ccedil;ais."
     />
+    <script>
+      (() => {
+        const storedTheme = localStorage.getItem("automaginarium-theme");
+        const theme = storedTheme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+      })();
+    </script>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -21,6 +29,7 @@
         <span id="hero-status-text">Synchronisation live</span>
       </div>
       <nav class="header-links">
+        <button type="button" class="ghost-btn theme-toggle" data-theme-toggle>Mode sombre</button>
         <a href="apropos.html" title="À propos">À propos</a>
         <a href="https://github.com/multilingualprogramming/Automaginarium" title="GitHub" target="_blank" rel="noopener noreferrer">GitHub</a>
       </nav>
@@ -434,6 +443,7 @@
       </section>
     </main>
 
+    <script src="theme.js"></script>
     <script src="automate-core.js"></script>
     <script type="module" src="app.mjs"></script>
   </body>
