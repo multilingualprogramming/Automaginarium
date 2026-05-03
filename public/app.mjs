@@ -498,13 +498,16 @@ controls.ruleGenerator.addEventListener("change", () => {
 document.querySelector("#generate-rule").addEventListener("click", () => {
   applyConfig(buildGeneratedRuleConfig(), { source: "Regles" });
 });
-document.querySelector("#random-rule").addEventListener("click", () => {
+function applyRandomRule() {
   const config = window.AutomaginariumCore.normaliserConfiguration(controlsToConfig());
   const { maxRule } = window.AutomaginariumCore.ruleConfiguration(config);
   controls.ruleNumber.value = randomBigInt(maxRule).toString();
   controls.ruleMode.value = "numerique";
   applyConfig(controlsToConfig(), { source: "Regle aleatoire" });
-});
+}
+
+document.querySelector("#random-rule").addEventListener("click", applyRandomRule);
+document.querySelector("#random-rule-canvas").addEventListener("click", applyRandomRule);
 document.querySelector("#apply-json").addEventListener("click", () => {
   try {
     applyConfig(JSON.parse(controls.json.value), { source: "JSON" });

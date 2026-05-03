@@ -27,28 +27,31 @@
       </section>
 
       <section id="main-panel" class="workspace" aria-label="Univers g&eacute;n&eacute;r&eacute;">
-        <div class="canvas-wrap">
-          <div class="canvas-aura" aria-hidden="true"></div>
-          <canvas id="universe" width="805" height="500"></canvas>
-          <div class="canvas-hud">
-            <div class="hud-metric">
-              <strong id="hud-rule">90</strong>
-              <span>r&egrave;gle</span>
-            </div>
-            <div class="hud-metric">
-              <strong id="hud-gen">0</strong>
-              <span>g&eacute;n&eacute;rations</span>
-            </div>
-            <div class="hud-metric">
-              <strong id="hud-density">0%</strong>
-              <span>densit&eacute;</span>
-            </div>
-            <div class="hud-metric">
-              <strong id="hud-entropy">0.00</strong>
-              <span>entropie</span>
+        <div class="canvas-column">
+          <div class="canvas-wrap">
+            <div class="canvas-aura" aria-hidden="true"></div>
+            <canvas id="universe" width="805" height="500"></canvas>
+            <div class="canvas-hud">
+              <div class="hud-metric">
+                <strong id="hud-rule">90</strong>
+                <span>r&egrave;gle</span>
+              </div>
+              <div class="hud-metric">
+                <strong id="hud-gen">0</strong>
+                <span>g&eacute;n&eacute;rations</span>
+              </div>
+              <div class="hud-metric">
+                <strong id="hud-density">0%</strong>
+                <span>densit&eacute;</span>
+              </div>
+              <div class="hud-metric">
+                <strong id="hud-entropy">0.00</strong>
+                <span>entropie</span>
+              </div>
             </div>
           </div>
-          <div class="canvas-controls">
+          <div class="canvas-actions-bar" aria-label="Actions du canevas">
+            <button id="random-rule-canvas" type="button">R&egrave;gle al&eacute;atoire</button>
             <button id="export-png" type="button">PNG</button>
             <button id="export-json" type="button">JSON</button>
           </div>
