@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="fr">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>À propos — Automaginarium</title>
+    <meta name="description"
+      content="Découvrez Automaginarium, un laboratoire configurable d'automates cellulaires en Multilingual français." />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      body {
+        background: linear-gradient(135deg, rgba(83, 176, 255, 0.05), rgba(255, 157, 77, 0.05));
+      }
+
+      .about-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px 24px;
+        color: var(--text);
+        line-height: 1.7;
+      }
+
+      .about-header {
+        margin-bottom: 48px;
+        text-align: center;
+        padding-bottom: 32px;
+        border-bottom: 1px solid var(--line-strong);
+      }
+
+      .about-header h1 {
+        font-size: 2.5rem;
+        margin: 0 0 12px 0;
+        background: linear-gradient(90deg, #53b0ff, #7dd3ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .about-header p {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        margin: 0;
+      }
+
+      .about-section {
+        margin-bottom: 48px;
+      }
+
+      .about-section h2 {
+        font-size: 1.5rem;
+        margin: 0 0 16px 0;
+        color: var(--accent);
+      }
+
+      .about-section p {
+        margin: 12px 0;
+        color: var(--text-secondary);
+      }
+
+      .about-section ul {
+        list-style: none;
+        padding-left: 0;
+        margin: 16px 0;
+      }
+
+      .about-section li {
+        padding: 8px 0 8px 24px;
+        position: relative;
+        color: var(--text-secondary);
+      }
+
+      .about-section li:before {
+        content: "▸";
+        position: absolute;
+        left: 0;
+        color: var(--accent);
+      }
+
+      .tech-stack {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin: 24px 0;
+      }
+
+      .tech-card {
+        padding: 20px;
+        background: rgba(var(--panel), 0.5);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+      }
+
+      .tech-card h3 {
+        margin: 0 0 12px 0;
+        font-size: 1rem;
+        color: var(--accent);
+      }
+
+      .tech-card p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+      }
+
+      .links-section {
+        margin-top: 48px;
+        padding-top: 32px;
+        border-top: 1px solid var(--line-strong);
+        text-align: center;
+      }
+
+      .links-section a {
+        display: inline-block;
+        margin: 0 16px;
+        padding: 10px 16px;
+        color: var(--accent);
+        text-decoration: none;
+        border: 1px solid var(--accent);
+        border-radius: 6px;
+        transition: all 200ms ease;
+      }
+
+      .links-section a:hover {
+        background: rgba(83, 176, 255, 0.1);
+      }
+
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 24px;
+        color: var(--accent);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 200ms ease;
+      }
+
+      .back-link:hover {
+        gap: 12px;
+      }
+
+      .attribution {
+        margin-top: 48px;
+        padding: 24px;
+        background: rgba(var(--panel), 0.3);
+        border-left: 3px solid var(--accent);
+        border-radius: 4px;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="topbar floating-header">
+      <div class="brand-lockup">
+        <p class="eyebrow">Multilingual français → univers configurables</p>
+        <h1 id="app-title">Automaginarium</h1>
+      </div>
+      <nav class="header-links">
+        <a href="index.html" title="Retour à l'application">Application</a>
+        <a href="https://github.com/multilingualprogramming/Automaginarium" title="GitHub" target="_blank"
+          rel="noopener noreferrer">GitHub</a>
+      </nav>
+    </header>
+
+    <main class="about-container">
+      <a href="index.html" class="back-link">← Retour à Automaginarium</a>
+
+      <div class="about-header">
+        <h1>À propos d'Automaginarium</h1>
+        <p>Un laboratoire configurable d'automates cellulaires</p>
+      </div>
+
+      <div class="about-section">
+        <h2>Vision</h2>
+        <p>
+          Automaginarium est une extension de <a href="https://github.com/multilingualprogramming/cellcosmos"
+            style="color: var(--accent);">Cellcosmos</a>,
+          un explorateur d'automates cellulaires élémentaires de Wolfram. Alors que Cellcosmos se concentre sur les 256
+          règles
+          binaires classiques, Automaginarium ouvre l'espace entier des possibilités :
+        </p>
+        <ul>
+          <li>Alphabets configurables : binaire, ternaire, quaternaire, ou valeurs personnalisées</li>
+          <li>Tailles de voisinage variables : 3, 5, 7, et au-delà</li>
+          <li>Sorties multi-canaux pour une richesse expressive accrue</li>
+          <li>Modes de transition déclaratifs : tables, totalistiques, aléatoires, ou numériques</li>
+          <li>Exploration génétique avec fitness pondérée et évolution interactive</li>
+          <li>Perturbation interactive du canevas avec effets visuels</li>
+        </ul>
+      </div>
+
+      <div class="about-section">
+        <h2>Architecture</h2>
+        <p>
+          Automaginarium démontre la puissance du langage Multilingual français en tant que couche
+          canonique pour la logique de domaine :
+        </p>
+        <ul>
+          <li><strong>src/</strong> — Logique française multilinguiste : automates, règles, métriques</li>
+          <li><strong>public/</strong> — Couche JavaScript minimale : canvas, événements DOM, interface</li>
+          <li><strong>examples/</strong> — Présets et configurations déclaratives en JSON</li>
+          <li><strong>docs/</strong> — Guides, tutoriels, et notes d'architecture</li>
+        </ul>
+        <p>
+          Le français Multilingual s'exporte vers WebAssembly (WASM) et JavaScript généré.
+          L'interface de navigateur reste une glace mince, appelant le noyau canonique.
+        </p>
+      </div>
+
+      <div class="about-section">
+        <h2>Technologies</h2>
+        <div class="tech-stack">
+          <div class="tech-card">
+            <h3>Multilingual</h3>
+            <p>Langage de programmation polyglotte, avec French comme dialecte principal pour Automaginarium.</p>
+          </div>
+          <div class="tech-card">
+            <h3>WebAssembly</h3>
+            <p>Compilation du français Multilingual vers WASM pour des performances de calcul élevées.</p>
+          </div>
+          <div class="tech-card">
+            <h3>Canvas & DOM</h3>
+            <p>Rendu 2D natif en HTML5, interface événementielle pour la manipulation interactive.</p>
+          </div>
+          <div class="tech-card">
+            <h3>Automates Cellulaires</h3>
+            <p>Systèmes dynamiques déterministes configurables, inspirés par Wolfram et la théorie.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="about-section">
+        <h2>Fonctionnalités Principales</h2>
+        <ul>
+          <li><strong>Atelier Génétique</strong> — Évolution interactive de configurations avec fitness pondérée,
+            leaderboard par canal, et graphique d'évolution</li>
+          <li><strong>Boîte à Outils Perturbation</strong> — Outils interactifs (Inspecter, Perturber, Attirer, Geler,
+            Muter) avec effets visuels (anneaux lumineux, traces de fumée, carte thermique)</li>
+          <li><strong>Galerie de Présets</strong> — Configurations prédéfinies explorant des espaces de règles
+            imaginatifs</li>
+          <li><strong>Éditeur Visuel</strong> — Ajustement en direct des paramètres avec rendu canvas immédiat</li>
+          <li><strong>Import/Export</strong> — Configurations en JSON, export PNG des univers générés</li>
+        </ul>
+      </div>
+
+      <div class="about-section">
+        <h2>Pour Commencer</h2>
+        <ol style="padding-left: 24px;">
+          <li>Ouvrez l'<a href="index.html" style="color: var(--accent);">application</a></li>
+          <li>Sélectionnez un préset dans la galerie (onglet Vue)</li>
+          <li>Ajustez les paramètres dans l'onglet Univers</li>
+          <li>Explorez les modes de règles (Règles, JSON)</li>
+          <li>Essayez l'Atelier Génétique pour évoluer de nouvelles règles</li>
+          <li>Utilisez la Perturbation pour interagir avec le canevas en temps réel</li>
+        </ol>
+      </div>
+      <div class="about-section">
+        <h3>Architecture et Cr&eacute;ation</h3>
+        <ul>
+          <li><a href="https://johnsamuel.info/">John Samuel</a></li>
+        </ul>
+      </div>
+
+      <div class="about-section">
+        <h2>Documentation</h2>
+        <p>Consultez le dépôt pour une documentation complète :</p>
+        <ul>
+          <li><a href="https://github.com/multilingualprogramming/Automaginarium/blob/main/docs/quickstart.md"
+              style="color: var(--accent);">Démarrage rapide</a></li>
+          <li><a href="https://github.com/multilingualprogramming/Automaginarium/blob/main/docs/create-universe.md"
+              style="color: var(--accent);">Guide de création d'univers</a></li>
+          <li><a href="https://github.com/multilingualprogramming/Automaginarium/blob/main/docs/gallery.md"
+              style="color: var(--accent);">Galerie et présets</a></li>
+          <li><a href="https://github.com/multilingualprogramming/Automaginarium/blob/main/README.md"
+              style="color: var(--accent);">README du projet</a></li>
+        </ul>
+      </div>
+
+      <div class="attribution">
+        <strong>Attribution</strong><br />
+        Automaginarium est un successeur de <a href="https://github.com/multilingualprogramming/cellcosmos"
+          style="color: var(--accent);">Cellcosmos</a>
+        et réutilise intentionnellement ses idées de projet et sa direction visuelle. La métrique du navigateur initial
+        et l'approche de rendu
+        sont dérivées des concepts de Cellcosmos. Où le code source est directement adapté, les commentaires identifient
+        Cellcosmos comme l'origine.
+      </div>
+
+      <div class="links-section">
+        <a href="https://github.com/multilingualprogramming/Automaginarium">Voir sur GitHub</a>
+        <a href="index.html">Retour à l'Application</a>
+      </div>
+    </main>
+  </body>
+
+</html>

@@ -2742,6 +2742,29 @@ canvas {
   }
 }
 
+.header-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+}
+
+.header-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 200ms ease;
+  border: 1px solid transparent;
+}
+
+.header-links a:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: rgba(83, 176, 255, 0.08);
+}
+
 /* Responsive Canvas-First */
 @media (max-width: 1300px) {
   .quantum-workspace .workspace {
@@ -2803,6 +2826,18 @@ canvas {
     width: 100%;
     justify-content: center;
     margin-top: 8px;
+  }
+
+  .header-links {
+    width: 100%;
+    justify-content: center;
+    margin-left: 0;
+    margin-top: 8px;
+  }
+
+  .header-links a {
+    font-size: 0.8rem;
+    padding: 6px 10px;
   }
 
   .quantum-workspace .workspace {
