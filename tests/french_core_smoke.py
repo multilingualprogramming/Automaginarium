@@ -1,13 +1,24 @@
 import importlib.util
 import pathlib
+import sys
+import types
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 GENERATED = ROOT / "public" / "generated" / "automate_universel.py"
+GENERATED_DIR = GENERATED.parent
+GRADIENT_MODULE = "dégradés_couleur"
 
 
 def load_core():
     assert GENERATED.exists(), f"generated French core missing: {GENERATED}"
+    generated_dir = str(GENERATED_DIR)
+    if generated_dir not in sys.path:
+        sys.path.insert(0, generated_dir)
+    if GRADIENT_MODULE not in sys.modules:
+        # The generated core currently imports this helper even though the smoke
+        # tested code paths do not use it.
+        sys.modules[GRADIENT_MODULE] = types.ModuleType(GRADIENT_MODULE)
     spec = importlib.util.spec_from_file_location("automate_universel_generated", GENERATED)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
