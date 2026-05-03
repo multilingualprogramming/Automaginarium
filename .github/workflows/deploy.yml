@@ -77,8 +77,9 @@ jobs:
         run: |
           rm -rf _site
           mkdir -p _site
-          cp index.html .nojekyll LICENSE README.md _site/
-          cp -r public examples docs _site/
+          cp .nojekyll LICENSE README.md _site/
+          cp -r public/. _site/
+          cp -r examples docs _site/
 
       - name: Televerser l'artefact Pages
         uses: actions/upload-pages-artifact@v3

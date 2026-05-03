@@ -52,7 +52,7 @@ Then visit `http://localhost:8788/public/index.html`.
 
 The demo can load bundled presets, edit alphabets/neighborhoods/channels/boundaries/initial states, generate rule tables, validate and apply JSON, import/export configurations, and export the current canvas as PNG.
 
-The repository root also contains `index.html`, so the app can be served from the root URL. This is the recommended shape for GitHub Pages:
+GitHub Pages publishes the contents of `public/` at the repository site root, while still copying `examples/` and `docs/` alongside it. That keeps the production URL clean:
 
 ```text
 https://<owner>.github.io/Automaginarium/

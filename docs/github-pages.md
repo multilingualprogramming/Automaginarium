@@ -9,7 +9,7 @@ Recommended repository settings:
 3. Set **Source** to `GitHub Actions`.
 5. Save.
 
-The root `index.html` redirects to `public/index.html`, where the application runs. The workflow builds generated Multilingual/WASM artifacts at deploy time and uploads a complete Pages artifact.
+The workflow builds generated Multilingual/WASM artifacts at deploy time, then publishes the contents of `public/` as the GitHub Pages site root. The `examples/` and `docs/` directories are copied alongside it in the final Pages artifact.
 
 Source files that must be committed for Pages:
 
@@ -48,5 +48,5 @@ python -m http.server 8788
 Open:
 
 ```text
-http://localhost:8788/
+http://localhost:8788/public/index.html
 ```

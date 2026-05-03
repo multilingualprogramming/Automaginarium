@@ -77,6 +77,10 @@ const featureModules = {
   perturb: null,
   gradient: null,
 };
+const PRESET_BASE_CANDIDATES = [
+  new URL("examples/", window.location.href),
+  new URL("../examples/", window.location.href),
+];
 
 async function ensureFeatureModule(name) {
   if (featureModules[name]) return featureModules[name];
@@ -598,11 +602,17 @@ function applyConfig(config, { source = "Configuration" } = {}) {
 
 async function fetchPreset(id) {
   if (presetCache.has(id)) return structuredClone(presetCache.get(id));
-  const response = await fetch(`../examples/${id}.json`);
-  if (!response.ok) throw new Error(`Preset introuvable: ${id}`);
-  const config = await response.json();
-  presetCache.set(id, config);
-  return structuredClone(config);
+  let lastError = null;
+  for (const baseUrl of PRESET_BASE_CANDIDATES) {
+    const response = await fetch(new URL(`${id}.json`, baseUrl));
+    if (response.ok) {
+      const config = await response.json();
+      presetCache.set(id, config);
+      return structuredClone(config);
+    }
+    lastError = new Error(`Preset introuvable: ${id} (${response.status})`);
+  }
+  throw lastError || new Error(`Preset introuvable: ${id}`);
 }
 
 async function loadPreset(id) {
