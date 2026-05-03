@@ -11,53 +11,55 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <header class="topbar">
+    <header class="topbar floating-header">
       <div class="brand-lockup">
         <p class="eyebrow">Multilingual fran&ccedil;ais &rarr; univers configurables</p>
         <h1 id="app-title">Automaginarium</h1>
       </div>
+      <div class="sync-indicator">
+        <span class="sync-indicator-dot" id="hero-sync-dot" data-state="ok"></span>
+        <span id="hero-status-text">Synchronisation live</span>
+      </div>
     </header>
 
-    <main class="app-shell">
-      <section class="hero-band minimal" aria-labelledby="app-title">
-        <div class="hero-indicator">
-          <span class="sync-pulse" id="hero-sync-dot"></span>
-          <span id="hero-status-text">Synchronisation live</span>
-        </div>
-      </section>
-
+    <main class="app-shell quantum-workspace">
       <section id="main-panel" class="workspace" aria-label="Univers g&eacute;n&eacute;r&eacute;">
-        <div class="canvas-column">
-          <div class="canvas-wrap">
-            <div class="canvas-aura" aria-hidden="true"></div>
-            <canvas id="universe" width="805" height="500"></canvas>
-            <div class="canvas-hud">
-              <div class="hud-metric">
-                <strong id="hud-rule">90</strong>
-                <span>r&egrave;gle</span>
-              </div>
-              <div class="hud-metric">
-                <strong id="hud-gen">0</strong>
-                <span>g&eacute;n&eacute;rations</span>
-              </div>
-              <div class="hud-metric">
-                <strong id="hud-density">0%</strong>
-                <span>densit&eacute;</span>
-              </div>
-              <div class="hud-metric">
-                <strong id="hud-entropy">0.00</strong>
-                <span>entropie</span>
+        <!-- CANVAS-FIRST LAYOUT -->
+        <div class="canvas-column canvas-dominant">
+          <div class="neural-grid-container">
+            <div class="canvas-wrap">
+              <div class="canvas-aura" aria-hidden="true"></div>
+              <div class="neural-grid" aria-hidden="true"></div>
+              <canvas id="universe" width="805" height="500"></canvas>
+              <div class="canvas-hud">
+                <div class="hud-metric glowing">
+                  <strong id="hud-rule">90</strong>
+                  <span>r&egrave;gle</span>
+                </div>
+                <div class="hud-metric glowing">
+                  <strong id="hud-gen">0</strong>
+                  <span>g&eacute;n&eacute;rations</span>
+                </div>
+                <div class="hud-metric glowing">
+                  <strong id="hud-density">0%</strong>
+                  <span>densit&eacute;</span>
+                </div>
+                <div class="hud-metric glowing">
+                  <strong id="hud-entropy">0.00</strong>
+                  <span>entropie</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="canvas-actions-bar" aria-label="Actions du canevas">
-            <button id="random-rule-canvas" type="button">R&egrave;gle al&eacute;atoire</button>
-            <button id="export-png" type="button">PNG</button>
-            <button id="export-json" type="button">JSON</button>
+            <div class="canvas-actions-bar" aria-label="Actions du canevas">
+              <button id="random-rule-canvas" type="button">R&egrave;gle al&eacute;atoire</button>
+              <button id="export-png" type="button">PNG</button>
+              <button id="export-json" type="button">JSON</button>
+            </div>
           </div>
         </div>
 
-        <aside class="inspector workspace-settings" aria-label="Panneau de r&eacute;glages">
+        <!-- FLOATING INSPECTOR PANELS -->
+        <aside class="inspector workspace-settings floating-panels" aria-label="Panneau de r&eacute;glages">
           <div class="inspector-tabs" role="tablist" aria-label="Sections de r&eacute;glage">
             <button type="button" class="inspector-tab-btn" data-panel="info-panel" role="tab" aria-selected="false">Vue</button>
             <button type="button" class="inspector-tab-btn" data-panel="display-panel" role="tab" aria-selected="false">Affichage</button>
@@ -195,15 +197,18 @@
         </aside>
       </section>
 
-      <section id="gallery-panel" class="gallery-panel" aria-labelledby="gallery-title">
-        <div class="panel-heading inline-heading">
+      <section id="gallery-panel" class="gallery-carousel-section" aria-labelledby="gallery-title">
+        <div class="carousel-header">
           <div>
             <p class="eyebrow">Galerie</p>
-            <h2 id="gallery-title">Configurations remarquables</h2>
-            <p class="meta">Choisir un univers de d&eacute;part avant de l'ajuster dans le laboratoire.</p>
+            <h2 id="gallery-title">Univers remarquables</h2>
+          </div>
+          <div class="carousel-controls">
+            <button id="carousel-prev" type="button" class="carousel-btn" aria-label="Pr&eacute;c&eacute;dent">←</button>
+            <button id="carousel-next" type="button" class="carousel-btn" aria-label="Suivant">→</button>
           </div>
         </div>
-        <div id="preset-gallery" class="preset-gallery" aria-label="Galerie de pr&eacute;sets">
+        <div id="preset-gallery" class="preset-carousel" aria-label="Galerie de pr&eacute;sets en carousel">
           <button type="button" class="preset-card" data-preset="wolfram-30">
             <strong>Wolfram 30</strong>
             <span>&eacute;l&eacute;mentaire</span>

@@ -539,5 +539,30 @@ document.querySelector("#export-png").addEventListener("click", () => {
   link.click();
 });
 
+// CAROUSEL NAVIGATION
+const carouselGallery = document.querySelector("#preset-gallery");
+const carouselPrevBtn = document.querySelector("#carousel-prev");
+const carouselNextBtn = document.querySelector("#carousel-next");
+
+if (carouselGallery && carouselPrevBtn && carouselNextBtn) {
+  const scrollAmount = 260; // Card width + gap
+
+  carouselPrevBtn.addEventListener("click", () => {
+    carouselGallery.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+  });
+
+  carouselNextBtn.addEventListener("click", () => {
+    carouselGallery.scrollBy({ left: scrollAmount, behavior: "smooth" });
+  });
+
+  // Update preset card active state when clicked
+  carouselGallery.querySelectorAll(".preset-card").forEach((card) => {
+    card.addEventListener("click", function() {
+      carouselGallery.querySelectorAll(".preset-card").forEach(c => c.classList.remove("active"));
+      this.classList.add("active");
+    });
+  });
+}
+
 setSyncState("pending", "Initialisation du laboratoire...");
 await loadPreset("wolfram-90");
