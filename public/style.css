@@ -2111,3 +2111,107 @@ button,
   background: rgba(var(--accent), 0.5);
   box-shadow: 0 0 8px rgba(var(--accent), 0.3);
 }
+
+/* Workspace Sidebar Refresh */
+.workspace {
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
+  align-items: start;
+}
+
+.workspace-settings {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  position: sticky;
+  top: 18px;
+  height: calc(100vh - 36px);
+  max-height: none;
+  min-height: 0;
+  padding-left: 0;
+  border-left: 0;
+  gap: 14px;
+  overflow: visible;
+  overflow-y: visible;
+}
+
+.workspace-settings .inspector-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin-bottom: 0;
+  padding: 0 0 14px;
+  background:
+    linear-gradient(180deg, rgba(5, 8, 22, 0.98), rgba(5, 8, 22, 0.82) 78%, transparent);
+}
+
+.workspace-settings .inspector-panel {
+  display: none;
+  min-height: 0;
+}
+
+.workspace-settings .inspector-panel.active {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 10px;
+}
+
+.workspace-settings .inspector-panel.active::-webkit-scrollbar {
+  width: 8px;
+}
+
+.workspace-settings .inspector-panel.active::-webkit-scrollbar-thumb {
+  background: rgba(var(--accent), 0.3);
+  border-radius: 999px;
+}
+
+.workspace-settings .config-panel {
+  margin-bottom: 0;
+  overflow: visible;
+}
+
+.workspace-settings .panel-heading h2,
+.workspace-settings h3 {
+  margin-top: 0;
+}
+
+.workspace-settings .field-grid {
+  grid-template-columns: 1fr;
+}
+
+.workspace-settings .compact-fields {
+  grid-template-columns: 1fr;
+}
+
+.workspace-settings .button-row {
+  justify-content: flex-start;
+}
+
+.workspace-settings .rule-table {
+  max-height: none;
+}
+
+@media (max-width: 1100px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-settings {
+    display: block;
+    position: static;
+    top: auto;
+    height: auto;
+    max-height: none;
+  }
+
+  .workspace-settings .inspector-panel.active {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    padding-right: var(--space-lg);
+  }
+}

@@ -31,6 +31,8 @@ const syncIndicatorText = document.querySelector("#sync-indicator-text");
 const heroSyncDot = document.querySelector("#hero-sync-dot");
 const heroStatusText = document.querySelector("#hero-status-text");
 const presetCards = [...document.querySelectorAll("[data-preset]")];
+const inspectorTabs = [...document.querySelectorAll(".inspector-tab-btn")];
+const inspectorPanels = [...document.querySelectorAll(".inspector-panel")];
 const controls = {
   preset: document.querySelector("#preset"),
   name: document.querySelector("#config-name"),
@@ -54,6 +56,34 @@ const controls = {
   json: document.querySelector("#config-json"),
   importJson: document.querySelector("#import-json"),
 };
+const liveControlEntries = [
+  [controls.name, "input"],
+  [controls.alphabetInput, "input"],
+  [controls.alphabetOutput, "input"],
+  [controls.neighborhood, "input"],
+  [controls.channels, "input"],
+  [controls.width, "input"],
+  [controls.height, "input"],
+  [controls.boundary, "change"],
+  [controls.initialMode, "change"],
+  [controls.initialValues, "input"],
+  [controls.initialProbability, "input"],
+  [controls.cellSize, "input"],
+  [controls.ruleMode, "change"],
+  [controls.ruleNumber, "input"],
+];
+let liveApplyTimer = null;
+
+function setActiveInspectorPanel(panelId) {
+  inspectorTabs.forEach((tab) => {
+    const active = tab.dataset.panel === panelId;
+    tab.classList.toggle("active", active);
+    tab.setAttribute("aria-selected", active ? "true" : "false");
+  });
+  inspectorPanels.forEach((panel) => {
+    panel.classList.toggle("active", panel.id === panelId);
+  });
+}
 
 function parseSymbol(raw) {
   const trimmed = raw.trim();
@@ -333,6 +363,13 @@ function updateRuleSpaceDisplay(config) {
   controls.ruleSpaceSize.textContent = `${t}^(${m}·${s}^${k}) = ${maxRule} regles possibles`;
 }
 
+function queueLiveApply(source = "Configuration live") {
+  window.clearTimeout(liveApplyTimer);
+  liveApplyTimer = window.setTimeout(() => {
+    applyConfig(controlsToConfig(), { source });
+  }, 120);
+}
+
 function applyConfig(config, { source = "Configuration" } = {}) {
   const normalized = window.AutomaginariumCore.normaliserConfiguration(config);
   const validation = validateConfig(normalized);
@@ -428,12 +465,35 @@ PRESETS.forEach((preset) => {
   controls.preset.appendChild(option);
 });
 
+inspectorTabs.forEach((tab) => {
+  tab.addEventListener("click", () => setActiveInspectorPanel(tab.dataset.panel));
+});
 controls.preset.addEventListener("change", () => loadPreset(controls.preset.value));
 presetCards.forEach((card) => {
   card.addEventListener("click", () => loadPreset(card.dataset.preset));
 });
-document.querySelector("#apply-controls").addEventListener("click", () => {
-  applyConfig(controlsToConfig(), { source: "Configuration" });
+liveControlEntries.forEach(([control, eventName]) => {
+  control.addEventListener(eventName, () => {
+    updateHudRule();
+    queueLiveApply();
+  });
+});
+controls.wolframRule.addEventListener("input", () => {
+  updateHudRule();
+  if (controls.ruleGenerator.value !== "wolfram") return;
+  window.clearTimeout(liveApplyTimer);
+  liveApplyTimer = window.setTimeout(() => {
+    controls.ruleMode.value = "table";
+    controls.ruleNumber.value = String(controls.wolframRule.value || 90);
+    applyConfig(buildGeneratedRuleConfig(), { source: "Regles live" });
+  }, 120);
+});
+controls.ruleGenerator.addEventListener("change", () => {
+  if (controls.ruleGenerator.value !== "wolfram") return;
+  controls.ruleMode.value = "table";
+  controls.ruleNumber.value = String(controls.wolframRule.value || 90);
+  updateHudRule();
+  applyConfig(buildGeneratedRuleConfig(), { source: "Regles live" });
 });
 document.querySelector("#generate-rule").addEventListener("click", () => {
   applyConfig(buildGeneratedRuleConfig(), { source: "Regles" });

@@ -49,14 +49,21 @@
             </div>
           </div>
           <div class="canvas-controls">
-            <button id="apply-controls" type="button">Appliquer</button>
             <button id="export-png" type="button">PNG</button>
             <button id="export-json" type="button">JSON</button>
           </div>
         </div>
 
-        <aside class="inspector">
-          <div id="info-panel" class="inspector-panel active">
+        <aside class="inspector workspace-settings" aria-label="Panneau de r&eacute;glages">
+          <div class="inspector-tabs" role="tablist" aria-label="Sections de r&eacute;glage">
+            <button type="button" class="inspector-tab-btn" data-panel="info-panel" role="tab" aria-selected="false">Vue</button>
+            <button type="button" class="inspector-tab-btn" data-panel="display-panel" role="tab" aria-selected="false">Affichage</button>
+            <button type="button" class="inspector-tab-btn active" data-panel="universe-panel" role="tab" aria-selected="true">Univers</button>
+            <button type="button" class="inspector-tab-btn" data-panel="rules-panel" role="tab" aria-selected="false">R&egrave;gles</button>
+            <button type="button" class="inspector-tab-btn" data-panel="json-panel" role="tab" aria-selected="false">JSON</button>
+          </div>
+
+          <div id="info-panel" class="inspector-panel" role="tabpanel">
             <p class="eyebrow">Configuration active</p>
             <h2 id="config-title">Chargement...</h2>
             <p id="config-meta" class="meta"></p>
@@ -68,123 +75,121 @@
             <div id="rule-table" class="rule-table" aria-label="Table de transition"></div>
           </div>
 
-          <div id="display-panel" class="inspector-panel active display-panel">
+          <div id="display-panel" class="inspector-panel display-panel" role="tabpanel">
             <p class="eyebrow">Affichage</p>
             <h3>Palette des &eacute;tats</h3>
             <p class="meta">Couleur pour chaque &eacute;tat de l'alphabet</p>
             <div class="palette-editor" id="palette-editor"></div>
           </div>
 
-          <div id="rules-panel" class="inspector-panel active rules-panel">
-            <p class="eyebrow">Table de transition</p>
-            <h3>R&egrave;gles appliqu&eacute;es</h3>
-            <p class="meta">Les transitions d'&eacute;tat actuellement actives pour cet automate</p>
-            <div id="rule-table-detail" class="rule-table"></div>
+          <div id="universe-panel" class="inspector-panel active" role="tabpanel">
+            <div class="lab-intro config-panel">
+              <div class="panel-heading inline-heading">
+                <div>
+                  <p class="eyebrow">Orchestration</p>
+                  <h2>Du r&eacute;glage &agrave; l'univers</h2>
+                  <p class="meta">
+                    Les blocs Param&egrave;tres et R&egrave;gles pilotent directement le canevas.
+                    Les modifications valides sont appliqu&eacute;es en direct.
+                  </p>
+                </div>
+                <div class="flow-pills" aria-label="Cha&icirc;ne de transformation">
+                  <span class="flow-pill">Param&egrave;tres</span>
+                  <span class="flow-pill">Transition</span>
+                  <span class="flow-pill">Univers</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="config-panel source-panel source-panel-universe">
+              <div class="panel-heading">
+                <p class="eyebrow">Param&egrave;tres</p>
+                <h2>Univers</h2>
+                <p class="meta">G&eacute;om&eacute;trie, alphabets et conditions initiales d&eacute;finissent la mati&egrave;re premi&egrave;re de l'univers.</p>
+              </div>
+              <div id="universe-live-summary" class="live-summary-card">
+                <span class="live-summary-label">Projection</span>
+                <strong>Pr&eacute;paration de l'univers en cours</strong>
+              </div>
+              <div class="field-grid">
+                <label>Nom<input id="config-name" type="text" /></label>
+                <label>Alphabet entr&eacute;e<input id="alphabet-input" type="text" placeholder="0,1,2 ou air,feu,eau" /></label>
+                <label>Alphabet sortie<input id="alphabet-output" type="text" placeholder="0,1" /></label>
+                <label>Voisinage<input id="neighborhood-size" type="number" min="1" max="9" step="2" /></label>
+                <label>Canaux sortie<input id="channel-count" type="number" min="1" max="4" step="1" /></label>
+                <label>Largeur<input id="grid-width" type="number" min="21" max="401" step="2" /></label>
+                <label>Hauteur<input id="grid-height" type="number" min="20" max="240" step="5" /></label>
+                <label>Fronti&egrave;re<select id="boundary-mode"><option value="fixe">Fixe</option><option value="circulaire">Circulaire</option></select></label>
+                <label>&Eacute;tat initial<select id="initial-mode"><option value="centre">Centre</option><option value="motif">Motif</option><option value="aleatoire">Al&eacute;atoire</option></select></label>
+                <label>Motif initial<input id="initial-values" type="text" placeholder="1,0,1,1" /></label>
+                <label>Probabilit&eacute; initiale<input id="initial-probability" type="number" min="0" max="1" step="0.01" /></label>
+                <label>Taille cellule<input id="cell-size" type="number" min="1" max="12" step="1" /></label>
+              </div>
+            </div>
+          </div>
+
+          <div id="rules-panel" class="inspector-panel rules-panel" role="tabpanel">
+            <div class="config-panel source-panel source-panel-rules">
+              <div class="panel-heading">
+                <p class="eyebrow">R&egrave;gles</p>
+                <h2>Espace de transition</h2>
+                <p class="meta">Le moteur de transition reste d&eacute;claratif et pilot&eacute; par la configuration.</p>
+              </div>
+              <div class="transition-surface">
+                <div id="transition-live-summary" class="live-summary-card">
+                  <span class="live-summary-label">R&eacute;ponse</span>
+                  <strong>Les r&egrave;gles pilotent la prochaine g&eacute;n&eacute;ration</strong>
+                </div>
+                <div id="transition-signals" class="transition-signals" aria-label="Aper&ccedil;u des transitions"></div>
+              </div>
+              <div class="field-grid compact-fields">
+                <label>
+                  Mode
+                  <select id="rule-mode">
+                    <option value="table">Table</option>
+                    <option value="totalistique">Totalistique</option>
+                    <option value="aleatoire">Al&eacute;atoire dynamique</option>
+                    <option value="numerique">Num&eacute;rique</option>
+                  </select>
+                </label>
+                <label>Wolfram<input id="wolfram-rule" type="number" min="0" max="255" step="1" value="90" /></label>
+                <label>Num&eacute;ro de r&egrave;gle<input id="rule-number" type="text" inputmode="numeric" placeholder="0" /></label>
+                <label>
+                  G&eacute;n&eacute;rateur
+                  <select id="rule-generator">
+                    <option value="wolfram">Wolfram</option>
+                    <option value="random">Table al&eacute;atoire</option>
+                    <option value="symmetric">Table sym&eacute;trique</option>
+                    <option value="totalistic">Totalistique</option>
+                  </select>
+                </label>
+                <button id="generate-rule" type="button">G&eacute;n&eacute;rer</button>
+                <button id="random-rule" type="button">R&egrave;gle al&eacute;atoire</button>
+              </div>
+              <p id="rule-space-size" class="meta"></p>
+              <p class="meta">Les tables sont d&eacute;claratives. Le mode totalistique calcule la sortie depuis la somme du voisinage.</p>
+              <div id="rule-table-detail" class="rule-table" aria-label="D&eacute;tail des r&egrave;gles appliqu&eacute;es"></div>
+            </div>
+          </div>
+
+          <div id="json-panel" class="inspector-panel" role="tabpanel">
+            <div class="config-panel json-panel expert-panel">
+              <div class="panel-heading inline-heading">
+                <div>
+                  <p class="eyebrow">JSON</p>
+                  <h2>Configuration brute</h2>
+                  <p class="meta">Le mode expert reste disponible pour l'&eacute;dition manuelle et l'import avanc&eacute;.</p>
+                </div>
+                <div class="button-row">
+                  <button id="apply-json" type="button">Appliquer JSON</button>
+                  <button id="reset-json" type="button">Recharger</button>
+                  <label class="file-button">Importer<input id="import-json" type="file" accept="application/json,.json" /></label>
+                </div>
+              </div>
+              <textarea id="config-json" spellcheck="false" aria-label="&Eacute;diteur de configuration JSON"></textarea>
+            </div>
           </div>
         </aside>
-      </section>
-
-      <section class="config-lab" aria-label="Configuration de l'univers">
-        <div class="lab-intro config-panel">
-          <div class="panel-heading inline-heading">
-            <div>
-              <p class="eyebrow">Orchestration</p>
-              <h2>Du r&eacute;glage &agrave; l'univers</h2>
-              <p class="meta">
-                Les blocs Param&egrave;tres et R&egrave;gles restent les seules sources d'entr&eacute;e.
-                Le navigateur se limite au chargement, au rendu et aux actions indispensables.
-              </p>
-            </div>
-            <div class="flow-pills" aria-label="Cha&icirc;ne de transformation">
-              <span class="flow-pill">Param&egrave;tres</span>
-              <span class="flow-pill">Transition</span>
-              <span class="flow-pill">Univers</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="config-panel source-panel source-panel-universe">
-          <div class="panel-heading">
-            <p class="eyebrow">Param&egrave;tres</p>
-            <h2>Univers</h2>
-            <p class="meta">G&eacute;om&eacute;trie, alphabets et conditions initiales d&eacute;finissent la mati&egrave;re premi&egrave;re de l'univers.</p>
-          </div>
-          <div id="universe-live-summary" class="live-summary-card">
-            <span class="live-summary-label">Projection</span>
-            <strong>Pr&eacute;paration de l'univers en cours</strong>
-          </div>
-          <div class="field-grid">
-            <label>Nom<input id="config-name" type="text" /></label>
-            <label>Alphabet entr&eacute;e<input id="alphabet-input" type="text" placeholder="0,1,2 ou air,feu,eau" /></label>
-            <label>Alphabet sortie<input id="alphabet-output" type="text" placeholder="0,1" /></label>
-            <label>Voisinage<input id="neighborhood-size" type="number" min="1" max="9" step="2" /></label>
-            <label>Canaux sortie<input id="channel-count" type="number" min="1" max="4" step="1" /></label>
-            <label>Largeur<input id="grid-width" type="number" min="21" max="401" step="2" /></label>
-            <label>Hauteur<input id="grid-height" type="number" min="20" max="240" step="5" /></label>
-            <label>Fronti&egrave;re<select id="boundary-mode"><option value="fixe">Fixe</option><option value="circulaire">Circulaire</option></select></label>
-            <label>&Eacute;tat initial<select id="initial-mode"><option value="centre">Centre</option><option value="motif">Motif</option><option value="aleatoire">Al&eacute;atoire</option></select></label>
-            <label>Motif initial<input id="initial-values" type="text" placeholder="1,0,1,1" /></label>
-            <label>Probabilit&eacute; initiale<input id="initial-probability" type="number" min="0" max="1" step="0.01" /></label>
-            <label>Taille cellule<input id="cell-size" type="number" min="1" max="12" step="1" /></label>
-          </div>
-        </div>
-
-        <div class="config-panel source-panel source-panel-rules">
-          <div class="panel-heading">
-            <p class="eyebrow">R&egrave;gles</p>
-            <h2>Espace de transition</h2>
-            <p class="meta">Le moteur de transition reste d&eacute;claratif et pilot&eacute; par la configuration.</p>
-          </div>
-          <div class="transition-surface">
-            <div id="transition-live-summary" class="live-summary-card">
-              <span class="live-summary-label">R&eacute;ponse</span>
-              <strong>Les r&egrave;gles pilotent la prochaine g&eacute;n&eacute;ration</strong>
-            </div>
-            <div id="transition-signals" class="transition-signals" aria-label="Aper&ccedil;u des transitions"></div>
-          </div>
-          <div class="field-grid compact-fields">
-            <label>
-              Mode
-              <select id="rule-mode">
-                <option value="table">Table</option>
-                <option value="totalistique">Totalistique</option>
-                <option value="aleatoire">Al&eacute;atoire dynamique</option>
-                <option value="numerique">Num&eacute;rique</option>
-              </select>
-            </label>
-            <label>Wolfram<input id="wolfram-rule" type="number" min="0" max="255" step="1" value="90" /></label>
-            <label>Num&eacute;ro de r&egrave;gle<input id="rule-number" type="text" inputmode="numeric" placeholder="0" /></label>
-            <label>
-              G&eacute;n&eacute;rateur
-              <select id="rule-generator">
-                <option value="wolfram">Wolfram</option>
-                <option value="random">Table al&eacute;atoire</option>
-                <option value="symmetric">Table sym&eacute;trique</option>
-                <option value="totalistic">Totalistique</option>
-              </select>
-            </label>
-            <button id="generate-rule" type="button">G&eacute;n&eacute;rer</button>
-            <button id="random-rule" type="button">R&egrave;gle al&eacute;atoire</button>
-          </div>
-          <p id="rule-space-size" class="meta"></p>
-          <p class="meta">Les tables sont d&eacute;claratives. Le mode totalistique calcule la sortie depuis la somme du voisinage.</p>
-        </div>
-
-        <div class="config-panel json-panel expert-panel">
-          <div class="panel-heading inline-heading">
-            <div>
-              <p class="eyebrow">JSON</p>
-              <h2>Configuration brute</h2>
-              <p class="meta">Le mode expert reste disponible pour l'&eacute;dition manuelle et l'import avanc&eacute;.</p>
-            </div>
-            <div class="button-row">
-              <button id="apply-json" type="button">Appliquer JSON</button>
-              <button id="reset-json" type="button">Recharger</button>
-              <label class="file-button">Importer<input id="import-json" type="file" accept="application/json,.json" /></label>
-            </div>
-          </div>
-          <textarea id="config-json" spellcheck="false" aria-label="&Eacute;diteur de configuration JSON"></textarea>
-        </div>
       </section>
 
       <section id="gallery-panel" class="gallery-panel" aria-labelledby="gallery-title">
