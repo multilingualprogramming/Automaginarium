@@ -436,19 +436,15 @@ function nouvelleGeneration(population, scores, tauxMutationSur1000, graine) {
 }
 
 function evaluerFitness(univers, poidsObj) {
-  // Computes metrics from univers and returns weighted fitness score
-  const lignes = univers && univers.lignes ? univers.lignes : [];
-  const totalCells = lignes.length > 0 ? lignes[0].length : 1;
-  const liveCells = lignes.flat().filter((v) => v !== 0).length;
-
-  const densite = totalCells > 0 ? liveCells / totalCells : 0;
-  const entropie = densite > 0 && densite < 1 ? -(densite * Math.log2(densite) + (1 - densite) * Math.log2(1 - densite)) : 0;
-  const compacite = liveCells > 0 ? Math.sqrt(liveCells) / (liveCells + 1) : 0;
-
-  // Placeholder values for oscillation (would require historical data)
-  const oscillation = 0;
-  const complexite = Math.max(0, entropie * (1 - compacite));
-  const croissance = 0; // Would need frame history
+  const {
+    entropie,
+    densite,
+    compacite,
+    symetrie,
+    oscillation,
+    complexite,
+    tauxCroissance,
+  } = metriquesUnivers(univers);
 
   const poids = [
     poidsObj.symetrie || 5,
@@ -459,12 +455,12 @@ function evaluerFitness(univers, poidsObj) {
     poidsObj.croissance || 5,
   ];
 
-  const fSym = callPacked("fitness_symetrie_scalaire", [0.5], 0.5);
+  const fSym = callPacked("fitness_symetrie_scalaire", [symetrie], symetrie);
   const fDen = callPacked("fitness_densite_scalaire", [densite, 0.45], Math.abs(densite - 0.45) < 0.2 ? 0.8 : 0.2);
-  const fSta = callPacked("fitness_stabilite_scalaire", [0, compacite], compacite * 0.5);
+  const fSta = callPacked("fitness_stabilite_scalaire", [Math.abs(tauxCroissance), compacite], ((1 - Math.abs(tauxCroissance)) * 0.5) + (compacite * 0.5));
   const fOsc = oscillation;
   const fCmp = callPacked("fitness_complexite_scalaire", [entropie, compacite], complexite);
-  const fCro = croissance;
+  const fCro = callPacked("fitness_croissance_scalaire", [Math.max(0, tauxCroissance)], Math.max(0, tauxCroissance));
 
   const score = callPacked("fitness_ponderee_scalaire",
     [fSym, fDen, fSta, fOsc, fCmp, fCro, ...poids],
@@ -474,7 +470,16 @@ function evaluerFitness(univers, poidsObj) {
 
   return {
     score: Math.max(0, Math.min(1, score)),
-    metriques: { entropie, densite, compacite, oscillation, complexite, croissance },
+    metriques: {
+      entropie,
+      densite,
+      compacite,
+      symetrie,
+      oscillation,
+      complexite,
+      croissance: Math.max(0, tauxCroissance),
+      tauxCroissance,
+    },
   };
 }
 
@@ -595,16 +600,109 @@ function calculerCentreDesMasse(ligne) {
   return vivants.reduce((a, b) => a + b, 0) / vivants.length;
 }
 
+function clamp01(value) {
+  return Math.max(0, Math.min(1, value));
+}
+
+function celluleVivante(value, valeurVide) {
+  return String(value) !== String(valeurVide);
+}
+
+function calculerDensiteLigne(ligne, valeurVide) {
+  if (!ligne || ligne.length === 0) return 0;
+  const actives = ligne.filter((value) => celluleVivante(value, valeurVide)).length;
+  return actives / ligne.length;
+}
+
+function calculerSymetrieLigne(ligne) {
+  if (!ligne || ligne.length <= 1) return 1;
+  let accords = 0;
+  const paires = Math.floor(ligne.length / 2);
+  for (let i = 0; i < paires; i += 1) {
+    if (String(ligne[i]) === String(ligne[ligne.length - 1 - i])) accords += 1;
+  }
+  return paires > 0 ? accords / paires : 1;
+}
+
+function calculerCompaciteLigne(ligne, valeurVide) {
+  if (!ligne || ligne.length === 0) return 0;
+  const indicesVivants = ligne
+    .map((value, index) => (celluleVivante(value, valeurVide) ? index : -1))
+    .filter((index) => index >= 0);
+  if (indicesVivants.length === 0) return 0;
+  const debut = indicesVivants[0];
+  const fin = indicesVivants[indicesVivants.length - 1];
+  const etendue = Math.max(1, fin - debut + 1);
+  return indicesVivants.length / etendue;
+}
+
+function varianceDensite(historiqueDensites) {
+  if (!historiqueDensites || historiqueDensites.length < 2) return 0;
+  const moyenne = historiqueDensites.reduce((sum, value) => sum + value, 0) / historiqueDensites.length;
+  const sommeCarres = historiqueDensites.reduce((sum, value) => sum + ((value - moyenne) ** 2), 0);
+  return Math.sqrt(sommeCarres / historiqueDensites.length);
+}
+
+function detecterPeriode(historiqueDensites, fenetre) {
+  if (!historiqueDensites || historiqueDensites.length < fenetre || fenetre < 2) return 0;
+  const derniers = historiqueDensites.slice(-fenetre);
+  for (let periode = 1; periode <= Math.floor(fenetre / 2); periode += 1) {
+    let correlation = 0;
+    let compte = 0;
+    for (let i = 0; i < derniers.length - periode; i += 1) {
+      correlation += Math.abs(derniers[i] - derniers[i + periode]);
+      compte += 1;
+    }
+    const correlationMoyenne = compte > 0 ? correlation / compte : 0;
+    if (correlationMoyenne < 0.1) return periode;
+  }
+  return 0;
+}
+
 function metriquesUnivers(univers) {
   const lignes = univers && univers.lignes ? univers.lignes : [];
-  const totalCells = lignes.length > 0 ? lignes[0].length : 1;
-  const liveCells = lignes.flat().filter((v) => v !== 0).length;
+  const configuration = univers && univers.configuration ? univers.configuration : {};
+  const valeurVide = configuration.alphabet_entree ? configuration.alphabet_entree[0] : 0;
+  const totalCells = lignes.reduce((sum, ligne) => sum + ligne.length, 0);
+  const liveCells = lignes.flat().filter((value) => celluleVivante(value, valeurVide)).length;
   const densite = totalCells > 0 ? liveCells / totalCells : 0;
   const entropie = densite > 0 && densite < 1 ? -(densite * Math.log2(densite) + (1 - densite) * Math.log2(1 - densite)) : 0;
-  const compacite = liveCells > 0 ? Math.sqrt(liveCells) / (liveCells + 1) : 0;
-  const symetrie = 0.5; // Placeholder
-  const tauxCroissance = 0; // Placeholder
-  return { entropie, compacite, symetrie, tauxCroissance, densite };
+
+  const densitesParGeneration = lignes.map((ligne) => calculerDensiteLigne(ligne, valeurVide));
+  const compacites = lignes.map((ligne) => calculerCompaciteLigne(ligne, valeurVide));
+  const symetries = lignes.map((ligne) => calculerSymetrieLigne(ligne));
+
+  const compacite = compacites.length > 0
+    ? compacites.reduce((sum, value) => sum + value, 0) / compacites.length
+    : 0;
+  const symetrie = symetries.length > 0
+    ? symetries.reduce((sum, value) => sum + value, 0) / symetries.length
+    : 0.5;
+
+  const tranche = Math.max(1, Math.floor(densitesParGeneration.length / 5));
+  const densiteDebut = densitesParGeneration.slice(0, tranche).reduce((sum, value) => sum + value, 0) / tranche;
+  const densiteFin = densitesParGeneration.slice(-tranche).reduce((sum, value) => sum + value, 0) / tranche;
+  const tauxCroissance = Math.max(-1, Math.min(1, densiteFin - densiteDebut));
+
+  const variance = clamp01(varianceDensite(densitesParGeneration) * 4);
+  const fenetre = Math.min(24, densitesParGeneration.length);
+  const periodeDetectee = detecterPeriode(densitesParGeneration, fenetre);
+  const scoreVariance = 1 - Math.min(1, Math.abs(variance - 0.5) * 2);
+  const scorePeriode = periodeDetectee > 0 ? 1 : 0;
+  const oscillation = clamp01((scoreVariance * 0.7) + (scorePeriode * 0.3));
+  const complexite = clamp01(entropie * (1 - compacite));
+
+  return {
+    entropie,
+    compacite,
+    symetrie,
+    tauxCroissance,
+    densite,
+    oscillation,
+    complexite,
+    varianceDensite: variance,
+    periodeDetectee,
+  };
 }
 
 window.AutomaginariumCore = {
