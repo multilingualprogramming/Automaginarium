@@ -693,7 +693,7 @@ canvas {
 /* Gallery Panel */
 .gallery-panel {
   border-top: 1px solid var(--line);
-  margin-top: 24px;
+  margin-top: 20px;
   padding-top: 20px;
 }
 
@@ -765,7 +765,7 @@ canvas {
   display: grid;
   grid-template-columns: minmax(300px, 0.8fr) minmax(260px, 0.65fr) minmax(420px, 1.2fr);
   gap: 18px;
-  padding-top: 24px;
+  padding-top: 10px;
 }
 
 .config-panel {

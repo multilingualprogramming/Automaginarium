@@ -332,10 +332,10 @@ def index_vers_voisinage(index, configuration):
     soit k = spec["k"]
     soit voisinage = []
     soit restant = index
-    pour i dans range(k - 1, -1, -1):
-        soit indice_symbole = restant // (s ** i)
+    pour indice_puissance dans range(k - 1, -1, -1):
+        soit indice_symbole = restant // (s ** indice_puissance)
         voisinage.append(configuration["alphabet_entree"][indice_symbole])
-        restant = restant % (s ** i)
+        restant = restant % (s ** indice_puissance)
     retour voisinage
 
 
