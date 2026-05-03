@@ -117,3 +117,6 @@ Where source code is directly adapted, comments identify Cellcosmos as the origi
 2. Replace more of `public/automate-core.js` with generated calls into the French core.
 3. Keep trimming browser-side helpers that do not strengthen the multilingual model or the static deployment story.
 4. Add more generated rule spaces: totalistic, symmetric, genetic, stochastic, and multi-channel examples.
+
+## Architecture et Création
+- John Samuel
