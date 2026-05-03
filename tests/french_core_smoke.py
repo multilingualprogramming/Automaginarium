@@ -61,10 +61,21 @@ def test_validation(core):
     assert result["erreurs"] == []
 
 
+def test_deterministic_random_helper(core):
+    first = core.sortie_aleatoire_deterministe(123, 9, 4, 3)
+    second = core.sortie_aleatoire_deterministe(123, 9, 4, 3)
+    third = core.sortie_aleatoire_deterministe(123, 10, 4, 3)
+    assert first == second
+    assert first != third
+    assert len(first) == 3
+    assert all(0 <= value < 4 for value in first)
+
+
 if __name__ == "__main__":
     core = load_core()
     test_wolfram_table(core)
     test_symmetric_table(core)
     test_detailed_universe(core)
     test_validation(core)
+    test_deterministic_random_helper(core)
     print("french core smoke ok")

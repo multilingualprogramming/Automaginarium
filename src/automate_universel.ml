@@ -142,6 +142,26 @@ def sortie_aleatoire(configuration, generateur):
     retour sortie
 
 
+def entier_pseudo_aleatoire(graine, identifiant):
+    soit base = int(graine) + 12345
+    soit melange = (base + (int(identifiant) * 1103515245)) % 2147483647
+    retour melange
+
+
+def indice_aleatoire_deterministe(graine, identifiant, taille_alphabet):
+    si taille_alphabet <= 0:
+        retour 0
+    retour entier_pseudo_aleatoire(graine, identifiant) % taille_alphabet
+
+
+def sortie_aleatoire_deterministe(graine, identifiant, taille_alphabet, nombre_canaux):
+    soit sortie = []
+    pour canal dans range(nombre_canaux):
+        soit code = indice_aleatoire_deterministe(graine, identifiant * 31 + canal, taille_alphabet)
+        sortie.append(code)
+    retour sortie
+
+
 def table_aleatoire(configuration, graine=42):
     soit config = normaliser_configuration(configuration)
     soit generateur = random.Random(graine)

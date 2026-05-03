@@ -82,6 +82,18 @@ def sortie_table_code(code_sortie, taille_alphabet):
     retour code_sortie % taille_alphabet
 
 
+def entier_pseudo_aleatoire(graine, identifiant):
+    soit base = graine + 12345
+    soit melange = (base + (identifiant * 1103515245)) % 2147483647
+    retour melange
+
+
+def indice_aleatoire_deterministe(graine, identifiant, taille_alphabet):
+    si taille_alphabet <= 0:
+        retour 0
+    retour entier_pseudo_aleatoire(graine, identifiant) % taille_alphabet
+
+
 def validation_mode_regle(code_mode):
     # 0=table, 1=totalistique, 2=aleatoire
     si code_mode == 0:

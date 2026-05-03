@@ -2,7 +2,7 @@
 
 Automaginarium is a configurable universe generator for cellular automata. It extends the spirit of [Cellcosmos](https://github.com/multilingualprogramming/cellcosmos): instead of exploring only the 256 elementary Wolfram rules, it opens the rule space itself.
 
-The project is designed to demonstrate the expressive power of the Multilingual programming language. The canonical automata concepts are written in French Multilingual source, while JavaScript is kept as a thin browser layer for loading presets and JSON, drawing to canvas, generating optional rule tables, wiring the preset gallery, and handling only the essential interface events.
+The project is designed to demonstrate the expressive power of the Multilingual programming language. The canonical automata concepts are written in French Multilingual source, while JavaScript is kept as a thin browser layer for loading presets and JSON, drawing to canvas, wiring the preset gallery, synchronizing form controls, and handling only the essential interface events.
 
 ## Vision
 
@@ -33,6 +33,7 @@ The repository currently includes:
 
 - a canonical French Multilingual core in `src/automate_universel.ml`
 - a small JavaScript adapter in `public/automate-core.js` that mirrors the current core until the Multilingual/WASM build pipeline is wired
+- canonical rule-table generators, form/config helpers, genetic helpers, and perturbation mutations exposed through the core bridge instead of separate browser-only engine modules
 - a canvas UI in `public/app.mjs`
 - copied Cellcosmos heritage references in `public/metrics.js` and `src/cellcosmos_primitives_heritage.ml`
 - example configurations and a JSON schema in `examples/`

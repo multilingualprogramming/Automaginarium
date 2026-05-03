@@ -37,7 +37,18 @@ function testRuntimeLoaderIsCommitted() {
   assert(loader.includes("createImportObject"));
 }
 
+function testLazyFeatureModulesAreCommitted() {
+  assert(fs.existsSync(path.join(root, "public/features/genetic-workbench.mjs")));
+  assert(fs.existsSync(path.join(root, "public/features/perturbation-toolkit.mjs")));
+  assert(fs.existsSync(path.join(root, "public/features/genetic-engine.mjs")));
+  assert(fs.existsSync(path.join(root, "public/features/perturbation-engine.mjs")));
+  const app = read("public/app.mjs");
+  assert(app.includes("./features/genetic-workbench.mjs"));
+  assert(app.includes("./features/perturbation-toolkit.mjs"));
+}
+
 testPagesEntrypoints();
 testPresetFiles();
 testRuntimeLoaderIsCommitted();
+testLazyFeatureModulesAreCommitted();
 console.log("static site smoke ok");
