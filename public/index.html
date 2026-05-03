@@ -105,6 +105,34 @@
             </div>
 
             <div id="gradient-controls" class="gradient-controls" style="display: none;">
+              <label>Mode d'application
+                <select id="gradient-application-mode" aria-label="Mode d'application du dégradé">
+                  <option value="etat">Basé sur l'état</option>
+                  <option value="position">Basé sur la position</option>
+                  <option value="combine">Combiné (état + position)</option>
+                </select>
+              </label>
+
+              <div id="gradient-direction-controls" style="display: none;">
+                <label>Direction du dégradé de position
+                  <select id="gradient-direction" aria-label="Direction du dégradé">
+                    <option value="haut-bas">Haut → Bas</option>
+                    <option value="gauche-droite">Gauche → Droite</option>
+                    <option value="diagonal">Diagonal (coin haut-gauche → coin bas-droit)</option>
+                    <option value="radial">Radial (depuis le centre)</option>
+                  </select>
+                </label>
+              </div>
+
+              <div id="gradient-influence-controls" style="display: none;">
+                <label>Influence de l'état
+                  <div class="gradient-influence-slider-container">
+                    <input type="range" id="gradient-state-influence" min="0" max="100" value="50" aria-label="Influence de l'état dans le mode combiné">
+                    <span id="gradient-influence-value">50%</span>
+                  </div>
+                </label>
+              </div>
+
               <label>Méthode d'interpolation
                 <select id="gradient-method" aria-label="Méthode d'interpolation">
                   <option value="lineaire">Linéaire (2 états)</option>

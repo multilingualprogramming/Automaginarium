@@ -229,7 +229,7 @@ function getDefaultPalette(alphabetSize) {
   );
 }
 
-function colorFor(value, config, channels) {
+function colorFor(value, config, channels, x = 0, y = 0, gridWidth = 1, gridHeight = 1) {
   const visualValue = channels && channels.length > 1 ? channels[1] : value;
   const alphabet = config.alphabet_sortie || config.alphabet_entree || [0, 1];
   let index = alphabet.findIndex((item) => String(item) === String(visualValue));
@@ -238,7 +238,7 @@ function colorFor(value, config, channels) {
   // Check if gradient mode is enabled
   const gradient = config.rendu?.gradient;
   if (gradient && gradient.mode === "gradient") {
-    return interpolateGradientColor(index, alphabet.length, gradient);
+    return interpolateGradientColor(index, alphabet.length, gradient, x, y, gridWidth, gridHeight);
   }
 
   // Fall back to discrete palette
@@ -246,11 +246,44 @@ function colorFor(value, config, channels) {
   return palette[index % palette.length] || palette[0];
 }
 
-function interpolateGradientColor(stateIndex, stateCount, gradientConfig) {
-  const t = stateCount > 1 ? stateIndex / (stateCount - 1) : 0;
+function positionToParameter(x, y, gridWidth, gridHeight, direction = "haut-bas") {
+  switch (direction) {
+    case "gauche-droite":
+      return gridWidth > 1 ? x / (gridWidth - 1) : 0;
+    case "diagonal":
+      return gridWidth > 1 || gridHeight > 1 ? (x / (gridWidth - 1 || 1) + y / (gridHeight - 1 || 1)) / 2 : 0;
+    case "radial": {
+      const cx = (gridWidth - 1) / 2;
+      const cy = (gridHeight - 1) / 2;
+      const maxDist = Math.sqrt(cx * cx + cy * cy) || 1;
+      const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
+      return Math.min(1, dist / maxDist);
+    }
+    case "haut-bas":
+    default:
+      return gridHeight > 1 ? y / (gridHeight - 1) : 0;
+  }
+}
+
+function interpolateGradientColor(stateIndex, stateCount, gradientConfig, x = 0, y = 0, gridWidth = 1, gridHeight = 1) {
   const anchors = gradientConfig.ancres || {};
   const method = gradientConfig.methode || "lineaire";
+  const appliquer = gradientConfig.appliquer || "etat";
+  const direction = gradientConfig.direction || "haut-bas";
+  const influenceEtat = (gradientConfig.influence_etat ?? 50) / 100;
 
+  // Calculate parameters based on mode
+  let t_state = stateCount > 1 ? stateIndex / (stateCount - 1) : 0;
+  let t_position = positionToParameter(x, y, gridWidth, gridHeight, direction);
+  let t = t_state;
+
+  if (appliquer === "position") {
+    t = t_position;
+  } else if (appliquer === "combine") {
+    t = t_state * influenceEtat + t_position * (1 - influenceEtat);
+  }
+
+  // Apply interpolation based on method
   if (method === "lineaire" && stateCount >= 2) {
     const c0 = anchors["0"] || "#0066ff";
     const c1 = anchors["1"] || "#ff6b35";
@@ -268,17 +301,36 @@ function interpolateGradientColor(stateIndex, stateCount, gradientConfig) {
   }
 
   if (method === "bilinear" && stateCount >= 4) {
+    let u, v;
+    if (appliquer === "position") {
+      // For position-based, map position to 2D space
+      u = gridWidth > 1 ? x / (gridWidth - 1) : 0;
+      v = gridHeight > 1 ? y / (gridHeight - 1) : 0;
+    } else if (appliquer === "combine") {
+      // For combined, blend state and position for each axis
+      const u_state = (stateIndex % 2);
+      const v_state = Math.floor(stateIndex / 2) % 2;
+      u = u_state * influenceEtat + (gridWidth > 1 ? x / (gridWidth - 1) : 0) * (1 - influenceEtat);
+      v = v_state * influenceEtat + (gridHeight > 1 ? y / (gridHeight - 1) : 0) * (1 - influenceEtat);
+    } else {
+      // State-based: use state index to determine grid position
+      u = (stateIndex % 2);
+      v = Math.floor(stateIndex / 2) % 2;
+    }
     const c0 = anchors["0"] || "#0066ff";
     const c1 = anchors["1"] || "#00aaff";
     const c2 = anchors["2"] || "#00ff41";
     const c3 = anchors["3"] || "#ff6b35";
-    const u = t * 2;
-    const v = t * 2;
-    return bilinearColor(u < 1 ? u : 2 - u, v < 1 ? v : 2 - v, c0, c1, c2, c3);
+    return bilinearColor(u, v, c0, c1, c2, c3);
   }
 
-  // IDW fallback
+  // IDW fallback for 5+ states
   const colors = Object.values(anchors);
+  if (appliquer === "position") {
+    t = t_position;
+  } else if (appliquer === "combine") {
+    t = t_state * influenceEtat + t_position * (1 - influenceEtat);
+  }
   return idwColor(t, stateCount, colors);
 }
 
@@ -429,13 +481,15 @@ function render() {
   const cell = Number(configuration.rendu.taille_cellule || 5);
   ctx.fillStyle = configuration.rendu.fond || "#05070d";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const gridHeight = lignes.length;
+  const gridWidth = lignes.length > 0 ? lignes[0].length : 1;
   lignes.forEach((line, y) => {
     line.forEach((value, x) => {
       const channels = sorties?.[y]?.[x];
       const visualValue = channels && channels.length > 1 ? channels[1] : value;
       const bgValue = configuration.alphabet_sortie?.[0] ?? configuration.alphabet_entree[0];
       if (!configuration.rendu.afficher_zero && String(visualValue) === String(bgValue)) return;
-      ctx.fillStyle = colorFor(value, configuration, channels);
+      ctx.fillStyle = colorFor(value, configuration, channels, x, y, gridWidth, gridHeight);
       ctx.fillRect(x * cell, y * cell, cell, cell);
     });
   });
@@ -476,9 +530,42 @@ function activateInitialMode(mode) {
   controls.initialMode.value = mode;
 }
 
+function ensureGradientConfig(config) {
+  if (!config.rendu) {
+    config.rendu = {};
+  }
+  if (!config.rendu.gradient) {
+    const alphabet = config.alphabet_sortie || config.alphabet_entree || [0, 1];
+    const stateCount = alphabet.length;
+    const defaultPalette = getDefaultPalette(stateCount);
+    const defaultMethod = stateCount === 2 ? "lineaire" : stateCount === 3 ? "barycentric" : stateCount >= 4 ? "bilinear" : "idw";
+
+    config.rendu.gradient = {
+      mode: "discret",
+      appliquer: "etat",
+      direction: "haut-bas",
+      influence_etat: 50,
+      methode: defaultMethod,
+      nombre_etats: stateCount,
+      ancres: {},
+    };
+
+    for (let i = 0; i < stateCount; i++) {
+      config.rendu.gradient.ancres[String(i)] = defaultPalette[i] || "#808080";
+    }
+  } else {
+    // Ensure all new fields exist in existing gradient configs
+    if (!config.rendu.gradient.appliquer) config.rendu.gradient.appliquer = "etat";
+    if (!config.rendu.gradient.direction) config.rendu.gradient.direction = "haut-bas";
+    if (config.rendu.gradient.influence_etat === undefined) config.rendu.gradient.influence_etat = 50;
+  }
+  return config;
+}
+
 function applyConfig(config, { source = "Configuration" } = {}) {
   try {
     const normalized = window.AutomaginariumCore.ensureRenderableConfiguration(config);
+    ensureGradientConfig(normalized);
     const validation = validateConfig(normalized);
     showStatus(validation);
     if (!validation.valid) {

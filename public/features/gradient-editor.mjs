@@ -5,6 +5,12 @@
 export function initializeGradientEditor({ getConfig, setConfig, render }) {
   const modeRadios = document.querySelectorAll('input[name="gradient-mode"]');
   const gradientControls = document.getElementById("gradient-controls");
+  const applicationModeSelect = document.getElementById("gradient-application-mode");
+  const directionControls = document.getElementById("gradient-direction-controls");
+  const directionSelect = document.getElementById("gradient-direction");
+  const influenceControls = document.getElementById("gradient-influence-controls");
+  const influenceSlider = document.getElementById("gradient-state-influence");
+  const influenceValue = document.getElementById("gradient-influence-value");
   const methodSelect = document.getElementById("gradient-method");
   const anchorsContainer = document.getElementById("gradient-anchors");
   const previewCanvas = document.getElementById("gradient-preview");
@@ -14,6 +20,9 @@ export function initializeGradientEditor({ getConfig, setConfig, render }) {
 
   let gradientState = {
     mode: "discret",
+    appliquer: "etat",
+    direction: "haut-bas",
+    influence_etat: 50,
     method: "lineaire",
     anchors: {},
   };
@@ -31,7 +40,6 @@ export function initializeGradientEditor({ getConfig, setConfig, render }) {
       4: ["#0066ff", "#00aaff", "#00ff41", "#ff6b35"],
     };
     if (palettes[count]) return palettes[count];
-    // For 5+, generate evenly spaced hues
     const colors = [];
     for (let i = 0; i < count; i++) {
       const hue = (i / count) * 360;
@@ -47,6 +55,9 @@ export function initializeGradientEditor({ getConfig, setConfig, render }) {
 
     gradientState = {
       mode: savedGradient.mode || "discret",
+      appliquer: savedGradient.appliquer || "etat",
+      direction: savedGradient.direction || "haut-bas",
+      influence_etat: savedGradient.influence_etat ?? 50,
       method: savedGradient.methode || "lineaire",
       ancres: savedGradient.ancres || {},
     };
@@ -61,6 +72,21 @@ export function initializeGradientEditor({ getConfig, setConfig, render }) {
     }
   }
 
+  function updateApplicationModeVisibility() {
+    if (directionControls) {
+      directionControls.style.display =
+        (gradientState.appliquer === "position" || gradientState.appliquer === "combine")
+          ? "block"
+          : "none";
+    }
+    if (influenceControls) {
+      influenceControls.style.display =
+        gradientState.appliquer === "combine"
+          ? "block"
+          : "none";
+    }
+  }
+
   function syncGradientToConfig() {
     const config = getConfig();
     if (!config) return;
@@ -69,6 +95,9 @@ export function initializeGradientEditor({ getConfig, setConfig, render }) {
     updatedConfig.rendu = updatedConfig.rendu || {};
     updatedConfig.rendu.gradient = {
       mode: gradientState.mode,
+      appliquer: gradientState.appliquer,
+      direction: gradientState.direction,
+      influence_etat: gradientState.influence_etat,
       methode: gradientState.method,
       nombre_etats: getStateCount(),
       ancres: { ...gradientState.ancres },
@@ -119,6 +148,25 @@ export function initializeGradientEditor({ getConfig, setConfig, render }) {
     }
   }
 
+  function positionToParameter(x, y, canvasWidth, canvasHeight) {
+    switch (gradientState.direction) {
+      case "gauche-droite":
+        return canvasWidth > 1 ? x / (canvasWidth - 1) : 0;
+      case "diagonal":
+        return canvasWidth > 1 || canvasHeight > 1 ? (x / (canvasWidth - 1 || 1) + y / (canvasHeight - 1 || 1)) / 2 : 0;
+      case "radial": {
+        const cx = (canvasWidth - 1) / 2;
+        const cy = (canvasHeight - 1) / 2;
+        const maxDist = Math.sqrt(cx * cx + cy * cy) || 1;
+        const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
+        return Math.min(1, dist / maxDist);
+      }
+      case "haut-bas":
+      default:
+        return canvasHeight > 1 ? y / (canvasHeight - 1) : 0;
+    }
+  }
+
   function drawPreviewCanvas() {
     if (!previewCanvas) return;
 
@@ -128,28 +176,41 @@ export function initializeGradientEditor({ getConfig, setConfig, render }) {
 
     ctx.clearRect(0, 0, width, height);
 
-    const stateCount = getStateCount();
-    const pixelWidth = width / Math.max(stateCount, 1);
+    if (gradientState.mode === "discret") {
+      const stateCount = getStateCount();
+      const pixelWidth = width / Math.max(stateCount, 1);
 
-    for (let i = 0; i < stateCount; i++) {
-      const t = stateCount > 1 ? i / (stateCount - 1) : 0;
-      const color = interpolateColor(t);
+      for (let i = 0; i < stateCount; i++) {
+        const color = gradientState.ancres[String(i)] || "#808080";
+        ctx.fillStyle = color;
+        ctx.fillRect(i * pixelWidth, 0, pixelWidth, height);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(i * pixelWidth, 0, pixelWidth, height);
+      }
+    } else {
+      if (gradientState.appliquer === "etat") {
+        const stateCount = getStateCount();
+        const pixelWidth = width / Math.max(stateCount, 1);
 
-      ctx.fillStyle = color;
-      ctx.fillRect(i * pixelWidth, 0, pixelWidth, height);
-
-      // Add subtle border between colors
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(i * pixelWidth, 0, pixelWidth, height);
+        for (let i = 0; i < stateCount; i++) {
+          const color = interpolateColorForState(i, stateCount);
+          ctx.fillStyle = color;
+          ctx.fillRect(i * pixelWidth, 0, pixelWidth, height);
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+          ctx.lineWidth = 1;
+          ctx.strokeRect(i * pixelWidth, 0, pixelWidth, height);
+        }
+      } else {
+        const pixelSize = Math.max(1, Math.floor(width / 50));
+        for (let px = 0; px < width; px += pixelSize) {
+          const t_pos = positionToParameter(px, 0, width, height);
+          const color = interpolateColorForT(t_pos);
+          ctx.fillStyle = color;
+          ctx.fillRect(px, 0, pixelSize, height);
+        }
+      }
     }
-
-    // Add gradient overlay for visual appeal
-    const gradient = ctx.createLinearGradient(0, 0, width, 0);
-    const colors = Object.values(gradientState.ancres).slice(0, 3);
-    colors.forEach((color, idx) => {
-      gradient.addColorStop(idx / Math.max(colors.length - 1, 1), color);
-    });
   }
 
   function drawSampleGrid() {
@@ -161,47 +222,92 @@ export function initializeGradientEditor({ getConfig, setConfig, render }) {
 
     ctx.clearRect(0, 0, width, height);
 
-    const stateCount = getStateCount();
-    const cols = Math.ceil(Math.sqrt(stateCount));
-    const rows = Math.ceil(stateCount / cols);
+    if (gradientState.mode === "discret") {
+      const stateCount = getStateCount();
+      const cols = Math.ceil(Math.sqrt(stateCount));
+      const rows = Math.ceil(stateCount / cols);
+      const cellWidth = width / cols;
+      const cellHeight = height / rows;
 
-    const cellWidth = width / cols;
-    const cellHeight = height / rows;
+      for (let i = 0; i < stateCount; i++) {
+        const row = Math.floor(i / cols);
+        const col = i % cols;
+        const x = col * cellWidth;
+        const y = row * cellHeight;
+        const color = gradientState.ancres[String(i)] || "#808080";
 
-    for (let i = 0; i < stateCount; i++) {
-      const row = Math.floor(i / cols);
-      const col = i % cols;
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, cellWidth, cellHeight);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, cellWidth, cellHeight);
 
-      const x = col * cellWidth;
-      const y = row * cellHeight;
+        ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+        ctx.font = "10px monospace";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(String(i), x + cellWidth / 2, y + cellHeight / 2);
+      }
+    } else {
+      const gridSize = 12;
+      const cellWidth = width / gridSize;
+      const cellHeight = height / gridSize;
 
-      const t = stateCount > 1 ? i / (stateCount - 1) : 0;
-      const color = interpolateColor(t);
-
-      ctx.fillStyle = color;
-      ctx.fillRect(x, y, cellWidth, cellHeight);
-
-      // Border
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(x, y, cellWidth, cellHeight);
-
-      // State label
-      ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-      ctx.font = "10px monospace";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(String(i), x + cellWidth / 2, y + cellHeight / 2);
+      for (let row = 0; row < gridSize; row++) {
+        for (let col = 0; col < gridSize; col++) {
+          const x = col * cellWidth;
+          const y = row * cellHeight;
+          const t_pos = positionToParameter(col, row, gridSize, gridSize);
+          const color = interpolateColorForT(t_pos);
+          ctx.fillStyle = color;
+          ctx.fillRect(x, y, cellWidth, cellHeight);
+        }
+      }
     }
   }
 
-  function interpolateColor(t) {
+  function interpolateColorForState(stateIndex, stateCount) {
     if (gradientState.mode === "discret") {
-      const stateCount = getStateCount();
-      const index = Math.floor(t * stateCount);
-      return gradientState.ancres[String(Math.min(index, stateCount - 1))] || "#808080";
+      return gradientState.ancres[String(stateIndex)] || "#808080";
     }
 
+    const method = gradientState.method;
+    const t = stateCount > 1 ? stateIndex / (stateCount - 1) : 0;
+
+    if (method === "lineaire" && stateCount >= 2) {
+      const c0 = gradientState.ancres["0"] || "#0066ff";
+      const c1 = gradientState.ancres["1"] || "#ff6b35";
+      return lerpColor(t, c0, c1);
+    }
+
+    if (method === "barycentric" && stateCount >= 3) {
+      const c0 = gradientState.ancres["0"] || "#0066ff";
+      const c1 = gradientState.ancres["1"] || "#00ff41";
+      const c2 = gradientState.ancres["2"] || "#ff6b35";
+
+      const lambda0 = Math.max(0, 1 - t);
+      const lambda1 = t < 0.5 ? t * 2 : (1 - t) * 2;
+      const lambda2 = t;
+
+      return barycentricColor(lambda0, lambda1, lambda2, c0, c1, c2);
+    }
+
+    if (method === "bilinear" && stateCount >= 4) {
+      const c0 = gradientState.ancres["0"] || "#0066ff";
+      const c1 = gradientState.ancres["1"] || "#00aaff";
+      const c2 = gradientState.ancres["2"] || "#00ff41";
+      const c3 = gradientState.ancres["3"] || "#ff6b35";
+
+      const u = (stateIndex % 2);
+      const v = Math.floor(stateIndex / 2) % 2;
+
+      return bilinearColor(u, v, c0, c1, c2, c3);
+    }
+
+    return idwColor(t);
+  }
+
+  function interpolateColorForT(t) {
     const stateCount = getStateCount();
     const method = gradientState.method;
 
@@ -229,20 +335,12 @@ export function initializeGradientEditor({ getConfig, setConfig, render }) {
       const c2 = gradientState.ancres["2"] || "#00ff41";
       const c3 = gradientState.ancres["3"] || "#ff6b35";
 
-      const u = t * 2;
-      const v = t * 2;
+      const u = t;
+      const v = t;
 
-      return bilinearColor(
-        u < 1 ? u : 2 - u,
-        v < 1 ? v : 2 - v,
-        c0,
-        c1,
-        c2,
-        c3,
-      );
+      return bilinearColor(u, v, c0, c1, c2, c3);
     }
 
-    // IDW fallback
     return idwColor(t);
   }
 
@@ -350,10 +448,8 @@ export function initializeGradientEditor({ getConfig, setConfig, render }) {
   }
 
   function hexToColor(hex) {
-    // Convert hex to format accepted by input[type="color"]
     if (hex.startsWith("#")) return hex;
     if (hex.startsWith("rgb")) {
-      // Parse rgb(r,g,b) and convert to hex
       const match = hex.match(/\d+/g);
       if (match && match.length >= 3) {
         const r = parseInt(match[0]).toString(16).padStart(2, "0");
@@ -366,7 +462,6 @@ export function initializeGradientEditor({ getConfig, setConfig, render }) {
   }
 
   function colorToHex(color) {
-    // input[type="color"] returns #RRGGBB
     return color;
   }
 
@@ -378,13 +473,36 @@ export function initializeGradientEditor({ getConfig, setConfig, render }) {
   function onModeChange(e) {
     gradientState.mode = e.target.value;
     gradientControls.style.display = gradientState.mode === "gradient" ? "grid" : "none";
+    updateApplicationModeVisibility();
+    updatePreviewCanvases();
+    syncGradientToConfig();
+  }
+
+  function onApplicationModeChange(e) {
+    gradientState.appliquer = e.target.value;
+    updateApplicationModeVisibility();
+    updatePreviewCanvases();
+    syncGradientToConfig();
+  }
+
+  function onDirectionChange(e) {
+    gradientState.direction = e.target.value;
+    updatePreviewCanvases();
+    syncGradientToConfig();
+  }
+
+  function onInfluenceChange(e) {
+    gradientState.influence_etat = parseInt(e.target.value);
+    if (influenceValue) {
+      influenceValue.textContent = `${gradientState.influence_etat}%`;
+    }
     updatePreviewCanvases();
     syncGradientToConfig();
   }
 
   function onMethodChange(e) {
     gradientState.method = e.target.value;
-    renderColorPickers(); // Show/hide relevant color pickers
+    renderColorPickers();
     updatePreviewCanvases();
     syncGradientToConfig();
   }
@@ -416,10 +534,21 @@ export function initializeGradientEditor({ getConfig, setConfig, render }) {
     URL.revokeObjectURL(url);
   }
 
-  // Event listeners
   modeRadios.forEach((radio) => {
     radio.addEventListener("change", onModeChange);
   });
+
+  if (applicationModeSelect) {
+    applicationModeSelect.addEventListener("change", onApplicationModeChange);
+  }
+
+  if (directionSelect) {
+    directionSelect.addEventListener("change", onDirectionChange);
+  }
+
+  if (influenceSlider) {
+    influenceSlider.addEventListener("input", onInfluenceChange);
+  }
 
   if (methodSelect) {
     methodSelect.addEventListener("change", onMethodChange);
@@ -433,25 +562,49 @@ export function initializeGradientEditor({ getConfig, setConfig, render }) {
     exportBtn.addEventListener("click", onExport);
   }
 
-  // Initialize
   function init() {
     initializeGradientState();
     modeRadios.forEach((radio) => {
       radio.checked = radio.value === gradientState.mode;
     });
+    if (applicationModeSelect) {
+      applicationModeSelect.value = gradientState.appliquer;
+    }
+    if (directionSelect) {
+      directionSelect.value = gradientState.direction;
+    }
+    if (influenceSlider) {
+      influenceSlider.value = gradientState.influence_etat;
+      if (influenceValue) {
+        influenceValue.textContent = `${gradientState.influence_etat}%`;
+      }
+    }
     if (methodSelect) {
       methodSelect.value = gradientState.method;
     }
     gradientControls.style.display = gradientState.mode === "gradient" ? "grid" : "none";
+    updateApplicationModeVisibility();
     renderColorPickers();
     updatePreviewCanvases();
   }
 
-  // Public API
   return {
     init,
     updateOnConfigChange: () => {
       initializeGradientState();
+      if (applicationModeSelect) {
+        applicationModeSelect.value = gradientState.appliquer;
+      }
+      if (directionSelect) {
+        directionSelect.value = gradientState.direction;
+      }
+      if (influenceSlider) {
+        influenceSlider.value = gradientState.influence_etat;
+        if (influenceValue) {
+          influenceValue.textContent = `${gradientState.influence_etat}%`;
+        }
+      }
+      updateApplicationModeVisibility();
       renderColorPickers();
       updatePreviewCanvases();
     },

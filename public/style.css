@@ -3457,3 +3457,45 @@ canvas {
 .gradient-controls-buttons button:active {
   transform: scale(0.98);
 }
+
+#gradient-direction-controls,
+#gradient-influence-controls {
+  padding: var(--space-md);
+  background: rgba(var(--accent), 0.03);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+#gradient-direction-controls label,
+#gradient-influence-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  font-weight: 500;
+}
+
+#gradient-direction-controls select {
+  width: 100%;
+  padding: var(--space-md);
+}
+
+.gradient-influence-slider-container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+#gradient-state-influence {
+  flex: 1;
+  height: 6px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+#gradient-influence-value {
+  flex: 0 0 50px;
+  text-align: right;
+  font-weight: 500;
+  color: var(--accent);
+  font-size: 0.9rem;
+}
