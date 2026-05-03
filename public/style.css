@@ -2814,3 +2814,461 @@ canvas {
     min-height: 220px;
   }
 }
+
+/* ============================================================================ */
+/* GENETIC WORKBENCH PANEL STYLES */
+/* ============================================================================ */
+
+.genetic-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.genetic-preset-btn {
+  flex: 1;
+  min-width: 80px;
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(20, 12, 40, 0.6);
+  border: 1px solid rgba(138, 43, 226, 0.2);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.genetic-preset-btn:hover {
+  background: rgba(138, 43, 226, 0.15);
+  border-color: var(--accent-quantum-purple);
+  color: var(--accent-quantum-cyan);
+}
+
+.genetic-preset-btn.active {
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.25), rgba(0, 255, 200, 0.1));
+  border-color: var(--accent-quantum-cyan);
+  color: var(--accent-quantum-cyan);
+  box-shadow: var(--glow-cyan);
+}
+
+.genetic-poids-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+  padding: var(--space-md);
+  background: rgba(8, 14, 27, 0.5);
+  border: 1px solid rgba(125, 211, 255, 0.12);
+  border-radius: 8px;
+}
+
+.genetic-weight-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-md);
+  align-items: center;
+}
+
+.genetic-weight-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.genetic-weight-input {
+  flex: 1;
+}
+
+.genetic-weight-val {
+  min-width: 32px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--accent-quantum-cyan);
+  font-size: 0.9rem;
+}
+
+.genetic-controls {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-lg);
+}
+
+.genetic-controls button {
+  flex: 1;
+  min-width: 70px;
+  padding: 10px var(--space-md);
+  background: rgba(20, 12, 40, 0.7);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: var(--accent-quantum-cyan);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.genetic-controls button:hover {
+  background: rgba(138, 43, 226, 0.2);
+  border-color: var(--accent-quantum-purple);
+  box-shadow: var(--glow-accent);
+}
+
+.genetic-controls button:active {
+  transform: scale(0.98);
+}
+
+.genetic-status {
+  padding: var(--space-md);
+  background: rgba(8, 14, 27, 0.6);
+  border: 1px solid rgba(125, 211, 255, 0.12);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-bottom: var(--space-lg);
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.genetic-graph-container {
+  margin-bottom: var(--space-lg);
+  background: rgba(8, 14, 27, 0.5);
+  border: 1px solid rgba(125, 211, 255, 0.12);
+  border-radius: 8px;
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.genetic-graph-container h3 {
+  margin: 0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+#ga-fitness-graph {
+  width: 100%;
+  height: 100px;
+  background: rgba(20, 12, 40, 0.5);
+  border: 1px solid rgba(138, 43, 226, 0.15);
+  border-radius: 6px;
+}
+
+.genetic-leaderboard {
+  margin-bottom: var(--space-lg);
+  background: rgba(8, 14, 27, 0.5);
+  border: 1px solid rgba(125, 211, 255, 0.12);
+  border-radius: 8px;
+  padding: var(--space-md);
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.genetic-leaderboard h3 {
+  margin: 0 0 var(--space-md) 0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.genetic-leaderboard-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid rgba(125, 211, 255, 0.08);
+  font-size: 0.8rem;
+}
+
+.genetic-leaderboard-item:last-child {
+  border-bottom: none;
+}
+
+.genetic-leaderboard-label {
+  color: var(--text-secondary);
+}
+
+.genetic-leaderboard-score {
+  font-weight: 700;
+  color: var(--accent-quantum-cyan);
+  font-size: 0.9rem;
+}
+
+.genetic-population-browser {
+  display: grid;
+  gap: var(--space-md);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.genetic-individu-card {
+  padding: var(--space-md);
+  background: rgba(20, 12, 40, 0.6);
+  border: 1px solid rgba(138, 43, 226, 0.15);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.genetic-individu-card:hover {
+  border-color: var(--accent-quantum-cyan);
+  background: rgba(20, 12, 40, 0.8);
+  box-shadow: var(--glow-cyan);
+}
+
+.genetic-individu-card.meilleur {
+  border-color: var(--accent-quantum-magenta);
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.15), rgba(255, 0, 127, 0.08));
+  box-shadow: var(--glow-magenta);
+}
+
+.genetic-individu-score {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-sm);
+  font-weight: 600;
+  color: var(--accent-quantum-cyan);
+  font-size: 0.9rem;
+}
+
+.genetic-individu-meta {
+  display: grid;
+  gap: 4px;
+  margin-bottom: var(--space-sm);
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.genetic-individu-actions {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.genetic-individu-actions button {
+  flex: 1;
+  padding: 6px 10px;
+  background: rgba(138, 43, 226, 0.1);
+  border: 1px solid rgba(138, 43, 226, 0.3);
+  color: var(--accent-quantum-cyan);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.genetic-individu-actions button:hover {
+  background: rgba(138, 43, 226, 0.2);
+  border-color: var(--accent-quantum-purple);
+}
+
+/* ============================================================================ */
+/* PERTURBATION TOOLKIT PANEL STYLES */
+/* ============================================================================ */
+
+.perturb-tool-group {
+  margin-bottom: var(--space-lg);
+  background: rgba(8, 14, 27, 0.5);
+  border: 1px solid rgba(125, 211, 255, 0.12);
+  border-radius: 8px;
+  padding: var(--space-md);
+}
+
+.perturb-tool-group h3 {
+  margin: 0 0 var(--space-md) 0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.perturb-tool-btns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: var(--space-sm);
+}
+
+.perturb-tool-btn {
+  padding: 10px var(--space-sm);
+  background: rgba(20, 12, 40, 0.6);
+  border: 1px solid rgba(138, 43, 226, 0.2);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.perturb-tool-btn:hover {
+  background: rgba(138, 43, 226, 0.15);
+  border-color: var(--accent-quantum-cyan);
+  color: var(--accent-quantum-cyan);
+}
+
+.perturb-tool-btn[aria-pressed="true"] {
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.25), rgba(0, 255, 200, 0.1));
+  border-color: var(--accent-quantum-cyan);
+  color: var(--accent-quantum-cyan);
+  box-shadow: var(--glow-cyan);
+  font-weight: 600;
+}
+
+.perturb-effects-group {
+  margin-bottom: var(--space-lg);
+  background: rgba(8, 14, 27, 0.5);
+  border: 1px solid rgba(125, 211, 255, 0.12);
+  border-radius: 8px;
+  padding: var(--space-md);
+}
+
+.perturb-effects-group h3 {
+  margin: 0 0 var(--space-md) 0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.perturb-effects-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.perturb-effect-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.perturb-effect-checkbox:hover {
+  background: rgba(138, 43, 226, 0.1);
+}
+
+.perturb-effect-checkbox input[type="checkbox"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent-quantum-cyan);
+}
+
+.perturb-effect-checkbox label {
+  margin: 0;
+  color: var(--text);
+  cursor: pointer;
+  flex: 1;
+  font-size: 0.85rem;
+}
+
+.perturb-queue-section {
+  margin-bottom: var(--space-lg);
+  background: rgba(8, 14, 27, 0.5);
+  border: 1px solid rgba(125, 211, 255, 0.12);
+  border-radius: 8px;
+  padding: var(--space-md);
+}
+
+.perturb-queue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+  gap: var(--space-md);
+}
+
+.perturb-queue-header h3 {
+  margin: 0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+#perturb-queue-count {
+  font-size: 0.8rem;
+  color: var(--accent-quantum-cyan);
+  font-weight: 600;
+}
+
+#perturb-clear-queue {
+  padding: 6px 10px;
+  background: rgba(138, 43, 226, 0.1);
+  border: 1px solid rgba(138, 43, 226, 0.3);
+  color: var(--accent-quantum-cyan);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+#perturb-clear-queue:hover {
+  background: rgba(138, 43, 226, 0.2);
+  border-color: var(--accent-quantum-purple);
+}
+
+.perturb-event-queue {
+  display: grid;
+  gap: var(--space-xs);
+  max-height: 160px;
+  overflow-y: auto;
+  min-height: 24px;
+}
+
+.perturb-queue-item {
+  padding: 6px 10px;
+  background: rgba(20, 12, 40, 0.6);
+  border: 1px solid rgba(138, 43, 226, 0.15);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.perturb-queue-item-type {
+  color: var(--accent-quantum-cyan);
+  font-weight: 600;
+}
+
+.perturb-inspect-readout {
+  padding: var(--space-md);
+  background: rgba(20, 12, 40, 0.6);
+  border: 1px solid rgba(138, 43, 226, 0.15);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: "Cascadia Code", "JetBrains Mono", monospace;
+  font-size: 0.75rem;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+#perturb-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 1;
+}

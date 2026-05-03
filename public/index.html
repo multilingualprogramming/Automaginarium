@@ -66,6 +66,8 @@
             <button type="button" class="inspector-tab-btn active" data-panel="universe-panel" role="tab" aria-selected="true">Univers</button>
             <button type="button" class="inspector-tab-btn" data-panel="rules-panel" role="tab" aria-selected="false">R&egrave;gles</button>
             <button type="button" class="inspector-tab-btn" data-panel="json-panel" role="tab" aria-selected="false">JSON</button>
+            <button type="button" class="inspector-tab-btn" data-panel="genetic-panel" role="tab" aria-selected="false">G&eacute;n&eacute;tique</button>
+            <button type="button" class="inspector-tab-btn" data-panel="perturb-panel" role="tab" aria-selected="false">Perturbation</button>
           </div>
 
           <div id="info-panel" class="inspector-panel" role="tabpanel">
@@ -192,6 +194,113 @@
                 </div>
               </div>
               <textarea id="config-json" spellcheck="false" aria-label="&Eacute;diteur de configuration JSON"></textarea>
+            </div>
+          </div>
+
+          <div id="genetic-panel" class="inspector-panel" role="tabpanel">
+            <div class="config-panel">
+              <div class="panel-heading">
+                <p class="eyebrow">Workbench G&eacute;n&eacute;tique</p>
+                <h2>D&eacute;couverte de r&egrave;gles</h2>
+                <p class="meta">L'algorithme g&eacute;n&eacute;tique explore l'espace des tables de transition pour trouver des automates qui satisfont vos crit&egrave;res de fitness.</p>
+              </div>
+
+              <div class="genetic-presets" role="group" aria-label="Pr&eacute;sets de fitness">
+                <button type="button" class="genetic-preset-btn" data-preset-fitness="beau">Beau</button>
+                <button type="button" class="genetic-preset-btn" data-preset-fitness="chaotique">Chaotique</button>
+                <button type="button" class="genetic-preset-btn" data-preset-fitness="stable">Stable</button>
+                <button type="button" class="genetic-preset-btn" data-preset-fitness="croissance">Croissance</button>
+                <button type="button" class="genetic-preset-btn" data-preset-fitness="oscillant">Oscillant</button>
+              </div>
+
+              <div class="genetic-poids-grid" aria-label="Poids de fitness">
+                <label>Sym&eacute;trie <input type="range" id="ga-w-symetrie" min="0" max="10" step="1" value="5" /> <span class="genetic-weight-val" id="ga-w-symetrie-val">5</span></label>
+                <label>Densit&eacute; <input type="range" id="ga-w-densite" min="0" max="10" step="1" value="5" /> <span class="genetic-weight-val" id="ga-w-densite-val">5</span></label>
+                <label>Stabilit&eacute; <input type="range" id="ga-w-stabilite" min="0" max="10" step="1" value="5" /> <span class="genetic-weight-val" id="ga-w-stabilite-val">5</span></label>
+                <label>Oscillation <input type="range" id="ga-w-oscillation" min="0" max="10" step="1" value="5" /> <span class="genetic-weight-val" id="ga-w-oscillation-val">5</span></label>
+                <label>Complexit&eacute; <input type="range" id="ga-w-complexite" min="0" max="10" step="1" value="5" /> <span class="genetic-weight-val" id="ga-w-complexite-val">5</span></label>
+                <label>Croissance <input type="range" id="ga-w-croissance" min="0" max="10" step="1" value="5" /> <span class="genetic-weight-val" id="ga-w-croissance-val">5</span></label>
+              </div>
+
+              <label>Taille de la population <input type="number" id="ga-taille-population" min="4" max="64" step="4" value="16" /></label>
+
+              <div class="genetic-controls button-row">
+                <button type="button" id="ga-init">Initialiser</button>
+                <button type="button" id="ga-step">Pas</button>
+                <button type="button" id="ga-evolve" class="accent-btn">Evoluer</button>
+                <button type="button" id="ga-reset">R&eacute;init</button>
+                <button type="button" id="ga-apply-best" class="accent-btn">Appliquer le meilleur</button>
+              </div>
+
+              <p id="ga-status" class="meta genetic-status">En attente d'initialisation.</p>
+
+              <div class="genetic-graph-container" aria-label="&Eacute;volution de la fitness">
+                <p class="eyebrow">Fitness par g&eacute;n&eacute;ration</p>
+                <canvas id="ga-fitness-graph" width="300" height="100" aria-label="Graphique de l'&eacute;volution de la fitness"></canvas>
+              </div>
+
+              <div class="genetic-leaderboard-section">
+                <p class="eyebrow">Classement par canal</p>
+                <div id="ga-leaderboard" class="genetic-leaderboard" aria-live="polite"></div>
+              </div>
+
+              <div class="genetic-population-section">
+                <p class="eyebrow">Navigateur de population</p>
+                <div id="ga-population-browser" class="genetic-population-browser" role="list" aria-label="Membres de la population courante"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="perturb-panel" class="inspector-panel" role="tabpanel">
+            <div class="config-panel">
+              <div class="panel-heading">
+                <p class="eyebrow">Boite &agrave; outils de perturbation</p>
+                <h2>Interactions sur le canevas</h2>
+                <p class="meta">Cliquez ou glissez sur le canevas pour perturber l'univers en temps r&eacute;el.</p>
+              </div>
+
+              <fieldset class="perturb-tool-group" aria-label="Mode d'outil">
+                <legend class="eyebrow">Outil actif</legend>
+                <div class="perturb-tool-btns" role="group">
+                  <button type="button" class="perturb-tool-btn active" data-tool="inspecter" aria-pressed="true">Inspecter</button>
+                  <button type="button" class="perturb-tool-btn" data-tool="perturber" aria-pressed="false">Perturber</button>
+                  <button type="button" class="perturb-tool-btn" data-tool="attirer" aria-pressed="false">Attirer</button>
+                  <button type="button" class="perturb-tool-btn" data-tool="geler" aria-pressed="false">Geler</button>
+                  <button type="button" class="perturb-tool-btn" data-tool="muter" aria-pressed="false">Muter</button>
+                </div>
+              </fieldset>
+
+              <label id="perturb-type-label">Type de perturbation
+                <select id="perturb-type">
+                  <option value="pulse">Pulse</option>
+                  <option value="effacer">Effacer</option>
+                  <option value="inverser">Inverser</option>
+                </select>
+              </label>
+
+              <div class="field-grid">
+                <label>Rayon (px) <input type="range" id="perturb-rayon" min="2" max="50" step="1" value="10" /> <span id="perturb-rayon-val">10</span></label>
+                <label>Force <input type="range" id="perturb-force" min="1" max="10" step="1" value="5" /> <span id="perturb-force-val">0.5</span></label>
+                <label>Dur&eacute;e gel (g&eacute;n.) <input type="number" id="perturb-gel-duree" min="1" max="50" step="1" value="5" /></label>
+              </div>
+
+              <fieldset class="perturb-effects-group" aria-label="Effets visuels">
+                <legend class="eyebrow">Effets visuels</legend>
+                <label class="checkbox-label"><input type="checkbox" id="perturb-fx-anneaux" checked /> Anneaux lumineux (Glow rings)</label>
+                <label class="checkbox-label"><input type="checkbox" id="perturb-fx-fumee" checked /> Traces de fum&eacute;e (Smoke trails)</label>
+                <label class="checkbox-label"><input type="checkbox" id="perturb-fx-chaleur" /> Carte de chaleur (Heat map)</label>
+              </fieldset>
+
+              <div class="perturb-queue-section">
+                <p class="eyebrow">File d'&eacute;v&eacute;nements <span id="perturb-queue-count" class="genetic-weight-val">0/24</span></p>
+                <div id="perturb-event-queue" class="perturb-event-queue" aria-live="polite" aria-label="File des perturbations en attente"></div>
+                <button type="button" id="perturb-clear-queue">Vider la file</button>
+              </div>
+
+              <div id="perturb-inspect-readout" class="perturb-inspect-readout" aria-live="polite">
+                <p class="eyebrow">Cellule sous le curseur</p>
+                <p id="perturb-inspect-cell">—</p>
+              </div>
             </div>
           </div>
         </aside>

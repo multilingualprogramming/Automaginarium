@@ -91,3 +91,75 @@ def validation_mode_regle(code_mode):
     si code_mode == 2:
         retour 1
     retour 0
+
+
+# ============================================================================
+# FITNESS SCALAIRES: Fonctions numériques pour l'evolution genetique
+# Toutes ces fonctions prennent et retournent des f64 (compatibilité WASM)
+# ============================================================================
+
+def fitness_complexite_scalaire(entropie, compacite):
+    """entropie et compacite en [0..1]. Retourne entropie * (1 - compacite) capped [0..1]."""
+    soit score = entropie * (1.0 - compacite)
+    retour max(0.0, min(1.0, score))
+
+
+def fitness_stabilite_scalaire(taux_croissance_abs, compacite):
+    """Low growth + high compactness = stable."""
+    soit stabilite = (1.0 - min(1.0, taux_croissance_abs)) * 0.5 + compacite * 0.5
+    retour max(0.0, min(1.0, stabilite))
+
+
+def fitness_symetrie_scalaire(symetrie):
+    """symetrie en [0..1]. Bell curve peaked at 0.7."""
+    soit diff = abs(symetrie - 0.7)
+    soit score = 1.0 - (diff / 0.7)
+    retour max(0.0, min(1.0, score))
+
+
+def fitness_densite_scalaire(densite, cible):
+    """Distance-based fitness: highest at cible."""
+    soit diff = abs(densite - cible)
+    soit score = 1.0 - min(1.0, diff * 2.0)
+    retour max(0.0, min(1.0, score))
+
+
+def fitness_croissance_scalaire(taux_croissance):
+    """Positive growth scores well."""
+    retour max(0.0, min(1.0, taux_croissance))
+
+
+def fitness_ponderee_scalaire(f_sym, f_den, f_sta, f_osc, f_cmp, f_cro,
+                              w_sym, w_den, w_sta, w_osc, w_cmp, w_cro):
+    """Weighted sum of 6 fitness scores. Normalizes to [0..1]."""
+    soit somme = (f_sym * w_sym) + (f_den * w_den) + (f_sta * w_sta) + \
+                 (f_osc * w_osc) + (f_cmp * w_cmp) + (f_cro * w_cro)
+    soit total_poids = w_sym + w_den + w_sta + w_osc + w_cmp + w_cro
+    si total_poids <= 0:
+        retour 0.0
+    soit score = somme / total_poids
+    retour max(0.0, min(1.0, score))
+
+
+def intensite_radiale_scalaire(dx, dy, rayon):
+    """Euclidean distance falloff: max(0, 1 - dist/rayon)."""
+    soit distance = (dx * dx + dy * dy) ** 0.5
+    si rayon <= 0:
+        retour 0.0
+    soit intensite = 1.0 - (distance / rayon)
+    retour max(0.0, min(1.0, intensite))
+
+
+def variance_scalaire_3(a, b, c):
+    """Variance of three values."""
+    soit moyenne = (a + b + c) / 3.0
+    soit variance = ((a - moyenne) ** 2 + (b - moyenne) ** 2 + (c - moyenne) ** 2) / 3.0
+    retour (variance ** 0.5)
+
+
+def variance_scalaire_5(a, b, c, d, e):
+    """Variance of five values."""
+    soit moyenne = (a + b + c + d + e) / 5.0
+    soit variance = ((a - moyenne) ** 2 + (b - moyenne) ** 2 + (c - moyenne) ** 2 + \
+                     (d - moyenne) ** 2 + (e - moyenne) ** 2) / 5.0
+    retour (variance ** 0.5)
