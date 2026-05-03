@@ -15,7 +15,6 @@ Source files that must be committed for Pages:
 
 - `public/index.html`
 - `public/app.mjs`
-- `public/ui.mjs`
 - `public/automate-core.js`
 - `public/style.css`
 - `public/generated/automate_packed_runtime.mjs`
