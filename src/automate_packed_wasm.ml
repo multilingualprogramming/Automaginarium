@@ -38,30 +38,30 @@ def code_voisinage_accumule(code_courant, valeur, taille_alphabet):
     retour code_courant * taille_alphabet + valeur
 
 
-def code_voisinage_3_base(a, b, c, taille_alphabet):
+def code_voisinage_3_base(valeur_a, valeur_b, valeur_c, taille_alphabet):
     soit code = 0
-    code = code_voisinage_accumule(code, a, taille_alphabet)
-    code = code_voisinage_accumule(code, b, taille_alphabet)
-    code = code_voisinage_accumule(code, c, taille_alphabet)
+    code = code_voisinage_accumule(code, valeur_a, taille_alphabet)
+    code = code_voisinage_accumule(code, valeur_b, taille_alphabet)
+    code = code_voisinage_accumule(code, valeur_c, taille_alphabet)
     retour code
 
 
-def code_voisinage_5_base(a, b, c, d, valeur_e, taille_alphabet):
+def code_voisinage_5_base(valeur_a, valeur_b, valeur_c, valeur_d, valeur_e, taille_alphabet):
     soit code = 0
-    code = code_voisinage_accumule(code, a, taille_alphabet)
-    code = code_voisinage_accumule(code, b, taille_alphabet)
-    code = code_voisinage_accumule(code, c, taille_alphabet)
-    code = code_voisinage_accumule(code, d, taille_alphabet)
+    code = code_voisinage_accumule(code, valeur_a, taille_alphabet)
+    code = code_voisinage_accumule(code, valeur_b, taille_alphabet)
+    code = code_voisinage_accumule(code, valeur_c, taille_alphabet)
+    code = code_voisinage_accumule(code, valeur_d, taille_alphabet)
     code = code_voisinage_accumule(code, valeur_e, taille_alphabet)
     retour code
 
 
-def somme_voisinage_5(a, b, c, d, valeur_e):
-    retour a + b + c + d + valeur_e
+def somme_voisinage_5(valeur_a, valeur_b, valeur_c, valeur_d, valeur_e):
+    retour valeur_a + valeur_b + valeur_c + valeur_d + valeur_e
 
 
-def cellule_totalistique_5(a, b, c, d, valeur_e, taille_alphabet):
-    retour sortie_totalistique(somme_voisinage_5(a, b, c, d, valeur_e), taille_alphabet, 0)
+def cellule_totalistique_5(valeur_a, valeur_b, valeur_c, valeur_d, valeur_e, taille_alphabet):
+    retour sortie_totalistique(somme_voisinage_5(valeur_a, valeur_b, valeur_c, valeur_d, valeur_e), taille_alphabet, 0)
 
 
 def lire_bord_fixe(valeur, valeur_repli):
@@ -129,11 +129,9 @@ def fitness_croissance_scalaire(taux_croissance):
     retour max(0.0, min(1.0, taux_croissance))
 
 
-def fitness_ponderee_scalaire(f_sym, f_den, f_sta, f_osc, f_cmp, f_cro,
-                              w_sym, w_den, w_sta, w_osc, w_cmp, w_cro):
+def fitness_ponderee_scalaire(f_sym, f_den, f_sta, f_osc, f_cmp, f_cro, w_sym, w_den, w_sta, w_osc, w_cmp, w_cro):
     """Weighted sum of 6 fitness scores. Normalizes to [0..1]."""
-    soit somme = (f_sym * w_sym) + (f_den * w_den) + (f_sta * w_sta) + \
-                 (f_osc * w_osc) + (f_cmp * w_cmp) + (f_cro * w_cro)
+    soit somme = (f_sym * w_sym) + (f_den * w_den) + (f_sta * w_sta) + (f_osc * w_osc) + (f_cmp * w_cmp) + (f_cro * w_cro)
     soit total_poids = w_sym + w_den + w_sta + w_osc + w_cmp + w_cro
     si total_poids <= 0:
         retour 0.0
@@ -150,16 +148,15 @@ def intensite_radiale_scalaire(dx, dy, rayon):
     retour max(0.0, min(1.0, intensite))
 
 
-def variance_scalaire_3(a, b, c):
+def variance_scalaire_3(valeur_a, valeur_b, valeur_c):
     """Variance of three values."""
-    soit moyenne = (a + b + c) / 3.0
-    soit variance = ((a - moyenne) ** 2 + (b - moyenne) ** 2 + (c - moyenne) ** 2) / 3.0
+    soit moyenne = (valeur_a + valeur_b + valeur_c) / 3.0
+    soit variance = ((valeur_a - moyenne) ** 2 + (valeur_b - moyenne) ** 2 + (valeur_c - moyenne) ** 2) / 3.0
     retour (variance ** 0.5)
 
 
-def variance_scalaire_5(a, b, c, d, e):
+def variance_scalaire_5(valeur_a, valeur_b, valeur_c, valeur_d, valeur_e):
     """Variance of five values."""
-    soit moyenne = (a + b + c + d + e) / 5.0
-    soit variance = ((a - moyenne) ** 2 + (b - moyenne) ** 2 + (c - moyenne) ** 2 + \
-                     (d - moyenne) ** 2 + (e - moyenne) ** 2) / 5.0
+    soit moyenne = (valeur_a + valeur_b + valeur_c + valeur_d + valeur_e) / 5.0
+    soit variance = ((valeur_a - moyenne) ** 2 + (valeur_b - moyenne) ** 2 + (valeur_c - moyenne) ** 2 + (valeur_d - moyenne) ** 2 + (valeur_e - moyenne) ** 2) / 5.0
     retour (variance ** 0.5)

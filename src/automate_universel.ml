@@ -435,9 +435,7 @@ def individu_mutation_depuis(config_parent, taux_sur_1000, graine):
     """Returns a lightly mutated copy of parent config."""
     soit config = normaliser_configuration(config_parent)
     soit cles = toutes_cles_voisinage(config["alphabet_entree"], config["taille_voisinage"])
-    soit table_mutee = muter_table(config["table_transition"], cles,
-                                    config["alphabet_sortie"], config["nombre_canaux_sortie"],
-                                    taux_sur_1000, graine)
+    soit table_mutee = muter_table(config["table_transition"], cles, config["alphabet_sortie"], config["nombre_canaux_sortie"], taux_sur_1000, graine)
     soit config_mutee = dict(config)
     config_mutee["table_transition"] = table_mutee
     retour config_mutee
@@ -451,12 +449,12 @@ def population_initiale(config_base, taille, graine):
     soit config = normaliser_configuration(config_base)
     soit moitie = taille // 2
 
-    pour i dans range(moitie):
+    pour indice_iteration dans range(moitie):
         soit graine_mutation = gen.randint(0, 2147483647)
         soit individu = individu_mutation_depuis(config, 120, graine_mutation)
         population.append(individu)
 
-    pour i dans range(taille - moitie):
+    pour indice_iteration dans range(taille - moitie):
         soit graine_aleatoire = gen.randint(0, 2147483647)
         soit individu = individu_aleatoire(config, graine_aleatoire)
         population.append(individu)
@@ -464,11 +462,11 @@ def population_initiale(config_base, taille, graine):
     retour population
 
 
-def selection_tournoi(scores, k, graine):
+def selection_tournoi(scores, taille_tournoi, graine):
     """Tournament selection: picks k indices at random, returns index of highest score."""
     soit gen = random.Random(graine)
-    soit candidats = [gen.randint(0, len(scores) - 1) pour _ dans range(min(k, len(scores)))]
-    retour max(candidats, key=lambda i: scores[i])
+    soit candidats = [gen.randint(0, len(scores) - 1) pour _ dans range(min(taille_tournoi, len(scores)))]
+    retour max(candidats, key=lambda indice_candidat: scores[indice_candidat])
 
 
 def nouvelle_generation(population, scores, taux_mutation_sur_1000, graine):
@@ -476,11 +474,11 @@ def nouvelle_generation(population, scores, taux_mutation_sur_1000, graine):
     Preserves best individual (elitism)."""
     soit gen = random.Random(graine)
     soit nouvelle = []
-    soit meilleur_indice = max(range(len(scores)), key=lambda i: scores[i])
+    soit meilleur_indice = max(range(len(scores)), key=lambda indice_score: scores[indice_score])
     soit meilleur_config = population[meilleur_indice]
     nouvelle.append(meilleur_config)
 
-    pour i dans range(len(population) - 1):
+    pour indice_iteration dans range(len(population) - 1):
         soit graine_tournoi_a = gen.randint(0, 2147483647)
         soit graine_tournoi_b = gen.randint(0, 2147483647)
         soit indice_a = selection_tournoi(scores, 3, graine_tournoi_a)
@@ -489,12 +487,9 @@ def nouvelle_generation(population, scores, taux_mutation_sur_1000, graine):
         soit config_parent_a = normaliser_configuration(population[indice_a])
         soit config_parent_b = normaliser_configuration(population[indice_b])
 
-        soit cles = toutes_cles_voisinage(config_parent_a["alphabet_entree"],
-                                         config_parent_a["taille_voisinage"])
+        soit cles = toutes_cles_voisinage(config_parent_a["alphabet_entree"], config_parent_a["taille_voisinage"])
         soit graine_crossover = gen.randint(0, 2147483647)
-        soit table_enfant = croisement_table_uniforme(config_parent_a["table_transition"],
-                                                      config_parent_b["table_transition"],
-                                                      graine_crossover)
+        soit table_enfant = croisement_table_uniforme(config_parent_a["table_transition"], config_parent_b["table_transition"], graine_crossover)
 
         soit config_enfant = dict(config_parent_a)
         config_enfant["table_transition"] = table_enfant
@@ -536,8 +531,7 @@ def fitness_croissance(taux_croissance):
 
 def fitness_ponderee(f_sym, f_den, f_sta, f_osc, f_cmp, f_cro, poids):
     """Weighted sum of 6 fitness scores. poids = [w_sym, w_den, w_sta, w_osc, w_cmp, w_cro]."""
-    soit somme = (f_sym * poids[0]) + (f_den * poids[1]) + (f_sta * poids[2]) + \
-                 (f_osc * poids[3]) + (f_cmp * poids[4]) + (f_cro * poids[5])
+    soit somme = (f_sym * poids[0]) + (f_den * poids[1]) + (f_sta * poids[2]) + (f_osc * poids[3]) + (f_cmp * poids[4]) + (f_cro * poids[5])
     soit total_poids = sum(poids)
     soit score = somme / total_poids si total_poids > 0 sinon 0.0
     retour max(0.0, min(1.0, score))
@@ -572,9 +566,9 @@ def preset_fitness_oscillant():
 # PERTURBATION: Interactive event injection into cellular automata
 # ============================================================================
 
-def perturbation_intensite_cellule(x, y, cx, cy, rayon):
+def perturbation_intensite_cellule(position_x, position_y, cx, cy, rayon):
     """Euclidean distance falloff: 1.0 at center, 0.0 at edge."""
-    soit distance = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
+    soit distance = ((position_x - cx) ** 2 + (position_y - cy) ** 2) ** 0.5
     retour max(0.0, 1.0 - (distance / max(1, rayon)))
 
 
@@ -584,11 +578,11 @@ def perturbation_pulse(ligne, cx, rayon, alphabet, force_sur_1000, graine):
     soit ligne_perturbee = list(ligne)
     soit probabilite_base = force_sur_1000 / 1000.0
 
-    pour x dans range(max(0, cx - rayon), min(len(ligne), cx + rayon + 1)):
-        soit intensite = perturbation_intensite_cellule(x, 0, cx, 0, rayon)
+    pour position_x dans range(max(0, cx - rayon), min(len(ligne), cx + rayon + 1)):
+        soit intensite = perturbation_intensite_cellule(position_x, 0, cx, 0, rayon)
         soit probabilite = min(1.0, probabilite_base * intensite)
         si gen.random() < probabilite:
-            ligne_perturbee[x] = gen.choice(alphabet)
+            ligne_perturbee[position_x] = gen.choice(alphabet)
 
     retour ligne_perturbee
 
@@ -598,11 +592,11 @@ def perturbation_effacer(ligne, cx, rayon, valeur_defaut, force_sur_1000):
     soit ligne_effacee = list(ligne)
     soit probabilite_base = force_sur_1000 / 1000.0
 
-    pour x dans range(max(0, cx - rayon), min(len(ligne), cx + rayon + 1)):
-        soit intensite = perturbation_intensite_cellule(x, 0, cx, 0, rayon)
+    pour position_x dans range(max(0, cx - rayon), min(len(ligne), cx + rayon + 1)):
+        soit intensite = perturbation_intensite_cellule(position_x, 0, cx, 0, rayon)
         soit probabilite = min(1.0, probabilite_base * intensite)
         si random.random() < probabilite:
-            ligne_effacee[x] = valeur_defaut
+            ligne_effacee[position_x] = valeur_defaut
 
     retour ligne_effacee
 
@@ -613,13 +607,13 @@ def perturbation_inverser(ligne, cx, rayon, alphabet, force_sur_1000, graine):
     soit ligne_inversee = list(ligne)
     soit probabilite_base = force_sur_1000 / 1000.0
 
-    pour x dans range(max(0, cx - rayon), min(len(ligne), cx + rayon + 1)):
-        soit intensite = perturbation_intensite_cellule(x, 0, cx, 0, rayon)
+    pour position_x dans range(max(0, cx - rayon), min(len(ligne), cx + rayon + 1)):
+        soit intensite = perturbation_intensite_cellule(position_x, 0, cx, 0, rayon)
         soit probabilite = min(1.0, probabilite_base * intensite)
         si gen.random() < probabilite:
-            soit autres = [v pour v dans alphabet si v != ligne[x]]
+            soit autres = [valeur_alternative pour valeur_alternative dans alphabet si valeur_alternative != ligne[position_x]]
             si len(autres) > 0:
-                ligne_inversee[x] = gen.choice(autres)
+                ligne_inversee[position_x] = gen.choice(autres)
 
     retour ligne_inversee
 
@@ -629,11 +623,11 @@ def perturbation_attirer(ligne, cx, rayon, valeur_attrait, force_sur_1000):
     soit ligne_attirante = list(ligne)
     soit probabilite_base = force_sur_1000 / 1000.0
 
-    pour x dans range(max(0, cx - rayon), min(len(ligne), cx + rayon + 1)):
-        soit intensite = perturbation_intensite_cellule(x, 0, cx, 0, rayon)
+    pour position_x dans range(max(0, cx - rayon), min(len(ligne), cx + rayon + 1)):
+        soit intensite = perturbation_intensite_cellule(position_x, 0, cx, 0, rayon)
         soit probabilite = min(1.0, probabilite_base * intensite)
         si random.random() < probabilite:
-            ligne_attirante[x] = valeur_attrait
+            ligne_attirante[position_x] = valeur_attrait
 
     retour ligne_attirante
 
@@ -643,8 +637,8 @@ def perturbation_geler(masque_gel, cx, cy, rayon, largeur, duree_generations):
     Cells in radius get duree_generations added to their count."""
     soit masque_nouveau = dict(masque_gel)
 
-    pour x dans range(max(0, cx - rayon), min(largeur, cx + rayon + 1)):
-        soit cle_x = str(x)
+    pour position_x dans range(max(0, cx - rayon), min(largeur, cx + rayon + 1)):
+        soit cle_x = str(position_x)
         si cle_x dans masque_nouveau:
             masque_nouveau[cle_x] = masque_nouveau[cle_x] + duree_generations
         sinon:
@@ -658,9 +652,9 @@ def appliquer_masque_gel(ligne, masque_gel, ligne_gelee):
     soit ligne_resultat = list(ligne)
 
     pour cle_x dans masque_gel:
-        soit x = int(cle_x)
-        si 0 <= x < len(ligne_resultat) et cle_x dans ligne_gelee:
-            ligne_resultat[x] = ligne_gelee[cle_x]
+        soit position_x = int(cle_x)
+        si 0 <= position_x < len(ligne_resultat) et cle_x dans ligne_gelee:
+            ligne_resultat[position_x] = ligne_gelee[cle_x]
 
     retour ligne_resultat
 
@@ -683,7 +677,7 @@ def variance_densite(historique_densites):
         retour 0.0
 
     soit moyenne = sum(historique_densites) / len(historique_densites)
-    soit somme_carres = sum([(d - moyenne) ** 2 pour d dans historique_densites])
+    soit somme_carres = sum([(densite - moyenne) ** 2 pour densite dans historique_densites])
     retour (somme_carres / len(historique_densites)) ** 0.5
 
 
@@ -698,8 +692,8 @@ def detecter_periode(historique_densites, fenetre):
     pour periode dans range(1, fenetre // 2 + 1):
         soit correlation = 0.0
         soit compte = 0
-        pour i dans range(len(derniers) - periode):
-            soit diff = abs(derniers[i] - derniers[i + periode])
+        pour indice_dernier dans range(len(derniers) - periode):
+            soit diff = abs(derniers[indice_dernier] - derniers[indice_dernier + periode])
             correlation = correlation + diff
             compte = compte + 1
 
