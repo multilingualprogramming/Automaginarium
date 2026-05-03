@@ -370,6 +370,11 @@ function queueLiveApply(source = "Configuration live") {
   }, 120);
 }
 
+function activateInitialMode(mode) {
+  if (controls.initialMode.value === mode) return;
+  controls.initialMode.value = mode;
+}
+
 function applyConfig(config, { source = "Configuration" } = {}) {
   const normalized = window.AutomaginariumCore.normaliserConfiguration(config);
   const validation = validateConfig(normalized);
@@ -477,6 +482,16 @@ liveControlEntries.forEach(([control, eventName]) => {
     updateHudRule();
     queueLiveApply();
   });
+});
+controls.initialValues.addEventListener("input", () => {
+  if (controls.initialValues.value.trim() === "") return;
+  activateInitialMode("motif");
+  queueLiveApply();
+});
+controls.initialProbability.addEventListener("input", () => {
+  if (controls.initialProbability.value === "") return;
+  activateInitialMode("aleatoire");
+  queueLiveApply();
 });
 controls.wolframRule.addEventListener("input", () => {
   updateHudRule();
