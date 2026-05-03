@@ -3307,3 +3307,153 @@ canvas {
   z-index: 5;
   opacity: 1;
 }
+
+/* ============================================================================
+   GRADIENTS PANEL STYLES
+   ============================================================================ */
+
+.gradients-panel {
+  padding: var(--space-lg);
+}
+
+.gradient-mode-toggle {
+  display: flex;
+  gap: var(--space-md);
+  margin: var(--space-md) 0;
+  padding: var(--space-md);
+  background: rgba(var(--accent), 0.05);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.gradient-mode-toggle label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.gradient-mode-toggle input[type="radio"] {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+.gradient-controls {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.gradient-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  font-weight: 500;
+}
+
+.gradient-controls select {
+  width: 100%;
+  padding: var(--space-md);
+}
+
+.gradient-preview-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+#gradient-preview {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.gradient-anchors {
+  display: grid;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: rgba(var(--accent), 0.03);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.gradient-anchor {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.gradient-anchor-label {
+  flex: 0 0 60px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.gradient-anchor-color {
+  flex: 0 0 50px;
+}
+
+.gradient-anchor-color input[type="color"] {
+  width: 50px;
+  height: 40px;
+  cursor: pointer;
+}
+
+.gradient-anchor-value {
+  flex: 1;
+  font-family: "Cascadia Code", monospace;
+  font-size: 0.85rem;
+  color: var(--text);
+  padding: 0 var(--space-sm);
+}
+
+.gradient-sample-grid-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+#gradient-sample-grid {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.gradient-controls-buttons {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.gradient-controls-buttons button {
+  flex: 1;
+  padding: var(--space-md) var(--space-lg);
+  background: rgba(var(--accent), 0.1);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.gradient-controls-buttons button:hover {
+  background: rgba(var(--accent), 0.2);
+  box-shadow: 0 4px 12px rgba(var(--accent), 0.15);
+}
+
+.gradient-controls-buttons button:active {
+  transform: scale(0.98);
+}

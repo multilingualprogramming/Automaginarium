@@ -1,5 +1,6 @@
 importer json
 importer random
+importer dégradés_couleur
 
 # Automaginarium - noyau canonique en Multilingual francais.
 #

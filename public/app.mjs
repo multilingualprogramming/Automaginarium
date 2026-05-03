@@ -75,6 +75,7 @@ let liveApplyTimer = null;
 const featureModules = {
   genetic: null,
   perturb: null,
+  gradient: null,
 };
 
 async function ensureFeatureModule(name) {
@@ -103,6 +104,19 @@ async function ensureFeatureModule(name) {
     }
     return featureModules[name];
   }
+  if (name === "gradient") {
+    const { initializeGradientEditor } = await import("./features/gradient-editor.mjs");
+    featureModules[name] = initializeGradientEditor({
+      getConfig: () => state.config,
+      setConfig: (config) => {
+        state.config = config;
+        render();
+      },
+      render,
+    });
+    featureModules[name].init();
+    return featureModules[name];
+  }
   return null;
 }
 
@@ -120,6 +134,9 @@ function setActiveInspectorPanel(panelId) {
   }
   if (panelId === "perturb-panel") {
     void ensureFeatureModule("perturb");
+  }
+  if (panelId === "gradients-panel") {
+    void ensureFeatureModule("gradient");
   }
 }
 
@@ -217,8 +234,129 @@ function colorFor(value, config, channels) {
   const alphabet = config.alphabet_sortie || config.alphabet_entree || [0, 1];
   let index = alphabet.findIndex((item) => String(item) === String(visualValue));
   if (index < 0) index = Math.abs(Number(visualValue) || Number(value) || 0) % alphabet.length;
+
+  // Check if gradient mode is enabled
+  const gradient = config.rendu?.gradient;
+  if (gradient && gradient.mode === "gradient") {
+    return interpolateGradientColor(index, alphabet.length, gradient);
+  }
+
+  // Fall back to discrete palette
   const palette = config.rendu.palette || getDefaultPalette(alphabet.length);
   return palette[index % palette.length] || palette[0];
+}
+
+function interpolateGradientColor(stateIndex, stateCount, gradientConfig) {
+  const t = stateCount > 1 ? stateIndex / (stateCount - 1) : 0;
+  const anchors = gradientConfig.ancres || {};
+  const method = gradientConfig.methode || "lineaire";
+
+  if (method === "lineaire" && stateCount >= 2) {
+    const c0 = anchors["0"] || "#0066ff";
+    const c1 = anchors["1"] || "#ff6b35";
+    return lerpColor(t, c0, c1);
+  }
+
+  if (method === "barycentric" && stateCount >= 3) {
+    const c0 = anchors["0"] || "#0066ff";
+    const c1 = anchors["1"] || "#00ff41";
+    const c2 = anchors["2"] || "#ff6b35";
+    const lambda0 = Math.max(0, 1 - t);
+    const lambda1 = t < 0.5 ? t * 2 : (1 - t) * 2;
+    const lambda2 = t;
+    return barycentricColor(lambda0, lambda1, lambda2, c0, c1, c2);
+  }
+
+  if (method === "bilinear" && stateCount >= 4) {
+    const c0 = anchors["0"] || "#0066ff";
+    const c1 = anchors["1"] || "#00aaff";
+    const c2 = anchors["2"] || "#00ff41";
+    const c3 = anchors["3"] || "#ff6b35";
+    const u = t * 2;
+    const v = t * 2;
+    return bilinearColor(u < 1 ? u : 2 - u, v < 1 ? v : 2 - v, c0, c1, c2, c3);
+  }
+
+  // IDW fallback
+  const colors = Object.values(anchors);
+  return idwColor(t, stateCount, colors);
+}
+
+function lerpColor(t, color1, color2) {
+  const c1 = hexToRgb(color1);
+  const c2 = hexToRgb(color2);
+  const r = Math.round(c1.r + (c2.r - c1.r) * t);
+  const g = Math.round(c1.g + (c2.g - c1.g) * t);
+  const b = Math.round(c1.b + (c2.b - c1.b) * t);
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+function hexToRgb(hex) {
+  const h = hex.replace("#", "");
+  return {
+    r: parseInt(h.substr(0, 2), 16),
+    g: parseInt(h.substr(2, 2), 16),
+    b: parseInt(h.substr(4, 2), 16),
+  };
+}
+
+function barycentricColor(l0, l1, l2, color1, color2, color3) {
+  const c1 = hexToRgb(color1);
+  const c2 = hexToRgb(color2);
+  const c3 = hexToRgb(color3);
+  const sum = l0 + l1 + l2 || 1;
+  const n0 = l0 / sum;
+  const n1 = l1 / sum;
+  const n2 = l2 / sum;
+  const r = Math.round(c1.r * n0 + c2.r * n1 + c3.r * n2);
+  const g = Math.round(c1.g * n0 + c2.g * n1 + c3.g * n2);
+  const b = Math.round(c1.b * n0 + c2.b * n1 + c3.b * n2);
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+function bilinearColor(u, v, color1, color2, color3, color4) {
+  const uc = Math.max(0, Math.min(1, u));
+  const vc = Math.max(0, Math.min(1, v));
+  const c1 = hexToRgb(color1);
+  const c2 = hexToRgb(color2);
+  const c3 = hexToRgb(color3);
+  const c4 = hexToRgb(color4);
+  const bottom = {
+    r: c1.r + (c2.r - c1.r) * uc,
+    g: c1.g + (c2.g - c1.g) * uc,
+    b: c1.b + (c2.b - c1.b) * uc,
+  };
+  const top = {
+    r: c4.r + (c3.r - c4.r) * uc,
+    g: c4.g + (c3.g - c4.g) * uc,
+    b: c4.b + (c3.b - c4.b) * uc,
+  };
+  const r = Math.round(bottom.r + (top.r - bottom.r) * vc);
+  const g = Math.round(bottom.g + (top.g - bottom.g) * vc);
+  const b = Math.round(bottom.b + (top.b - bottom.b) * vc);
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+function idwColor(t, stateCount, colors) {
+  if (colors.length === 0) return "#808080";
+  if (colors.length === 1) return colors[0];
+
+  let weights = [];
+  for (let i = 0; i < stateCount; i++) {
+    const pointPos = stateCount > 1 ? i / (stateCount - 1) : 0.5;
+    const diff = Math.abs(t - pointPos);
+    if (diff < 0.001) {
+      return colors[i] || "#808080";
+    }
+    weights.push(1 / (diff * diff));
+  }
+
+  const sumWeights = weights.reduce((a, b) => a + b, 0);
+  const rgbs = colors.map(hexToRgb);
+  const r = Math.round(rgbs.reduce((sum, rgb, i) => sum + rgb.r * weights[i], 0) / sumWeights);
+  const g = Math.round(rgbs.reduce((sum, rgb, i) => sum + rgb.g * weights[i], 0) / sumWeights);
+  const b = Math.round(rgbs.reduce((sum, rgb, i) => sum + rgb.b * weights[i], 0) / sumWeights);
+  return `rgb(${r}, ${g}, ${b})`;
 }
 
 function renderTransitionSignals(config) {
@@ -358,6 +496,9 @@ function applyConfig(config, { source = "Configuration" } = {}) {
     describe(normalized);
     updateRuleSpaceDisplay(normalized);
     updatePaletteEditor();
+    if (featureModules.gradient && typeof featureModules.gradient.updateOnConfigChange === "function") {
+      featureModules.gradient.updateOnConfigChange();
+    }
     updateHudRule();
     render();
     setSyncState("ok", `${source} chargee`);
