@@ -30,7 +30,7 @@ def build_french_core() -> None:
             "-m",
             "multilingualprogramming",
             "compile",
-            "src/automate_universel.ml",
+            "src/automate_universel.multi",
         ],
         cwd=ROOT,
         check=True,
@@ -48,7 +48,7 @@ def build_packed_wasm() -> None:
             "-m",
             "multilingualprogramming",
             "build-wasm-bundle",
-            "src/automate_packed_wasm.ml",
+            "src/automate_packed_wasm.multi",
             "--out-dir",
             str(PACKED),
         ]

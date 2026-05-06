@@ -50,4 +50,4 @@ Here `1` drives evolution and `3` can drive color.
 
 ## French Multilingual Ownership
 
-The canonical model lives in `src/automate_universel.ml`. The browser-friendly numeric WASM bridge lives in `src/automate_packed_wasm.ml`. JavaScript should stay focused on JSON loading, UI events, and canvas rendering.
+The canonical model lives in `src/automate_universel.multi`. The browser-friendly numeric WASM bridge lives in `src/automate_packed_wasm.multi`. JavaScript should stay focused on JSON loading, UI events, and canvas rendering.

@@ -19,7 +19,7 @@ Source files that must be committed for Pages:
 - `public/style.css`
 - `public/generated/automate_packed_runtime.mjs`
 - `examples/*.json`
-- `src/*.ml`
+- `src/*.multi`
 - `.github/workflows/deploy.yml`
 
 Generated files that should not be committed:

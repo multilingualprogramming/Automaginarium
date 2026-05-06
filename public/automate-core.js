@@ -3,7 +3,7 @@
  *
  * This adapter forwards calls to the compiled French Multilingual core.
  * All domain logic (cellular automata, rules, generation) is canonical in
- * src/automate_universel.ml. These functions are temporary fallbacks/mirrors
+ * src/automate_universel.multi. These functions are temporary fallbacks/mirrors
  * until the Multilingual→WASM compilation pipeline is live.
  *
  * JavaScript serves only: canvas rendering, DOM, interface events.
@@ -35,9 +35,9 @@ function callPacked(name, args, fallback) {
 }
 
 // ============================================================================
-// TEMPORARY: These functions are duplicated from src/automate_universel.ml.
+// TEMPORARY: These functions are duplicated from src/automate_universel.multi.
 // They are fallbacks until the ML is compiled to WASM/JS.
-// DO NOT ADD NEW LOGIC HERE. Update src/automate_universel.ml instead.
+// DO NOT ADD NEW LOGIC HERE. Update src/automate_universel.multi instead.
 // ============================================================================
 
 function cleVoisinage(voisinage) {

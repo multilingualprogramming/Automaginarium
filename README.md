@@ -31,11 +31,11 @@ scripts/    Future build helpers for Multilingual/WASM compilation
 
 The repository currently includes:
 
-- a canonical French Multilingual core in `src/automate_universel.ml`
+- a canonical French Multilingual core in `src/automate_universel.multi`
 - a small JavaScript adapter in `public/automate-core.js` that mirrors the current core until the Multilingual/WASM build pipeline is wired
 - canonical rule-table generators, form/config helpers, genetic helpers, and perturbation mutations exposed through the core bridge instead of separate browser-only engine modules
 - a canvas UI in `public/app.mjs`
-- copied Cellcosmos heritage references in `public/metrics.js` and `src/cellcosmos_primitives_heritage.ml`
+- copied Cellcosmos heritage references in `public/metrics.js` and `src/cellcosmos_primitives_heritage.multi`
 - example configurations and a JSON schema in `examples/`
 - migration and architecture documentation in `docs/`
 - canonical rule keys using JSON-array strings such as `"[0,1,0]"`
@@ -79,7 +79,7 @@ Smoke tests include:
 
 ```bash
 node tests/core_smoke.js
-multilingual compile src/automate_universel.ml
+multilingual compile src/automate_universel.multi
 ```
 
 The packed runtime bridge is refreshed with:
@@ -114,7 +114,7 @@ Where source code is directly adapted, comments identify Cellcosmos as the origi
 
 ## Next Migration Steps
 
-1. Compile more of `src/automate_universel.ml` through the Multilingual toolchain to WebAssembly or generated JavaScript.
+1. Compile more of `src/automate_universel.multi` through the Multilingual toolchain to WebAssembly or generated JavaScript.
 2. Replace more of `public/automate-core.js` with generated calls into the French core.
 3. Keep trimming browser-side helpers that do not strengthen the multilingual model or the static deployment story.
 4. Add more generated rule spaces: totalistic, symmetric, genetic, stochastic, and multi-channel examples.

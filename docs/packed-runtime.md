@@ -5,13 +5,13 @@ The packed runtime introduces a generated path from French Multilingual into the
 The rich canonical engine remains:
 
 ```text
-src/automate_universel.ml
+src/automate_universel.multi
 ```
 
 The browser-friendly numeric ABI lives in:
 
 ```text
-src/automate_packed_wasm.ml
+src/automate_packed_wasm.multi
 ```
 
 Generated artifacts are written to:
@@ -37,4 +37,4 @@ Regenerate artifacts with:
 
 Current limitation: the full JSON/dictionary/list-rich core compiles to generated Python but does not yet produce a browser WASM bundle with the current Multilingual WAT backend. The narrow ABI module is the deliberate bridge until richer data lowering is available.
 
-The generated rich core is exercised by `tests/french_core_smoke.py`, so CI verifies behavior that comes directly from `src/automate_universel.ml`.
+The generated rich core is exercised by `tests/french_core_smoke.py`, so CI verifies behavior that comes directly from `src/automate_universel.multi`.

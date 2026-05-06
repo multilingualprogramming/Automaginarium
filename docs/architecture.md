@@ -4,7 +4,7 @@ Automaginarium is split into four layers:
 
 ```text
 examples/*.json              declarative universes
-src/automate_universel.ml    canonical French Multilingual automata core
+src/automate_universel.multi    canonical French Multilingual automata core
 public/automate-core.js      temporary browser adapter mirroring the core
 public/app.mjs               essential DOM events, canvas drawing, preset loading
 ```
@@ -17,9 +17,9 @@ Advanced tools such as the genetic workbench and perturbation toolkit are now la
 
 Canonical JSON-array rule keys use forms such as `"[0,1,0]"`, rather than concatenated keys such as `"010"`. The browser adapter still accepts older Cellcosmos-style keys as a compatibility fallback.
 
-The packed Multilingual/WASM bridge keeps the full French core as the canonical configuration and evolution model, while `src/automate_packed_wasm.ml` exposes a narrow numeric ABI for browser calls. The browser prefers `window.AutomaginariumPacked` when available and falls back to JavaScript only where rich JSON orchestration is still needed.
+The packed Multilingual/WASM bridge keeps the full French core as the canonical configuration and evolution model, while `src/automate_packed_wasm.multi` exposes a narrow numeric ABI for browser calls. The browser prefers `window.AutomaginariumPacked` when available and falls back to JavaScript only where rich JSON orchestration is still needed.
 
-Rule-table generation follows the same pattern: canonical helpers live in `src/automate_universel.ml`, narrow deterministic numeric helpers live in `src/automate_packed_wasm.ml`, and `public/automate-core.js` exposes the browser bridge so `public/app.mjs` does not duplicate the rule logic, form-to-config assembly, or configuration summaries.
+Rule-table generation follows the same pattern: canonical helpers live in `src/automate_universel.multi`, narrow deterministic numeric helpers live in `src/automate_packed_wasm.multi`, and `public/automate-core.js` exposes the browser bridge so `public/app.mjs` does not duplicate the rule logic, form-to-config assembly, or configuration summaries.
 
 ## Reuse From Cellcosmos
 
@@ -30,6 +30,6 @@ Directly reusable ideas:
 - palette-driven visual exploration
 - Wolfram rule table generation
 - metrics formulas from `public/metrics.js`
-- French Multilingual domain source organization from `src/automate_elementaire_wasm.ml`
+- French Multilingual domain source organization from `src/automate_elementaire_wasm.multi`
 
 The first skeleton intentionally avoids copying the full Cellcosmos interface because the old UI is tightly coupled to elementary binary rules. Features should be migrated as isolated modules.

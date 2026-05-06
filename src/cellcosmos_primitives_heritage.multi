@@ -1,4 +1,4 @@
-# Adapted from Cellcosmos src/automate_elementaire_wasm.ml.
+# Adapted from Cellcosmos src/automate_elementaire_wasm.multi.
 # Original project: https://github.com/multilingualprogramming/cellcosmos
 #
 # This file is kept as a migration reference for compact French Multilingual primitives.

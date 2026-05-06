@@ -2,7 +2,7 @@
 #
 # Ce module evite les dictionnaires et listes imbriquees afin de donner au
 # pipeline WebAssembly une ABI stable. Le noyau riche reste dans
-# automate_universel.ml; ce fichier expose les primitives que JavaScript peut
+# automate_universel.multi; ce fichier expose les primitives que JavaScript peut
 # appeler sans redevenir le moteur conceptuel.
 
 

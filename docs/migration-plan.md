@@ -17,7 +17,7 @@
 
 ## Stage 3 - French Multilingual Engine
 
-- compile `src/automate_universel.ml` with the Multilingual toolchain
+- compile `src/automate_universel.multi` with the Multilingual toolchain
 - expose `generer_univers`, `prochaine_generation`, and rule generators to WASM/generated bindings
 - remove duplicated transition logic from JavaScript
 
