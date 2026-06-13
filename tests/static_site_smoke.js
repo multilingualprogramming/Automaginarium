@@ -11,6 +11,7 @@ function testPagesEntrypoints() {
   assert(rootIndex.includes("public/index.html"));
   assert(publicIndex.includes("id=\"preset\""));
   assert(publicIndex.includes("type=\"module\" src=\"app.mjs\""));
+  assert(publicIndex.includes("id=\"replay-canvas\""));
   assert(!publicIndex.includes("type=\"module\" src=\"ui.mjs\""));
   assert(fs.existsSync(path.join(root, ".nojekyll")));
 }

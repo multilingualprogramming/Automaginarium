@@ -78,11 +78,15 @@ jobs:
           node --check public/app.mjs
           node --check public/generated/automate_packed_runtime.mjs
           node --check public/generated/automate_packed/host_shim.mjs
+          node --check public/generated/automate_universel/browser_module.mjs
 
       - name: Valider le moteur et le WASM
         run: |
           python tests/french_core_smoke.py
           node tests/core_smoke.js
+          node tests/generated_browser_module_smoke.js
+          node tests/generated_parity_smoke.mjs
+          node tests/browser_generated_flow_smoke.mjs
           node tests/packed_runtime_smoke.mjs
           node tests/static_site_smoke.js
 

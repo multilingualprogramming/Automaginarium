@@ -17,6 +17,8 @@ const exportsList = [
   "decrire_configuration",
   "signaux_transition",
   "table_wolfram",
+  "table_aleatoire",
+  "table_symetrique",
   "table_totalistique",
   "assurer_configuration_rendable",
   "construire_configuration_regle_generee",
@@ -82,6 +84,11 @@ async function testGeneratedModule() {
   assert.equal(module.resumer_univers_vivant(config).profile, "automaginarium-1d-ca-v1");
   assert.equal(module.construire_univers_vivant(config).kind, "semantic-core-v1");
   assert.deepEqual(module.table_wolfram(90)["[1,1,0]"], [1]);
+  assert.equal(Object.keys(module.table_aleatoire(config, 17)).length, 8);
+  assert.deepEqual(
+    module.table_symetrique(config, 17)["[0,1,1]"],
+    module.table_symetrique(config, 17)["[1,1,0]"],
+  );
   assert.equal(module.signaux_transition(config, 2).length, 2);
   assert.equal(module.generer_univers_detaille(config).lignes.length, 6);
   const multiChannel = {

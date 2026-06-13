@@ -1,10 +1,11 @@
 /*
  * Automaginarium browser bridge.
  *
- * This adapter forwards calls to the compiled French Multilingual core.
- * All domain logic (cellular automata, rules, generation) is canonical in
- * src/automate_universel.multi. These functions are temporary fallbacks/mirrors
- * until the Multilingual→WASM compilation pipeline is live.
+ * This adapter forwards calls to the generated French Multilingual browser
+ * module when it is available. All domain logic (cellular automata, rules,
+ * generation) is canonical in src/automate_universel.multi. The JavaScript
+ * implementations below are compatibility fallbacks for local/dev paths where
+ * generated artifacts have not been built yet.
  *
  * JavaScript serves only: canvas rendering, DOM, interface events.
  * All cellular automata logic belongs in src/.
@@ -36,7 +37,7 @@ function callPacked(name, args, fallback) {
 
 // ============================================================================
 // TEMPORARY: These functions are duplicated from src/automate_universel.multi.
-// They are fallbacks until the ML is compiled to WASM/JS.
+// Generated browser JS is preferred; these stay as compatibility fallbacks.
 // DO NOT ADD NEW LOGIC HERE. Update src/automate_universel.multi instead.
 // ============================================================================
 
@@ -300,12 +301,18 @@ function randomOutput(configuration, seed, neighborhoodIndex) {
 }
 
 function tableAleatoire(configurationBrute, seed = Date.now() >>> 0) {
+  if (window.AutomaginariumUniversVivant?.table_aleatoire) {
+    return window.AutomaginariumUniversVivant.table_aleatoire(configurationBrute, seed);
+  }
   const configuration = normaliserConfiguration(configurationBrute);
   const keys = toutesClesVoisinage(configuration.alphabet_entree, configuration.taille_voisinage);
   return Object.fromEntries(keys.map((key, index) => [key, randomOutput(configuration, seed, index)]));
 }
 
 function tableSymetrique(configurationBrute, seed = Date.now() >>> 0) {
+  if (window.AutomaginariumUniversVivant?.table_symetrique) {
+    return window.AutomaginariumUniversVivant.table_symetrique(configurationBrute, seed);
+  }
   const configuration = normaliserConfiguration(configurationBrute);
   const table = {};
   const keys = toutesClesVoisinage(configuration.alphabet_entree, configuration.taille_voisinage);
@@ -650,11 +657,20 @@ function metriquesUnivers(univers) {
   const lignes = univers?.lignes || [];
   const configuration = univers?.configuration || {};
   const valeurVide = configuration.alphabet_entree ? configuration.alphabet_entree[0] : 0;
-  const totalCells = lignes.reduce((sum, ligne) => sum + ligne.length, 0);
-  const liveCells = lignes.flat().filter((value) => celluleVivante(value, valeurVide)).length;
-  const densite = totalCells > 0 ? liveCells / totalCells : 0;
-  const entropie = densite > 0 && densite < 1 ? -(densite * Math.log2(densite) + (1 - densite) * Math.log2(1 - densite)) : 0;
+  const toutesValeurs = lignes.flat().map(String);
+  const totalCells = Math.max(1, toutesValeurs.length);
+  const comptes = new Map();
+  toutesValeurs.forEach((value) => {
+    comptes.set(value, (comptes.get(value) || 0) + 1);
+  });
+  const entropie = [...comptes.values()].reduce((sum, count) => {
+    const probability = count / totalCells;
+    return probability > 0 ? sum - (probability * Math.log2(probability)) : sum;
+  }, 0);
   const densitesParGeneration = lignes.map((ligne) => calculerDensiteLigne(ligne, valeurVide));
+  const densite = densitesParGeneration.length > 0
+    ? densitesParGeneration.reduce((sum, value) => sum + value, 0) / densitesParGeneration.length
+    : 0;
   const compacites = lignes.map((ligne) => calculerCompaciteLigne(ligne, valeurVide));
   const symetries = lignes.map(calculerSymetrieLigne);
   const compacite = compacites.length > 0 ? compacites.reduce((sum, value) => sum + value, 0) / compacites.length : 0;
@@ -701,7 +717,7 @@ function evaluerFitness(univers, poidsObj = {}) {
     "fitness_ponderee_scalaire",
     [fSym, fDen, fSta, oscillation, fCmp, fCro, ...poids],
     (fSym * poids[0] + fDen * poids[1] + fSta * poids[2] + oscillation * poids[3] + fCmp * poids[4] + fCro * poids[5]) /
-      poids.reduce((a, b) => a + b, 1),
+      Math.max(1, poids.reduce((a, b) => a + b, 0)),
   );
   const configuration = univers?.configuration || {};
   const scoresParCanal = Array.from(

@@ -278,6 +278,21 @@
                 <span class="live-summary-label">Comportement</span>
                 <strong>Univers exportable en attente</strong>
               </div>
+              <div class="replay-panel" aria-label="Rejouer cet univers">
+                <div class="panel-heading inline-heading compact-heading">
+                  <div>
+                    <p class="eyebrow">Replay</p>
+                    <h3>Rejouer cet univers</h3>
+                  </div>
+                  <p id="replay-status" class="meta">Generation 1 / 1</p>
+                </div>
+                <canvas id="replay-canvas" width="300" height="90" aria-label="Replay de l'univers courant"></canvas>
+                <div class="button-row replay-controls">
+                  <button id="replay-play" type="button">Lire</button>
+                  <button id="replay-step" type="button">Pas</button>
+                  <button id="replay-reset" type="button">Revenir</button>
+                </div>
+              </div>
               <textarea id="process-json" spellcheck="false" readonly aria-label="Données exportables de l'univers vivant"></textarea>
             </div>
           </div>

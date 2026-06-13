@@ -18,7 +18,7 @@ const PRESETS = [
   { id: "symboles-jardin", label: "Symboles jardin" },
 ];
 
-const state = { config: null, universe: null, lastValidConfig: null };
+const state = { config: null, universe: null, manifest: null, lastValidConfig: null };
 const presetCache = new Map();
 const canvas = document.querySelector("#universe");
 const ctx = canvas.getContext("2d");
@@ -32,6 +32,12 @@ const universeLiveSummary = document.querySelector("#universe-live-summary");
 const transitionLiveSummary = document.querySelector("#transition-live-summary");
 const processLiveSummary = document.querySelector("#process-live-summary");
 const processJsonView = document.querySelector("#process-json");
+const replayCanvas = document.querySelector("#replay-canvas");
+const replayCtx = replayCanvas?.getContext("2d");
+const replayStatus = document.querySelector("#replay-status");
+const replayPlayButton = document.querySelector("#replay-play");
+const replayStepButton = document.querySelector("#replay-step");
+const replayResetButton = document.querySelector("#replay-reset");
 const syncIndicatorDot = document.querySelector("#sync-indicator-dot");
 const syncIndicatorText = document.querySelector("#sync-indicator-text");
 const heroSyncDot = document.querySelector("#hero-sync-dot");
@@ -79,6 +85,8 @@ const liveControlEntries = [
   [controls.ruleNumber, "input"],
 ];
 let liveApplyTimer = null;
+let replayTimer = null;
+let replayGeneration = 0;
 const featureModules = {
   genetic: null,
   perturb: null,
@@ -531,9 +539,64 @@ function render() {
   }
 }
 
+function manifestInitialRow(manifest) {
+  const loci = manifest?.state?.loci;
+  if (!Array.isArray(loci)) return null;
+  return loci
+    .slice()
+    .sort((left, right) => Number(left.locus?.[0] || 0) - Number(right.locus?.[0] || 0))
+    .map((locus) => locus.state?.symbol);
+}
+
+function drawUniverseRow(targetCtx, targetCanvas, universe, rowIndex, manifest = null) {
+  if (!targetCtx || !targetCanvas || !universe) return;
+  const { configuration, lignes, sorties } = universe;
+  const row = rowIndex === 0 ? (manifestInitialRow(manifest) || lignes?.[rowIndex] || []) : (lignes?.[rowIndex] || []);
+  const rowSorties = sorties?.[rowIndex] || [];
+  const width = Math.max(1, row.length);
+  const cellWidth = targetCanvas.width / width;
+  targetCtx.fillStyle = canvasBackgroundFor(configuration);
+  targetCtx.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
+  row.forEach((value, x) => {
+    const channels = rowSorties[x];
+    const visualValue = channels && channels.length > 1 ? channels[1] : value;
+    const bgValue = configuration.alphabet_sortie?.[0] ?? configuration.alphabet_entree[0];
+    if (!configuration.rendu.afficher_zero && String(visualValue) === String(bgValue)) return;
+    targetCtx.fillStyle = colorFor(value, configuration, channels, x, rowIndex, width, lignes.length);
+    targetCtx.fillRect(Math.floor(x * cellWidth), 0, Math.ceil(cellWidth), targetCanvas.height);
+  });
+}
+
+function updateReplayStatus() {
+  if (!replayStatus || !state.universe?.lignes) return;
+  const steps = state.manifest?.schedule?.steps ?? Math.max(0, state.universe.lignes.length - 1);
+  replayStatus.textContent = `Generation ${Math.min(replayGeneration + 1, state.universe.lignes.length)} / ${steps + 1}`;
+}
+
+function renderReplay() {
+  if (!replayCanvas || !state.universe?.lignes?.length) return;
+  replayGeneration = Math.max(0, Math.min(replayGeneration, state.universe.lignes.length - 1));
+  drawUniverseRow(replayCtx, replayCanvas, state.universe, replayGeneration, state.manifest);
+  updateReplayStatus();
+}
+
+function stopReplay() {
+  if (replayTimer) window.clearInterval(replayTimer);
+  replayTimer = null;
+  if (replayPlayButton) replayPlayButton.textContent = "Lire";
+}
+
+function stepReplay() {
+  if (!state.universe?.lignes?.length) return;
+  replayGeneration = (replayGeneration + 1) % state.universe.lignes.length;
+  renderReplay();
+}
+
 function describe(config) {
   const description = window.AutomaginariumCore.describeConfiguration(config);
   const semanticSummary = window.AutomaginariumCore.resumerUniversVivant(config);
+  const manifest = window.AutomaginariumCore.construireUniversVivant(config);
+  state.manifest = manifest;
   title.textContent = description.title;
   meta.textContent = description.metaText;
   tableView.innerHTML = description.ruleTableHtml;
@@ -549,7 +612,7 @@ function describe(config) {
     processLiveSummary.innerHTML = `<span class="live-summary-label">Comportement</span><strong>${semanticSummary.rule} | ${semanticSummary.topology} | ${semanticSummary.schedule}</strong>`;
   }
   if (processJsonView) {
-    processJsonView.value = JSON.stringify(window.AutomaginariumCore.construireUniversVivant(config), null, 2);
+    processJsonView.value = JSON.stringify(manifest, null, 2);
   }
 }
 
@@ -627,6 +690,9 @@ function applyConfig(config, { source = "Configuration" } = {}) {
     }
     updateHudRule();
     render();
+    replayGeneration = 0;
+    stopReplay();
+    renderReplay();
     setSyncState("ok", `${source} chargee`);
     return true;
   } catch (error) {
@@ -737,6 +803,23 @@ function applyRandomRule() {
 
 document.querySelector("#random-rule").addEventListener("click", applyRandomRule);
 document.querySelector("#random-rule-canvas").addEventListener("click", applyRandomRule);
+replayPlayButton?.addEventListener("click", () => {
+  if (replayTimer) {
+    stopReplay();
+    return;
+  }
+  replayPlayButton.textContent = "Pause";
+  replayTimer = window.setInterval(stepReplay, 180);
+});
+replayStepButton?.addEventListener("click", () => {
+  stopReplay();
+  stepReplay();
+});
+replayResetButton?.addEventListener("click", () => {
+  stopReplay();
+  replayGeneration = 0;
+  renderReplay();
+});
 document.querySelector("#apply-json").addEventListener("click", () => {
   try {
     applyConfig(JSON.parse(controls.json.value), { source: "JSON" });
