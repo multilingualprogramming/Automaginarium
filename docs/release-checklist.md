@@ -8,10 +8,8 @@ Before publishing a release:
    .\scripts\build-packed-runtime.ps1
    ```
 
-   `requirements-build.txt` currently installs `multilingualprogramming[wasm]`
-   from the multilingual `main` branch because the published PyPI 0.8.0 wheel
-   does not include `build-browser-module`. After the next multilingual release,
-   repin this to the released version and rerun this checklist.
+   `requirements-build.txt` installs `multilingualprogramming[wasm]==0.8.1`
+   so generated artifacts come from the released multilingual toolchain.
 
 2. Run all local tests.
 

@@ -36,9 +36,11 @@ const exportsList = [
 ].join(",");
 
 function runBuild() {
+  const localMultilingual = path.join(root, "..", "multilingual");
+  const pythonPath = [process.env.PYTHONPATH, localMultilingual].filter(Boolean).join(path.delimiter);
   const env = {
     ...process.env,
-    PYTHONPATH: path.join(root, "..", "multilingual"),
+    PYTHONPATH: pythonPath,
   };
   const result = spawnSync(
     "python3",
