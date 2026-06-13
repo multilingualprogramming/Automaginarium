@@ -48,6 +48,7 @@ jobs:
           test -f public/generated/automate_packed/abi_manifest.json
           test -f public/generated/automate_packed_runtime.mjs
           test -f public/generated/automate_packed/host_shim.mjs
+          test -f public/generated/automate_universel/browser_module.mjs
 
       - name: Verifier la syntaxe JavaScript
         run: |
@@ -55,11 +56,13 @@ jobs:
           node --check public/app.mjs
           node --check public/generated/automate_packed_runtime.mjs
           node --check public/generated/automate_packed/host_shim.mjs
+          node --check public/generated/automate_universel/browser_module.mjs
 
       - name: Valider le moteur et le WASM
         run: |
           python tests/french_core_smoke.py
           node tests/core_smoke.js
+          node tests/generated_browser_module_smoke.js
           node tests/packed_runtime_smoke.mjs
           node tests/static_site_smoke.js
 

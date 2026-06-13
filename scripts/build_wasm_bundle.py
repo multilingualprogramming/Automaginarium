@@ -71,7 +71,11 @@ def build_french_core() -> None:
                 "resumer_univers_vivant,construire_univers_vivant,source_univers_vivant,"
                 "resumer_configuration,resumer_transition,decrire_configuration,signaux_transition,"
                 "table_wolfram,table_totalistique,assurer_configuration_rendable,"
-                "construire_configuration_regle_generee"
+                "construire_configuration_regle_generee,"
+                "etat_formulaire_vers_configuration,configuration_vers_etat_formulaire,"
+                "valider_configuration,etiquette_espace_regles,etiquette_regle_hud,"
+                "generer_univers_detaille,population_initiale,nouvelle_generation,"
+                "preset_poids_genetique,appliquer_perturbation"
             ),
             "--out",
             str(RICH_BROWSER / "browser_module.mjs"),

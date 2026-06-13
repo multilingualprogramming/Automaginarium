@@ -247,6 +247,9 @@ function prochaineGeneration(generation, configuration, seed) {
 }
 
 function genererUnivers(configurationBrute) {
+  if (window.AutomaginariumUniversVivant?.generer_univers_detaille) {
+    return window.AutomaginariumUniversVivant.generer_univers_detaille(configurationBrute);
+  }
   const configuration = normaliserConfiguration(configurationBrute);
   const lignes = [creerGenerationInitiale(configuration)];
   const sorties = [lignes[0].map((value) => (
@@ -446,6 +449,9 @@ function encodeList(values) {
 }
 
 function formStateToConfig(formState, currentConfig = {}) {
+  if (window.AutomaginariumUniversVivant?.etat_formulaire_vers_configuration) {
+    return window.AutomaginariumUniversVivant.etat_formulaire_vers_configuration(formState, currentConfig);
+  }
   const inputAlphabet = parseCommaList(formState.alphabetInput, [0, 1]);
   const outputAlphabet = parseCommaList(formState.alphabetOutput, inputAlphabet);
   let neighborhood = Number(formState.neighborhood || 3);
@@ -490,6 +496,13 @@ function formStateToConfig(formState, currentConfig = {}) {
 }
 
 function configToFormState(config) {
+  if (window.AutomaginariumUniversVivant?.configuration_vers_etat_formulaire) {
+    const formState = window.AutomaginariumUniversVivant.configuration_vers_etat_formulaire(config);
+    return {
+      ...formState,
+      json: JSON.stringify({ ...config, numero_regle: String(config.numero_regle || 0n) }, null, 2),
+    };
+  }
   return {
     name: config.nom || "",
     alphabetInput: encodeList(config.alphabet_entree || [0, 1]),
@@ -527,6 +540,9 @@ function individuMutationDepuis(configurationBrute, tauxSur1000, graine) {
 }
 
 function populationInitiale(configBase, taille, graine) {
+  if (window.AutomaginariumUniversVivant?.population_initiale) {
+    return window.AutomaginariumUniversVivant.population_initiale(configBase, taille, graine);
+  }
   const gen = mulberry32(graine);
   const population = [];
   const config = normaliserConfiguration(configBase);
@@ -550,6 +566,9 @@ function selectionTournoi(scores, tailleTournoi, graine) {
 }
 
 function nouvelleGeneration(population, scores, tauxMutationSur1000, graine) {
+  if (window.AutomaginariumUniversVivant?.nouvelle_generation) {
+    return window.AutomaginariumUniversVivant.nouvelle_generation(population, scores, tauxMutationSur1000, graine);
+  }
   const gen = mulberry32(graine);
   const nouvelle = [];
   const meilleurIdx = scores.reduce((best, score, idx) => (score > scores[best] ? idx : best), 0);
@@ -719,6 +738,9 @@ function evaluerPopulation(population, poidsObj = {}) {
 }
 
 function presetPoidsGenetique(nom) {
+  if (window.AutomaginariumUniversVivant?.preset_poids_genetique) {
+    return window.AutomaginariumUniversVivant.preset_poids_genetique(nom);
+  }
   const presets = {
     beau: { symetrie: 8, densite: 5, stabilite: 3, oscillation: 2, complexite: 4, croissance: 1 },
     chaotique: { symetrie: 1, densite: 3, stabilite: 1, oscillation: 2, complexite: 9, croissance: 2 },
@@ -730,6 +752,9 @@ function presetPoidsGenetique(nom) {
 }
 
 function appliquerPerturbation(univers, evenement) {
+  if (window.AutomaginariumUniversVivant?.appliquer_perturbation) {
+    return window.AutomaginariumUniversVivant.appliquer_perturbation(univers, evenement);
+  }
   const { cx, cy, rayon, force, type, graine } = evenement;
   const { configuration, lignes, sorties } = univers;
   const nouvelleLignes = lignes.map((ligne) => [...ligne]);
@@ -830,6 +855,9 @@ function randomRuleNumber(max, seed = Date.now() >>> 0) {
 }
 
 function hudRuleLabel(ruleState) {
+  if (window.AutomaginariumUniversVivant?.etiquette_regle_hud) {
+    return window.AutomaginariumUniversVivant.etiquette_regle_hud(ruleState);
+  }
   const neighborhood = Number(ruleState.neighborhood || 3);
   const channels = Number(ruleState.channels || 1);
   const ruleMode = ruleState.ruleMode || "table";
@@ -1078,6 +1106,9 @@ const construireUniversVivant = buildSemanticCoreV1;
 const sourceUniversVivant = semanticCoreSource;
 
 function ruleSpaceLabel(configuration) {
+  if (window.AutomaginariumUniversVivant?.etiquette_espace_regles) {
+    return window.AutomaginariumUniversVivant.etiquette_espace_regles(configuration);
+  }
   const { s, k, t, m, maxRule } = ruleConfiguration(configuration);
   return `${t}^(${m}·${s}^${k}) = ${maxRule} regles possibles`;
 }
@@ -1096,6 +1127,9 @@ function toutesClesVoisinage(alphabet, taille) {
 }
 
 function validerConfiguration(configurationBrute) {
+  if (window.AutomaginariumUniversVivant?.valider_configuration) {
+    return window.AutomaginariumUniversVivant.valider_configuration(configurationBrute);
+  }
   const config = normaliserConfiguration(configurationBrute);
   const erreurs = [];
   const avertissements = [];

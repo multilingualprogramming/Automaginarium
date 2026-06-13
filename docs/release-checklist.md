@@ -13,6 +13,7 @@ Before publishing a release:
    ```powershell
    python tests\french_core_smoke.py
    node tests\core_smoke.js
+   node tests\generated_browser_module_smoke.js
    node tests\packed_runtime_smoke.mjs
    node tests\static_site_smoke.js
    ```
@@ -40,6 +41,7 @@ Before publishing a release:
 
    - root URL
    - `public/generated/automate_packed/module.wasm`
+   - `public/generated/automate_universel/browser_module.mjs`
    - `examples/*.json`
 
 8. Confirm generated files are not staged:

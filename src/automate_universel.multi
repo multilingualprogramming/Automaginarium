@@ -458,7 +458,7 @@ def generer_univers_detaille(configuration_brute):
     soit lignes = []
     soit sorties = []
     lignes.append(creer_generation_initiale(configuration))
-    sorties.append([[valeur] pour valeur dans lignes[0]])
+    sorties.append([[valeur pour _ dans range(configuration["nombre_canaux_sortie"])] pour valeur dans lignes[0]])
     pour rang dans range(1, configuration["hauteur"]):
         soit detail = prochaine_generation_detaillee(lignes[rang - 1], configuration, rang)
         lignes.append(detail["generation"])
@@ -735,6 +735,17 @@ def preset_fitness_croissance():
 def preset_fitness_oscillant():
     """Preset: medium entropy + strong oscillation + symmetry."""
     retour [4, 5, 3, 9, 5, 1]
+
+
+def preset_poids_genetique(nom):
+    soit presets = {
+        "beau": {"symetrie": 8, "densite": 5, "stabilite": 3, "oscillation": 2, "complexite": 4, "croissance": 1},
+        "chaotique": {"symetrie": 1, "densite": 3, "stabilite": 1, "oscillation": 2, "complexite": 9, "croissance": 2},
+        "stable": {"symetrie": 3, "densite": 4, "stabilite": 9, "oscillation": 1, "complexite": 5, "croissance": 0},
+        "croissance": {"symetrie": 2, "densite": 3, "stabilite": 0, "oscillation": 1, "complexite": 3, "croissance": 9},
+        "oscillant": {"symetrie": 4, "densite": 5, "stabilite": 3, "oscillation": 9, "complexite": 5, "croissance": 1},
+    }
+    retour presets.get(nom, presets["beau"])
 
 
 def etiquette_regle_hud(etat_regle):
@@ -1105,6 +1116,57 @@ def decrementer_masque_gel(masque_gel):
             masque_nouveau[cle] = compte
 
     retour masque_nouveau
+
+
+def appliquer_perturbation(univers, evenement):
+    soit cx = int(evenement.get("cx", 0))
+    soit cy = int(evenement.get("cy", 0))
+    soit rayon = int(evenement.get("rayon", 1))
+    soit force = float(evenement.get("force", 0.5))
+    soit type_perturbation = evenement.get("type", "pulse")
+    soit graine = int(evenement.get("graine", 1))
+    soit configuration = univers["configuration"]
+    soit lignes = univers["lignes"]
+    soit sorties = univers.get("sorties", None)
+    soit nouvelles_lignes = [list(ligne) pour ligne dans lignes]
+    soit nouvelles_sorties = [[list(cellule) pour cellule dans ligne] pour ligne dans sorties] si sorties != None sinon None
+    soit generateur = random.Random(graine)
+    soit alphabet = configuration.get("alphabet_sortie", configuration.get("alphabet_entree", [0, 1]))
+
+    pour y dans range(max(0, cy - rayon), min(configuration["hauteur"], cy + rayon + 1)):
+        pour x dans range(max(0, cx - rayon), min(configuration["largeur"], cx + rayon + 1)):
+            soit dx = x - cx
+            soit dy = y - cy
+            soit distance = ((dx * dx) + (dy * dy)) ** 0.5
+            si distance > rayon:
+                continuer
+            soit intensite = max(0.0, 1.0 - (distance / (rayon + 1)))
+            soit probabilite = force * intensite
+            si generateur.random() >= probabilite:
+                continuer
+
+            si type_perturbation == "pulse":
+                nouvelles_lignes[y][x] = generateur.choice(alphabet)
+            sinon si type_perturbation == "effacer" ou type_perturbation == "geler":
+                nouvelles_lignes[y][x] = alphabet[0] si len(alphabet) > 0 sinon 0
+            sinon si type_perturbation == "inverser":
+                soit index = alphabet.index(nouvelles_lignes[y][x]) si nouvelles_lignes[y][x] dans alphabet sinon -1
+                nouvelles_lignes[y][x] = alphabet[(index + 1) % len(alphabet)] si index >= 0 sinon alphabet[1] si len(alphabet) > 1 sinon alphabet[0]
+            sinon si type_perturbation == "attirer":
+                nouvelles_lignes[y][x] = alphabet[len(alphabet) // 2]
+            sinon si type_perturbation == "muter":
+                soit index_mutation = alphabet.index(nouvelles_lignes[y][x]) si nouvelles_lignes[y][x] dans alphabet sinon -1
+                si index_mutation >= 0:
+                    soit index_suivant = (index_mutation + 1) % len(alphabet)
+                    nouvelles_lignes[y][x] = alphabet[index_mutation - 1] si generateur.random() < 0.5 et index_mutation > 0 sinon alphabet[index_suivant]
+                sinon:
+                    nouvelles_lignes[y][x] = alphabet[1] si len(alphabet) > 1 sinon alphabet[0]
+
+    retour {
+        "configuration": configuration,
+        "lignes": nouvelles_lignes,
+        "sorties": nouvelles_sorties,
+    }
 
 
 def variance_densite(historique_densites):

@@ -345,6 +345,36 @@ function testGeneratedLivingUniverseModulePrecedence() {
           effectiveGenerator: `generated-${generator}`,
         };
       },
+      etat_formulaire_vers_configuration(formState) {
+        return { nom: `generated ${formState.name}`, generatedFormConfig: true };
+      },
+      configuration_vers_etat_formulaire(config) {
+        return { name: `generated ${config.nom}`, generatedFormState: true };
+      },
+      valider_configuration() {
+        return { valide: true, erreurs: [], avertissements: ["generated"] };
+      },
+      etiquette_espace_regles() {
+        return "generated rule space";
+      },
+      etiquette_regle_hud() {
+        return "generated hud";
+      },
+      generer_univers_detaille(config) {
+        return { configuration: config, lignes: [["generated"]], sorties: [[["generated"]]] };
+      },
+      population_initiale(_config, taille) {
+        return Array.from({ length: taille }, (_, index) => ({ generatedPopulation: index }));
+      },
+      nouvelle_generation(population) {
+        return [{ generatedNextPopulation: population.length }];
+      },
+      preset_poids_genetique(nom) {
+        return { generatedPreset: nom };
+      },
+      appliquer_perturbation(univers, evenement) {
+        return { ...univers, generatedPerturbation: evenement.type };
+      },
     };
 
     const config = {
@@ -374,6 +404,16 @@ function testGeneratedLivingUniverseModulePrecedence() {
     const built = AutomaginariumCore.buildGeneratedRuleConfig(config, "wolfram", 90);
     assert.equal(built.effectiveGenerator, "generated-wolfram");
     assert.equal(built.config.generatedRuleConfig, true);
+    assert.equal(AutomaginariumCore.formStateToConfig({ name: "Form" }).generatedFormConfig, true);
+    assert.equal(AutomaginariumCore.configToFormState(config).generatedFormState, true);
+    assert.equal(AutomaginariumCore.validerConfiguration(config).avertissements[0], "generated");
+    assert.equal(AutomaginariumCore.ruleSpaceLabel(config), "generated rule space");
+    assert.equal(AutomaginariumCore.hudRuleLabel({}), "generated hud");
+    assert.equal(AutomaginariumCore.genererUnivers(config).lignes[0][0], "generated");
+    assert.equal(AutomaginariumCore.populationInitiale(config, 3, 1).length, 3);
+    assert.equal(AutomaginariumCore.nouvelleGeneration([{ a: 1 }, { b: 2 }], [1, 2], 50, 1)[0].generatedNextPopulation, 2);
+    assert.equal(AutomaginariumCore.presetPoidsGenetique("stable").generatedPreset, "stable");
+    assert.equal(AutomaginariumCore.appliquerPerturbation({ configuration: config, lignes: [], sorties: [] }, { type: "pulse" }).generatedPerturbation, "pulse");
   } finally {
     global.AutomaginariumUniversVivant = previousGenerated;
   }
