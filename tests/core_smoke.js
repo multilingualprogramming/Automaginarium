@@ -239,6 +239,45 @@ function testFormAndDescriptionHelpers() {
   }).includes("regles possibles"));
 }
 
+function testSemanticCoreExport() {
+  const config = {
+    nom: "Core v1",
+    alphabet_entree: [0, 1],
+    alphabet_sortie: [0, 1],
+    taille_voisinage: 3,
+    nombre_canaux_sortie: 1,
+    mode_regle: "table",
+    table_transition: AutomaginariumCore.tableWolfram(90),
+    largeur: 9,
+    hauteur: 6,
+    frontiere: "circulaire",
+    etat_initial: { mode: "centre" },
+    rendu: { taille_cellule: 4 },
+  };
+  const summary = AutomaginariumCore.semanticCoreSummary(config);
+  assert.equal(summary.profile, "automaginarium-1d-ca-v1");
+  assert.equal(summary.tier, 1);
+  assert(summary.schedule.includes("5 synchronous"));
+
+  const core = AutomaginariumCore.buildSemanticCoreV1(config);
+  assert.equal(core.kind, "semantic-core-v1");
+  assert.equal(core.profile, "automaginarium-1d-ca-v1");
+  assert.equal(core.topology.kind, "lattice");
+  assert.equal(core.topology.width, 9);
+  assert.equal(core.topology.wrap, true);
+  assert.equal(core.schedule.steps, 5);
+  assert.equal(core.state.loci.length, 9);
+  assert.equal(core.rule.table.length, 8);
+  assert.deepEqual(core.rule.table.find((entry) => (
+    entry.neighborhood.map((item) => item.symbol).join("") === "110"
+  )).output[0], { symbol: 1, index: 1 });
+  assert.doesNotThrow(() => JSON.stringify(core));
+
+  const source = AutomaginariumCore.semanticCoreSource(config);
+  assert(source.includes("build_process_core"));
+  assert(source.includes("automaginarium_transition"));
+}
+
 testCanonicalKeys();
 testWolfram90();
 testBackwardCompatibility();
@@ -248,4 +287,5 @@ testCanonicalRuleGenerators();
 testGeneticHelpersAndPerturbation();
 testSummariesAndHudMetrics();
 testFormAndDescriptionHelpers();
+testSemanticCoreExport();
 console.log("core smoke ok");

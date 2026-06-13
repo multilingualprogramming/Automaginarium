@@ -1,6 +1,11 @@
 import { installAutomaginariumPacked } from "./generated/automate_packed_runtime.mjs";
 
 await installAutomaginariumPacked();
+try {
+  window.AutomaginariumUniversVivant = await import("./generated/automate_universel/browser_module.mjs");
+} catch {
+  window.AutomaginariumUniversVivant = null;
+}
 
 const PRESETS = [
   { id: "wolfram-30", label: "Wolfram 30" },
@@ -25,6 +30,8 @@ const ruleDetailView = document.querySelector("#rule-table-detail");
 const transitionSignals = document.querySelector("#transition-signals");
 const universeLiveSummary = document.querySelector("#universe-live-summary");
 const transitionLiveSummary = document.querySelector("#transition-live-summary");
+const processLiveSummary = document.querySelector("#process-live-summary");
+const processJsonView = document.querySelector("#process-json");
 const syncIndicatorDot = document.querySelector("#sync-indicator-dot");
 const syncIndicatorText = document.querySelector("#sync-indicator-text");
 const heroSyncDot = document.querySelector("#hero-sync-dot");
@@ -526,6 +533,7 @@ function render() {
 
 function describe(config) {
   const description = window.AutomaginariumCore.describeConfiguration(config);
+  const semanticSummary = window.AutomaginariumCore.resumerUniversVivant(config);
   title.textContent = description.title;
   meta.textContent = description.metaText;
   tableView.innerHTML = description.ruleTableHtml;
@@ -536,6 +544,12 @@ function describe(config) {
   }
   if (transitionLiveSummary) {
     transitionLiveSummary.innerHTML = `<span class="live-summary-label">Reponse</span><strong>${window.AutomaginariumCore.summarizeTransition(config)}</strong>`;
+  }
+  if (processLiveSummary) {
+    processLiveSummary.innerHTML = `<span class="live-summary-label">Comportement</span><strong>${semanticSummary.rule} | ${semanticSummary.topology} | ${semanticSummary.schedule}</strong>`;
+  }
+  if (processJsonView) {
+    processJsonView.value = JSON.stringify(window.AutomaginariumCore.construireUniversVivant(config), null, 2);
   }
 }
 
@@ -746,6 +760,13 @@ controls.importJson.addEventListener("change", async () => {
 });
 document.querySelector("#export-json").addEventListener("click", () => {
   downloadText(`${state.config?.nom || "automaginarium"}.json`, JSON.stringify(state.config, null, 2));
+});
+document.querySelector("#export-process-json").addEventListener("click", () => {
+  const manifest = window.AutomaginariumCore.construireUniversVivant(state.config);
+  downloadText(`${state.config?.nom || "automaginarium"}.semantic-core-v1.json`, JSON.stringify(manifest, null, 2));
+});
+document.querySelector("#export-process-source").addEventListener("click", () => {
+  downloadText(`${state.config?.nom || "automaginarium"}.process.multi`, window.AutomaginariumCore.sourceUniversVivant(state.config));
 });
 document.querySelector("#export-png").addEventListener("click", () => {
   const link = document.createElement("a");

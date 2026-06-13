@@ -79,6 +79,7 @@
             <button type="button" class="inspector-tab-btn" data-panel="gradients-panel" role="tab" aria-selected="false">D&eacute;grad&eacute;s</button>
             <button type="button" class="inspector-tab-btn active" data-panel="universe-panel" role="tab" aria-selected="true">Univers</button>
             <button type="button" class="inspector-tab-btn" data-panel="rules-panel" role="tab" aria-selected="false">R&egrave;gles</button>
+            <button type="button" class="inspector-tab-btn" data-panel="process-panel" role="tab" aria-selected="false">Exporter</button>
             <button type="button" class="inspector-tab-btn" data-panel="json-panel" role="tab" aria-selected="false">JSON</button>
             <button type="button" class="inspector-tab-btn" data-panel="genetic-panel" role="tab" aria-selected="false">G&eacute;n&eacute;tique</button>
             <button type="button" class="inspector-tab-btn" data-panel="perturb-panel" role="tab" aria-selected="false">Perturbation</button>
@@ -257,6 +258,27 @@
               <p id="rule-space-size" class="meta"></p>
               <p class="meta">Les tables sont d&eacute;claratives. Le mode totalistique calcule la sortie depuis la somme du voisinage.</p>
               <div id="rule-table-detail" class="rule-table" aria-label="D&eacute;tail des r&egrave;gles appliqu&eacute;es"></div>
+            </div>
+          </div>
+
+          <div id="process-panel" class="inspector-panel" role="tabpanel">
+            <div class="config-panel json-panel expert-panel">
+              <div class="panel-heading inline-heading">
+                <div>
+                  <p class="eyebrow">Univers vivant</p>
+                  <h2>Exporter le comportement</h2>
+                  <p class="meta">Sauvegardez l'univers courant avec ses états, ses règles et son évolution pour le rejouer ou l'explorer avec d'autres outils.</p>
+                </div>
+                <div class="button-row">
+                  <button id="export-process-json" type="button">Exporter univers</button>
+                  <button id="export-process-source" type="button">Exporter source</button>
+                </div>
+              </div>
+              <div id="process-live-summary" class="live-summary-card">
+                <span class="live-summary-label">Comportement</span>
+                <strong>Univers exportable en attente</strong>
+              </div>
+              <textarea id="process-json" spellcheck="false" readonly aria-label="Données exportables de l'univers vivant"></textarea>
             </div>
           </div>
 

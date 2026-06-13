@@ -851,6 +851,208 @@ function transitionSignalEntries(configuration, limit = 6) {
   }));
 }
 
+// Univers vivant browser mirror.
+//
+// Canonical source lives in src/automate_universel.multi:
+// - valeur_semantique
+// - resumer_univers_vivant
+// - construire_univers_vivant
+// - source_univers_vivant
+//
+// This JS block exists only because the static browser app still needs a rich
+// JSON/list/dictionary bridge until the Multilingual runtime can expose the
+// full core directly in the browser.
+function symbolToSemanticValue(symbol, alphabet) {
+  const index = alphabet.findIndex((candidate) => String(candidate) === String(symbol));
+  return {
+    symbol,
+    index: index >= 0 ? index : null,
+  };
+}
+
+function canonicalRuleEntries(configuration) {
+  const config = normaliserConfiguration(configuration);
+  const keys = toutesClesVoisinage(config.alphabet_entree, config.taille_voisinage);
+  if (config.mode_regle === "table") {
+    return keys.map((key) => {
+      const voisinage = JSON.parse(key);
+      return {
+        neighborhood: voisinage.map((value) => symbolToSemanticValue(value, config.alphabet_entree)),
+        output: normaliserSortie(
+          config.table_transition[key] ?? config.table_transition[ancienneCleVoisinage(voisinage)] ?? sortieDefaut(config),
+          config,
+        ).map((value) => symbolToSemanticValue(value, config.alphabet_sortie)),
+      };
+    });
+  }
+  if (config.mode_regle === "totalistique") {
+    return keys.map((key) => {
+      const voisinage = JSON.parse(key);
+      return {
+        neighborhood: voisinage.map((value) => symbolToSemanticValue(value, config.alphabet_entree)),
+        output: transition_totalistique_compatible(voisinage, config).map((value) => symbolToSemanticValue(value, config.alphabet_sortie)),
+      };
+    });
+  }
+  return [];
+}
+
+function transition_totalistique_compatible(voisinage, configuration) {
+  const sum = voisinage.reduce((acc, value) => acc + Number(value), 0);
+  const baseIndex = Number.isFinite(sum)
+    ? ((Math.trunc(sum) % configuration.alphabet_sortie.length) + configuration.alphabet_sortie.length) % configuration.alphabet_sortie.length
+    : voisinage.length % configuration.alphabet_sortie.length;
+  return Array.from(
+    { length: configuration.nombre_canaux_sortie },
+    (_, channel) => configuration.alphabet_sortie[(baseIndex + channel) % configuration.alphabet_sortie.length],
+  );
+}
+
+function initialLociForSemanticCore(configuration) {
+  const config = normaliserConfiguration(configuration);
+  const ligne = creerGenerationInitiale(config);
+  return ligne.map((value, x) => ({
+    id: `cell_${x}`,
+    locus: [x, 0],
+    state: symbolToSemanticValue(value, config.alphabet_entree),
+  }));
+}
+
+function semanticCoreTier(configuration) {
+  const config = normaliserConfiguration(configuration);
+  if (config.mode_regle === "aleatoire") return 3;
+  if (config.mode_regle === "numerique") return 2;
+  if (config.taille_voisinage > 3 || config.alphabet_entree.length > 2 || config.nombre_canaux_sortie > 1) return 2;
+  return 1;
+}
+
+function semanticCoreTierName(tier) {
+  return [
+    "static",
+    "elementary rewrite",
+    "finite-state rewrite",
+    "stochastic rewrite",
+    "open-ended process",
+  ][tier] || "process";
+}
+
+function semanticCoreSummary(configuration) {
+  if (window.AutomaginariumUniversVivant?.resumer_univers_vivant) {
+    return window.AutomaginariumUniversVivant.resumer_univers_vivant(configuration);
+  }
+  const config = normaliserConfiguration(configuration);
+  const tier = semanticCoreTier(config);
+  return {
+    profile: "automaginarium-1d-ca-v1",
+    tier,
+    tier_name: semanticCoreTierName(tier),
+    topology: `${config.largeur}x1 ${config.frontiere === "circulaire" ? "wrapped" : "bounded"} lattice`,
+    schedule: `${Math.max(0, config.hauteur - 1)} synchronous step(s)`,
+    rule: `${config.mode_regle} / neighborhood ${config.taille_voisinage} / ${config.nombre_canaux_sortie} channel(s)`,
+  };
+}
+
+function buildSemanticCoreV1(configurationBrute) {
+  if (window.AutomaginariumUniversVivant?.construire_univers_vivant) {
+    return window.AutomaginariumUniversVivant.construire_univers_vivant(configurationBrute);
+  }
+  const config = normaliserConfiguration(configurationBrute);
+  const summary = semanticCoreSummary(config);
+  const tableEntries = canonicalRuleEntries(config);
+  return {
+    kind: "semantic-core-v1",
+    profile: summary.profile,
+    name: config.nom,
+    metadata: {
+      generator: "Automaginarium",
+      profile: summary.profile,
+      tier: summary.tier,
+      tier_name: summary.tier_name,
+      notes: "Automaginarium 1D cellular-automaton profile for Multilingual 0.8 process tooling.",
+    },
+    state: {
+      population: "fixed",
+      empty: {
+        state: symbolToSemanticValue(config.alphabet_entree[0], config.alphabet_entree),
+      },
+      alphabet: {
+        input: config.alphabet_entree.map((value) => symbolToSemanticValue(value, config.alphabet_entree)),
+        output: config.alphabet_sortie.map((value) => symbolToSemanticValue(value, config.alphabet_sortie)),
+      },
+      loci: initialLociForSemanticCore(config),
+    },
+    topology: {
+      kind: "lattice",
+      dimensionality: 1,
+      width: config.largeur,
+      height: 1,
+      wrap: config.frontiere === "circulaire",
+      neighborhood: "automaginarium-1d",
+      radius: Math.floor(config.taille_voisinage / 2),
+      boundary_value: symbolToSemanticValue(config.valeur_frontiere, config.alphabet_entree),
+    },
+    rule: {
+      kind: "automaginarium-transition",
+      mode: config.mode_regle,
+      neighborhood_size: config.taille_voisinage,
+      output_channels: config.nombre_canaux_sortie,
+      numeric_rule: config.numero_regle !== undefined ? String(config.numero_regle) : undefined,
+      table: tableEntries,
+    },
+    schedule: {
+      kind: "synchronous",
+      steps: Math.max(0, config.hauteur - 1),
+      projection: "rows-as-time",
+    },
+    rendering: {
+      cell_size: config.rendu?.taille_cellule || 5,
+      palette: config.rendu?.palette || null,
+      gradient: config.rendu?.gradient || null,
+    },
+    source_configuration: {
+      ...config,
+      numero_regle: config.numero_regle !== undefined ? String(config.numero_regle) : undefined,
+    },
+  };
+}
+
+function semanticCoreSource(configurationBrute) {
+  if (window.AutomaginariumUniversVivant?.source_univers_vivant) {
+    return window.AutomaginariumUniversVivant.source_univers_vivant(configurationBrute);
+  }
+  const config = normaliserConfiguration(configurationBrute);
+  const tableName = `${String(config.nom || "univers").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "") || "univers"}_rule`;
+  return [
+    "# Automaginarium semantic-core-v1 profile source",
+    "# Generated from the active Automaginarium configuration.",
+    "",
+    `let width = ${config.largeur}`,
+    `let steps = ${Math.max(0, config.hauteur - 1)}`,
+    `let alphabet_input = ${JSON.stringify(config.alphabet_entree)}`,
+    `let alphabet_output = ${JSON.stringify(config.alphabet_sortie)}`,
+    `let initial_loci = ${JSON.stringify(initialLociForSemanticCore(config))}`,
+    "",
+    `def ${tableName}():`,
+    `    return automaginarium_transition(${JSON.stringify({
+      mode: config.mode_regle,
+      neighborhood_size: config.taille_voisinage,
+      output_channels: config.nombre_canaux_sortie,
+      table: canonicalRuleEntries(config),
+    })})`,
+    "",
+    "let process = build_process_core(",
+    "    {\"loci\": initial_loci, \"population\": \"fixed\"},",
+    `    lattice_topology(width, 1, ${config.frontiere === "circulaire" ? "True" : "False"}, "automaginarium-1d"),`,
+    `    ${tableName}(),`,
+    "    synchronous_schedule()",
+    ")",
+  ].join("\n");
+}
+
+const resumerUniversVivant = semanticCoreSummary;
+const construireUniversVivant = buildSemanticCoreV1;
+const sourceUniversVivant = semanticCoreSource;
+
 function ruleSpaceLabel(configuration) {
   const { s, k, t, m, maxRule } = ruleConfiguration(configuration);
   return `${t}^(${m}·${s}^${k}) = ${maxRule} regles possibles`;
@@ -921,6 +1123,12 @@ window.AutomaginariumCore = {
   ruleSpaceLabel,
   summarizeConfig,
   summarizeTransition,
+  semanticCoreSummary,
+  buildSemanticCoreV1,
+  semanticCoreSource,
+  resumerUniversVivant,
+  construireUniversVivant,
+  sourceUniversVivant,
   universeHudMetrics,
   randomRuleNumber,
   cleVoisinage,

@@ -142,6 +142,39 @@ def test_form_and_summary_helpers(core):
     assert "regles possibles" in core.etiquette_espace_regles(ensured)
 
 
+def test_living_universe_export(core):
+    config = {
+        "nom": "Univers vivant",
+        "alphabet_entree": [0, 1],
+        "alphabet_sortie": [0, 1],
+        "taille_voisinage": 3,
+        "nombre_canaux_sortie": 1,
+        "mode_regle": "table",
+        "table_transition": core.table_wolfram(90),
+        "largeur": 9,
+        "hauteur": 6,
+        "frontiere": "circulaire",
+        "etat_initial": {"mode": "centre"},
+        "rendu": {"taille_cellule": 4},
+    }
+
+    summary = core.resumer_univers_vivant(config)
+    assert summary["profile"] == "automaginarium-1d-ca-v1"
+    assert summary["tier"] == 1
+
+    manifest = core.construire_univers_vivant(config)
+    assert manifest["kind"] == "semantic-core-v1"
+    assert manifest["topology"]["width"] == 9
+    assert manifest["topology"]["wrap"] is True
+    assert manifest["schedule"]["steps"] == 5
+    assert len(manifest["state"]["loci"]) == 9
+    assert len(manifest["rule"]["table"]) == 8
+
+    source = core.source_univers_vivant(config)
+    assert "build_process_core" in source
+    assert "automaginarium_transition" in source
+
+
 if __name__ == "__main__":
     core = load_core()
     test_wolfram_table(core)
@@ -150,4 +183,5 @@ if __name__ == "__main__":
     test_validation(core)
     test_deterministic_random_helper(core)
     test_form_and_summary_helpers(core)
+    test_living_universe_export(core)
     print("french core smoke ok")

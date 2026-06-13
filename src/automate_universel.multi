@@ -812,6 +812,193 @@ def signaux_transition(configuration, limite=6):
 
 
 # ============================================================================
+# UNIVERS VIVANT: Export processuel pour Multilingual 0.8
+# ============================================================================
+
+def valeur_semantique(symbole, alphabet):
+    soit indice = -1
+    pour position dans range(len(alphabet)):
+        si str(alphabet[position]) == str(symbole):
+            indice = position
+    retour {
+        "symbol": symbole,
+        "index": indice si indice >= 0 sinon None,
+    }
+
+
+def transition_totalistique_export(voisinage, configuration):
+    soit somme = 0
+    pour valeur dans voisinage:
+        somme = somme + int(valeur)
+    soit sortie = []
+    pour canal dans range(configuration["nombre_canaux_sortie"]):
+        soit indice = (somme + canal) % len(configuration["alphabet_sortie"])
+        sortie.append(configuration["alphabet_sortie"][indice])
+    retour sortie
+
+
+def entrees_regle_univers_vivant(configuration):
+    soit config = normaliser_configuration(configuration)
+    soit cles = toutes_cles_voisinage(config["alphabet_entree"], config["taille_voisinage"])
+    soit entrees = []
+
+    pour cle dans cles:
+        soit voisinage = json.loads(cle)
+        soit sortie = []
+        si config["mode_regle"] == "table":
+            sortie = transition_table(voisinage, config)
+        sinon si config["mode_regle"] == "totalistique":
+            sortie = transition_totalistique_export(voisinage, config)
+
+        si len(sortie) > 0:
+            entrees.append({
+                "neighborhood": [valeur_semantique(valeur, config["alphabet_entree"]) pour valeur dans voisinage],
+                "output": [valeur_semantique(valeur_sortie, config["alphabet_sortie"]) pour valeur_sortie dans sortie],
+            })
+
+    retour entrees
+
+
+def loci_initiaux_univers_vivant(configuration):
+    soit config = normaliser_configuration(configuration)
+    soit ligne = creer_generation_initiale(config)
+    soit loci = []
+    pour position_x dans range(len(ligne)):
+        loci.append({
+            "id": "cell_" + str(position_x),
+            "locus": [position_x, 0],
+            "state": valeur_semantique(ligne[position_x], config["alphabet_entree"]),
+        })
+    retour loci
+
+
+def niveau_comportement_univers(configuration):
+    soit config = normaliser_configuration(configuration)
+    si config["mode_regle"] == "aleatoire":
+        retour 3
+    si config["mode_regle"] == "numerique":
+        retour 2
+    si config["taille_voisinage"] > 3 ou len(config["alphabet_entree"]) > 2 ou config["nombre_canaux_sortie"] > 1:
+        retour 2
+    retour 1
+
+
+def nom_niveau_comportement(niveau):
+    soit noms = [
+        "statique",
+        "reecriture elementaire",
+        "reecriture a etats finis",
+        "reecriture stochastique",
+        "processus ouvert",
+    ]
+    si 0 <= niveau < len(noms):
+        retour noms[niveau]
+    retour "processus"
+
+
+def resumer_univers_vivant(configuration):
+    soit config = normaliser_configuration(configuration)
+    soit niveau = niveau_comportement_univers(config)
+    soit frontiere = "circulaire" si config["frontiere"] == "circulaire" sinon "bornee"
+    retour {
+        "profile": "automaginarium-1d-ca-v1",
+        "tier": niveau,
+        "tier_name": nom_niveau_comportement(niveau),
+        "topology": str(config["largeur"]) + "x1 lattice " + frontiere,
+        "schedule": str(max(0, config["hauteur"] - 1)) + " synchronous step(s)",
+        "rule": str(config["mode_regle"]) + " / neighborhood " + str(config["taille_voisinage"]) + " / " + str(config["nombre_canaux_sortie"]) + " channel(s)",
+    }
+
+
+def construire_univers_vivant(configuration):
+    soit config = normaliser_configuration(configuration)
+    soit resume = resumer_univers_vivant(config)
+    soit config_source = dict(config)
+    config_source["numero_regle"] = str(config.get("numero_regle", 0))
+    retour {
+        "kind": "semantic-core-v1",
+        "profile": resume["profile"],
+        "name": config["nom"],
+        "metadata": {
+            "generator": "Automaginarium",
+            "profile": resume["profile"],
+            "tier": resume["tier"],
+            "tier_name": resume["tier_name"],
+            "notes": "Profil Automaginarium 1D pour les outils process de Multilingual 0.8.",
+        },
+        "state": {
+            "population": "fixed",
+            "empty": {
+                "state": valeur_semantique(config["alphabet_entree"][0], config["alphabet_entree"]),
+            },
+            "alphabet": {
+                "input": [valeur_semantique(valeur, config["alphabet_entree"]) pour valeur dans config["alphabet_entree"]],
+                "output": [valeur_semantique(valeur, config["alphabet_sortie"]) pour valeur dans config["alphabet_sortie"]],
+            },
+            "loci": loci_initiaux_univers_vivant(config),
+        },
+        "topology": {
+            "kind": "lattice",
+            "dimensionality": 1,
+            "width": config["largeur"],
+            "height": 1,
+            "wrap": config["frontiere"] == "circulaire",
+            "neighborhood": "automaginarium-1d",
+            "radius": config["taille_voisinage"] // 2,
+            "boundary_value": valeur_semantique(config["valeur_frontiere"], config["alphabet_entree"]),
+        },
+        "rule": {
+            "kind": "automaginarium-transition",
+            "mode": config["mode_regle"],
+            "neighborhood_size": config["taille_voisinage"],
+            "output_channels": config["nombre_canaux_sortie"],
+            "numeric_rule": str(config.get("numero_regle", 0)),
+            "table": entrees_regle_univers_vivant(config),
+        },
+        "schedule": {
+            "kind": "synchronous",
+            "steps": max(0, config["hauteur"] - 1),
+            "projection": "rows-as-time",
+        },
+        "rendering": {
+            "cell_size": config.get("rendu", {}).get("taille_cellule", 5),
+            "palette": config.get("rendu", {}).get("palette", None),
+            "gradient": config.get("rendu", {}).get("gradient", None),
+        },
+        "source_configuration": config_source,
+    }
+
+
+def source_univers_vivant(configuration):
+    soit config = normaliser_configuration(configuration)
+    soit nom_regle = "regle_univers_vivant"
+    soit payload = {
+        "mode": config["mode_regle"],
+        "neighborhood_size": config["taille_voisinage"],
+        "output_channels": config["nombre_canaux_sortie"],
+        "table": entrees_regle_univers_vivant(config),
+    }
+    retour "\n".join([
+        "# Automaginarium - source de l'univers vivant",
+        "# Genere depuis la configuration courante.",
+        "",
+        "let width = " + str(config["largeur"]),
+        "let steps = " + str(max(0, config["hauteur"] - 1)),
+        "let initial_loci = " + json.dumps(loci_initiaux_univers_vivant(config)),
+        "",
+        "def " + nom_regle + "():",
+        "    return automaginarium_transition(" + json.dumps(payload) + ")",
+        "",
+        "let process = build_process_core(",
+        "    {\"loci\": initial_loci, \"population\": \"fixed\"},",
+        "    lattice_topology(width, 1, " + ("True" si config["frontiere"] == "circulaire" sinon "False") + ", \"automaginarium-1d\"),",
+        "    " + nom_regle + "(),",
+        "    synchronous_schedule()",
+        ")",
+    ])
+
+
+# ============================================================================
 # PERTURBATION: Interactive event injection into cellular automata
 # ============================================================================
 

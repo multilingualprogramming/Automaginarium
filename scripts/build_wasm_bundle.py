@@ -14,6 +14,7 @@ from wasmtime import wat2wasm
 ROOT = Path(__file__).resolve().parents[1]
 GENERATED = ROOT / "public" / "generated"
 PACKED = GENERATED / "automate_packed"
+RICH_BROWSER = GENERATED / "automate_universel"
 
 
 def run(command: list[str]) -> None:
@@ -54,6 +55,23 @@ def build_french_core() -> None:
         ]
     )
     (GENERATED / "automate_universel.py").write_text(result.stdout, encoding="utf-8")
+
+    RICH_BROWSER.mkdir(parents=True, exist_ok=True)
+    run(
+        [
+            sys.executable,
+            "-m",
+            "multilingualprogramming",
+            "build-browser-module",
+            "--lang",
+            "fr",
+            "src/automate_universel.multi",
+            "--export",
+            "resumer_univers_vivant,construire_univers_vivant,source_univers_vivant",
+            "--out",
+            str(RICH_BROWSER / "browser_module.mjs"),
+        ]
+    )
 
 
 def build_packed_wasm() -> None:
