@@ -372,6 +372,9 @@ function testGeneratedLivingUniverseModulePrecedence() {
       preset_poids_genetique(nom) {
         return { generatedPreset: nom };
       },
+      evaluer_population(population) {
+        return population.map((config, index) => ({ config, score: index + 1, generatedEvaluation: true }));
+      },
       appliquer_perturbation(univers, evenement) {
         return { ...univers, generatedPerturbation: evenement.type };
       },
@@ -413,6 +416,8 @@ function testGeneratedLivingUniverseModulePrecedence() {
     assert.equal(AutomaginariumCore.populationInitiale(config, 3, 1).length, 3);
     assert.equal(AutomaginariumCore.nouvelleGeneration([{ a: 1 }, { b: 2 }], [1, 2], 50, 1)[0].generatedNextPopulation, 2);
     assert.equal(AutomaginariumCore.presetPoidsGenetique("stable").generatedPreset, "stable");
+    assert.equal(AutomaginariumCore.evaluerPopulation([config], {}).length, 1);
+    assert.equal(AutomaginariumCore.evaluerPopulation([config], {})[0].generatedEvaluation, true);
     assert.equal(AutomaginariumCore.appliquerPerturbation({ configuration: config, lignes: [], sorties: [] }, { type: "pulse" }).generatedPerturbation, "pulse");
   } finally {
     global.AutomaginariumUniversVivant = previousGenerated;

@@ -29,6 +29,7 @@ const exportsList = [
   "population_initiale",
   "nouvelle_generation",
   "preset_poids_genetique",
+  "evaluer_population",
   "appliquer_perturbation",
 ].join(",");
 
@@ -100,6 +101,9 @@ async function testGeneratedModule() {
   assert.equal(module.population_initiale(config, 3, 11).length, 3);
   assert.equal(module.nouvelle_generation([config, config], [0.1, 0.9], 50, 11).length, 2);
   assert.equal(module.preset_poids_genetique("stable").stabilite, 9);
+  const evaluated = module.evaluer_population([config], module.preset_poids_genetique("beau"));
+  assert.equal(evaluated.length, 1);
+  assert.equal(evaluated[0].metriques.scores_par_canal.length, 1);
   const perturbed = module.appliquer_perturbation(module.generer_univers_detaille(config), {
     cx: 4,
     cy: 2,

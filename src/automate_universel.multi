@@ -1,4 +1,5 @@
 importer json
+importer math
 importer random
 importer dégradés_couleur
 
@@ -674,6 +675,151 @@ def nouvelle_generation(population, scores, taux_mutation_sur_1000, graine):
         nouvelle.append(config_enfant)
 
     retour nouvelle
+
+
+def cellule_vivante(valeur, valeur_vide):
+    retour str(valeur) != str(valeur_vide)
+
+
+def calculer_densite_ligne(ligne, valeur_vide):
+    si len(ligne) == 0:
+        retour 0.0
+    soit vivantes = [valeur pour valeur dans ligne si cellule_vivante(valeur, valeur_vide)]
+    retour len(vivantes) / len(ligne)
+
+
+def calculer_symetrie_ligne(ligne):
+    si len(ligne) <= 1:
+        retour 1.0
+    soit accords = 0
+    soit paires = len(ligne) // 2
+    pour indice dans range(paires):
+        si str(ligne[indice]) == str(ligne[len(ligne) - 1 - indice]):
+            accords = accords + 1
+    retour accords / paires si paires > 0 sinon 1.0
+
+
+def calculer_compacite_ligne(ligne, valeur_vide):
+    soit indices_vivants = [indice pour indice dans range(len(ligne)) si cellule_vivante(ligne[indice], valeur_vide)]
+    si len(indices_vivants) == 0:
+        retour 0.0
+    soit debut = indices_vivants[0]
+    soit fin = indices_vivants[len(indices_vivants) - 1]
+    retour len(indices_vivants) / max(1, fin - debut + 1)
+
+
+def metriques_univers(univers):
+    soit lignes = univers.get("lignes", [])
+    soit configuration = univers.get("configuration", {})
+    soit valeur_vide = configuration.get("alphabet_entree", [0])[0]
+    si len(lignes) == 0:
+        retour {
+            "entropie": 0.0,
+            "compacite": 0.0,
+            "symetrie": 0.5,
+            "tauxCroissance": 0.0,
+            "densite": 0.0,
+            "oscillation": 0.0,
+            "complexite": 0.0,
+            "varianceDensite": 0.0,
+            "periodeDetectee": 0,
+        }
+
+    soit densites = [calculer_densite_ligne(ligne, valeur_vide) pour ligne dans lignes]
+    soit compacites = [calculer_compacite_ligne(ligne, valeur_vide) pour ligne dans lignes]
+    soit symetries = [calculer_symetrie_ligne(ligne) pour ligne dans lignes]
+    soit toutes_valeurs = []
+    pour ligne dans lignes:
+        pour valeur dans ligne:
+            toutes_valeurs.append(str(valeur))
+
+    soit comptes = {}
+    pour cle_valeur dans toutes_valeurs:
+        comptes[cle_valeur] = comptes.get(cle_valeur, 0) + 1
+
+    soit total = max(1, len(toutes_valeurs))
+    soit entropie = 0.0
+    pour cle_compte dans comptes:
+        soit probabilite = comptes[cle_compte] / total
+        si probabilite > 0:
+            entropie = entropie - (probabilite * math.log2(probabilite))
+
+    soit densite = sum(densites) / len(densites)
+    soit compacite = sum(compacites) / len(compacites)
+    soit symetrie = sum(symetries) / len(symetries)
+    soit tranche = max(1, len(densites) // 5)
+    soit densite_debut = sum(densites[:tranche]) / tranche
+    soit densite_fin = sum(densites[-tranche:]) / tranche
+    soit taux_croissance = max(-1.0, min(1.0, densite_fin - densite_debut))
+    soit variance = max(0.0, min(1.0, variance_densite(densites) * 4.0))
+    soit periode = detecter_periode(densites, min(24, len(densites)))
+    soit score_variance = 1.0 - min(1.0, abs(variance - 0.5) * 2.0)
+    soit score_periode = 1.0 si periode > 0 sinon 0.0
+    soit oscillation = max(0.0, min(1.0, (score_variance * 0.7) + (score_periode * 0.3)))
+    soit complexite = max(0.0, min(1.0, entropie * (1.0 - compacite)))
+
+    retour {
+        "entropie": entropie,
+        "compacite": compacite,
+        "symetrie": symetrie,
+        "tauxCroissance": taux_croissance,
+        "densite": densite,
+        "oscillation": oscillation,
+        "complexite": complexite,
+        "varianceDensite": variance,
+        "periodeDetectee": periode,
+    }
+
+
+def evaluer_fitness(univers, poids_obj={}):
+    soit metriques = metriques_univers(univers)
+    soit poids = [
+        poids_obj.get("symetrie", 5),
+        poids_obj.get("densite", 5),
+        poids_obj.get("stabilite", 5),
+        poids_obj.get("oscillation", 5),
+        poids_obj.get("complexite", 5),
+        poids_obj.get("croissance", 5),
+    ]
+    soit f_sym = metriques["symetrie"]
+    soit f_den = 0.8 si abs(metriques["densite"] - 0.45) < 0.2 sinon 0.2
+    soit f_sta = ((1.0 - abs(metriques["tauxCroissance"])) * 0.5) + (metriques["compacite"] * 0.5)
+    soit f_cmp = metriques["complexite"]
+    soit f_cro = max(0.0, metriques["tauxCroissance"])
+    soit total_poids = max(1, sum(poids))
+    soit score = ((f_sym * poids[0]) + (f_den * poids[1]) + (f_sta * poids[2]) + (metriques["oscillation"] * poids[3]) + (f_cmp * poids[4]) + (f_cro * poids[5])) / total_poids
+    soit score_borne = max(0.0, min(1.0, score))
+    soit configuration = univers.get("configuration", {})
+    soit canaux = max(1, int(configuration.get("nombre_canaux_sortie", 1)))
+    soit scores_par_canal = [score_borne pour _ dans range(canaux)]
+    retour {
+        "score": score_borne,
+        "metriques": {
+            "entropie": metriques["entropie"],
+            "densite": metriques["densite"],
+            "compacite": metriques["compacite"],
+            "symetrie": metriques["symetrie"],
+            "oscillation": metriques["oscillation"],
+            "complexite": metriques["complexite"],
+            "croissance": max(0.0, metriques["tauxCroissance"]),
+            "tauxCroissance": metriques["tauxCroissance"],
+            "scores_par_canal": scores_par_canal,
+        },
+    }
+
+
+def evaluer_population(population, poids_obj={}):
+    soit evaluations = []
+    pour config dans population:
+        soit univers = generer_univers_detaille(config)
+        soit evaluation = evaluer_fitness(univers, poids_obj)
+        evaluations.append({
+            "config": config,
+            "univers": univers,
+            "score": evaluation["score"],
+            "metriques": evaluation["metriques"],
+        })
+    retour evaluations
 
 
 # ============================================================================

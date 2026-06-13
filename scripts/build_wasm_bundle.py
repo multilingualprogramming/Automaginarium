@@ -75,7 +75,7 @@ def build_french_core() -> None:
                 "etat_formulaire_vers_configuration,configuration_vers_etat_formulaire,"
                 "valider_configuration,etiquette_espace_regles,etiquette_regle_hud,"
                 "generer_univers_detaille,population_initiale,nouvelle_generation,"
-                "preset_poids_genetique,appliquer_perturbation"
+                "preset_poids_genetique,evaluer_population,appliquer_perturbation"
             ),
             "--out",
             str(RICH_BROWSER / "browser_module.mjs"),

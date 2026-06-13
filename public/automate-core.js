@@ -725,6 +725,9 @@ function evaluerFitness(univers, poidsObj = {}) {
 }
 
 function evaluerPopulation(population, poidsObj = {}) {
+  if (window.AutomaginariumUniversVivant?.evaluer_population) {
+    return window.AutomaginariumUniversVivant.evaluer_population(population, poidsObj);
+  }
   return population.map((config) => {
     const univers = genererUnivers(config);
     const evaluation = evaluerFitness(univers, poidsObj);
