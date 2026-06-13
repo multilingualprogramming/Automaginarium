@@ -764,10 +764,16 @@ function appliquerPerturbation(univers, evenement) {
 }
 
 function summarizeConfig(configuration) {
+  if (window.AutomaginariumUniversVivant?.resumer_configuration) {
+    return window.AutomaginariumUniversVivant.resumer_configuration(configuration);
+  }
   return `${configuration.largeur} x ${configuration.hauteur} cellules, ${configuration.alphabet_sortie.length} etat(s) visibles, voisinage ${configuration.taille_voisinage}, depart ${configuration.etat_initial?.mode || "centre"}`;
 }
 
 function summarizeTransition(configuration) {
+  if (window.AutomaginariumUniversVivant?.resumer_transition) {
+    return window.AutomaginariumUniversVivant.resumer_transition(configuration);
+  }
   const entries = Object.entries(configuration.table_transition || {});
   if (configuration.mode_regle === "totalistique") {
     return `Mode totalistique avec ${configuration.alphabet_sortie.length} etat(s) de sortie.`;
@@ -824,6 +830,9 @@ function hudRuleLabel(ruleState) {
 }
 
 function describeConfiguration(configuration) {
+  if (window.AutomaginariumUniversVivant?.decrire_configuration) {
+    return window.AutomaginariumUniversVivant.decrire_configuration(configuration);
+  }
   const entries = Object.entries(configuration.table_transition || {});
   const visibleEntries = entries.slice(0, 24);
   return {
@@ -836,6 +845,9 @@ function describeConfiguration(configuration) {
 }
 
 function transitionSignalEntries(configuration, limit = 6) {
+  if (window.AutomaginariumUniversVivant?.signaux_transition) {
+    return window.AutomaginariumUniversVivant.signaux_transition(configuration, limit);
+  }
   const entries = Object.entries(configuration.table_transition || {}).slice(0, limit);
   if (entries.length === 0) {
     return [{

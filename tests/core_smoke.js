@@ -278,6 +278,78 @@ function testSemanticCoreExport() {
   assert(source.includes("automaginarium_transition"));
 }
 
+function testGeneratedLivingUniverseModulePrecedence() {
+  const previousGenerated = global.AutomaginariumUniversVivant;
+  try {
+    global.AutomaginariumUniversVivant = {
+      resumer_univers_vivant(config) {
+        return {
+          profile: "generated-profile",
+          tier: 4,
+          tier_name: "generated",
+          topology: `${config.largeur} generated`,
+          schedule: "generated schedule",
+          rule: "generated rule",
+        };
+      },
+      construire_univers_vivant(config) {
+        return {
+          kind: "generated-core",
+          name: config.nom,
+          fromGeneratedModule: true,
+        };
+      },
+      source_univers_vivant(config) {
+        return `generated source for ${config.nom}`;
+      },
+      resumer_configuration(config) {
+        return `generated summary ${config.largeur}`;
+      },
+      resumer_transition(config) {
+        return `generated transition ${config.mode_regle}`;
+      },
+      decrire_configuration(config) {
+        return {
+          title: `generated ${config.nom}`,
+          metaText: "generated meta",
+          ruleTableHtml: "<span>generated table</span>",
+        };
+      },
+      signaux_transition(_config, limit) {
+        return [{
+          label: `generated limit ${limit}`,
+          title: "generated title",
+          body: "generated body",
+        }];
+      },
+    };
+
+    const config = {
+      nom: "Delegation",
+      alphabet_entree: [0, 1],
+      alphabet_sortie: [0, 1],
+      taille_voisinage: 3,
+      nombre_canaux_sortie: 1,
+      mode_regle: "table",
+      table_transition: AutomaginariumCore.tableWolfram(90),
+      largeur: 9,
+      hauteur: 6,
+      etat_initial: { mode: "centre" },
+    };
+
+    assert.equal(AutomaginariumCore.resumerUniversVivant(config).profile, "generated-profile");
+    assert.equal(AutomaginariumCore.construireUniversVivant(config).kind, "generated-core");
+    assert.equal(AutomaginariumCore.construireUniversVivant(config).fromGeneratedModule, true);
+    assert.equal(AutomaginariumCore.sourceUniversVivant(config), "generated source for Delegation");
+    assert.equal(AutomaginariumCore.summarizeConfig(config), "generated summary 9");
+    assert.equal(AutomaginariumCore.summarizeTransition(config), "generated transition table");
+    assert.equal(AutomaginariumCore.describeConfiguration(config).title, "generated Delegation");
+    assert.equal(AutomaginariumCore.transitionSignalEntries(config, 3)[0].label, "generated limit 3");
+  } finally {
+    global.AutomaginariumUniversVivant = previousGenerated;
+  }
+}
+
 testCanonicalKeys();
 testWolfram90();
 testBackwardCompatibility();
@@ -288,4 +360,5 @@ testGeneticHelpersAndPerturbation();
 testSummariesAndHudMetrics();
 testFormAndDescriptionHelpers();
 testSemanticCoreExport();
+testGeneratedLivingUniverseModulePrecedence();
 console.log("core smoke ok");

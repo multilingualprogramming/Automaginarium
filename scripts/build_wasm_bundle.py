@@ -67,7 +67,10 @@ def build_french_core() -> None:
             "fr",
             "src/automate_universel.multi",
             "--export",
-            "resumer_univers_vivant,construire_univers_vivant,source_univers_vivant",
+            (
+                "resumer_univers_vivant,construire_univers_vivant,source_univers_vivant,"
+                "resumer_configuration,resumer_transition,decrire_configuration,signaux_transition"
+            ),
             "--out",
             str(RICH_BROWSER / "browser_module.mjs"),
         ]
