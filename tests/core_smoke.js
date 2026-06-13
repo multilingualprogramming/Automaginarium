@@ -322,6 +322,29 @@ function testGeneratedLivingUniverseModulePrecedence() {
           body: "generated body",
         }];
       },
+      table_wolfram(numero) {
+        return { generated_wolfram: [numero] };
+      },
+      table_totalistique(config) {
+        return { generated_totalistic: [config.taille_voisinage] };
+      },
+      assurer_configuration_rendable(config) {
+        return {
+          ...config,
+          generatedRenderable: true,
+          table_transition: { generated: [1] },
+        };
+      },
+      construire_configuration_regle_generee(config, generator, wolframRule) {
+        return {
+          config: {
+            ...config,
+            generatedRuleConfig: true,
+            table_transition: { generated: [Number(wolframRule)] },
+          },
+          effectiveGenerator: `generated-${generator}`,
+        };
+      },
     };
 
     const config = {
@@ -345,6 +368,12 @@ function testGeneratedLivingUniverseModulePrecedence() {
     assert.equal(AutomaginariumCore.summarizeTransition(config), "generated transition table");
     assert.equal(AutomaginariumCore.describeConfiguration(config).title, "generated Delegation");
     assert.equal(AutomaginariumCore.transitionSignalEntries(config, 3)[0].label, "generated limit 3");
+    assert.deepEqual(AutomaginariumCore.tableWolfram(30), { generated_wolfram: [30] });
+    assert.deepEqual(AutomaginariumCore.tableTotalistique(config), { generated_totalistic: [3] });
+    assert.equal(AutomaginariumCore.ensureRenderableConfiguration(config).generatedRenderable, true);
+    const built = AutomaginariumCore.buildGeneratedRuleConfig(config, "wolfram", 90);
+    assert.equal(built.effectiveGenerator, "generated-wolfram");
+    assert.equal(built.config.generatedRuleConfig, true);
   } finally {
     global.AutomaginariumUniversVivant = previousGenerated;
   }

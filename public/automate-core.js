@@ -261,6 +261,9 @@ function genererUnivers(configurationBrute) {
 }
 
 function tableWolfram(numeroRegle) {
+  if (window.AutomaginariumUniversVivant?.table_wolfram) {
+    return window.AutomaginariumUniversVivant.table_wolfram(numeroRegle);
+  }
   const table = {};
   for (let motif = 0; motif < 8; motif += 1) {
     const voisinage = motif.toString(2).padStart(3, "0").split("").map(Number);
@@ -315,6 +318,9 @@ function tableSymetrique(configurationBrute, seed = Date.now() >>> 0) {
 }
 
 function tableTotalistique(configurationBrute) {
+  if (window.AutomaginariumUniversVivant?.table_totalistique) {
+    return window.AutomaginariumUniversVivant.table_totalistique(configurationBrute);
+  }
   const configuration = normaliserConfiguration(configurationBrute);
   const keys = toutesClesVoisinage(configuration.alphabet_entree, configuration.taille_voisinage);
   return Object.fromEntries(keys.map((key) => {
@@ -336,6 +342,9 @@ function tableTotalistique(configurationBrute) {
 }
 
 function ensureRenderableConfiguration(configurationBrute) {
+  if (window.AutomaginariumUniversVivant?.assurer_configuration_rendable) {
+    return window.AutomaginariumUniversVivant.assurer_configuration_rendable(configurationBrute);
+  }
   const normalized = normaliserConfiguration(configurationBrute);
   if (!normalized.table_transition || Object.keys(normalized.table_transition).length === 0) {
     const cles = toutesClesVoisinage(normalized.alphabet_entree, normalized.taille_voisinage);
@@ -348,6 +357,9 @@ function ensureRenderableConfiguration(configurationBrute) {
 }
 
 function buildGeneratedRuleConfig(configurationBrute, generator, wolframRule) {
+  if (window.AutomaginariumUniversVivant?.construire_configuration_regle_generee) {
+    return window.AutomaginariumUniversVivant.construire_configuration_regle_generee(configurationBrute, generator, wolframRule);
+  }
   const config = normaliserConfiguration(configurationBrute);
   let effectiveGenerator = generator;
   const isBinaryAlphabet = config.alphabet_entree.length === 2

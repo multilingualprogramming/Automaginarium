@@ -69,7 +69,9 @@ def build_french_core() -> None:
             "--export",
             (
                 "resumer_univers_vivant,construire_univers_vivant,source_univers_vivant,"
-                "resumer_configuration,resumer_transition,decrire_configuration,signaux_transition"
+                "resumer_configuration,resumer_transition,decrire_configuration,signaux_transition,"
+                "table_wolfram,table_totalistique,assurer_configuration_rendable,"
+                "construire_configuration_regle_generee"
             ),
             "--out",
             str(RICH_BROWSER / "browser_module.mjs"),
