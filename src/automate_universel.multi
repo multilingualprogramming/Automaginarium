@@ -63,7 +63,7 @@ def parser_symbole(brut):
 
 def parser_liste_virgules(valeur, repli):
     soit elements = [parser_symbole(fragment) pour fragment dans str(valeur).split(",")]
-    soit filtres = [element pour element dans elements si element is not None]
+    soit filtres = [element pour element dans elements si element != None]
     retour filtres si len(filtres) > 0 sinon repli
 
 
@@ -72,7 +72,7 @@ def encoder_liste(valeurs):
 
 
 def etat_formulaire_vers_configuration(etat_formulaire, configuration_courante=None):
-    si configuration_courante is None:
+    si configuration_courante == None:
         configuration_courante = {}
     soit alphabet_entree = parser_liste_virgules(etat_formulaire.get("alphabetInput", ""), [0, 1])
     soit alphabet_sortie = parser_liste_virgules(etat_formulaire.get("alphabetOutput", ""), alphabet_entree)
@@ -81,7 +81,7 @@ def etat_formulaire_vers_configuration(etat_formulaire, configuration_courante=N
         voisinage = voisinage + 1
     soit mode_initial = etat_formulaire.get("initialMode", "centre")
     soit configuration = dict(configuration_courante)
-    configuration["nom"] = str(etat_formulaire.get("name", "")).strip() or "Univers sans nom"
+    configuration["nom"] = str(etat_formulaire.get("name", "")).strip() ou "Univers sans nom"
     configuration["alphabet_entree"] = alphabet_entree
     configuration["alphabet_sortie"] = alphabet_sortie
     configuration["taille_voisinage"] = max(1, voisinage)
@@ -800,7 +800,7 @@ def signaux_transition(configuration, limite=6):
             "body": "Les sorties sont derivees sans table visible.",
         }]
     soit signaux = []
-    pour indice in range(len(entrees)):
+    pour indice dans range(len(entrees)):
         soit cle = entrees[indice][0]
         soit valeur = entrees[indice][1]
         signaux.append({
@@ -933,7 +933,7 @@ def variance_densite(historique_densites):
 def detecter_periode(historique_densites, fenetre):
     """Checks autocorrelation in last `fenetre` densities.
     Returns estimated period (1..fenetre//2) or 0 if none found."""
-    si len(historique_densites) < fenetre or fenetre < 2:
+    si len(historique_densites) < fenetre ou fenetre < 2:
         retour 0
 
     soit derniers = historique_densites[-fenetre:]

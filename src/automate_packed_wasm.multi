@@ -13,7 +13,7 @@ def cle_binaire_3(gauche, centre, droite):
 def sortie_wolfram(numero_regle, motif):
     soit indice = motif % 8
     soit diviseur = 1
-    pour rang in range(indice):
+    pour rang dans range(indice):
         diviseur = diviseur * 2
     retour (numero_regle // diviseur) % 2
 

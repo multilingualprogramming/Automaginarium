@@ -21,21 +21,37 @@ def run(command: list[str]) -> None:
     subprocess.run(command, cwd=ROOT, check=True)
 
 
+def run_captured(command: list[str]) -> subprocess.CompletedProcess[str]:
+    """Run a build command and show compiler output when it fails."""
+    try:
+        return subprocess.run(
+            command,
+            cwd=ROOT,
+            check=True,
+            text=True,
+            capture_output=True,
+        )
+    except subprocess.CalledProcessError as error:
+        if error.stdout:
+            print(error.stdout, end="", file=sys.stdout)
+        if error.stderr:
+            print(error.stderr, end="", file=sys.stderr)
+        raise
+
+
 def build_french_core() -> None:
     """Compile the rich French core to generated Python."""
     GENERATED.mkdir(parents=True, exist_ok=True)
-    result = subprocess.run(
+    result = run_captured(
         [
             sys.executable,
             "-m",
             "multilingualprogramming",
             "compile",
+            "--lang",
+            "fr",
             "src/automate_universel.multi",
-        ],
-        cwd=ROOT,
-        check=True,
-        text=True,
-        capture_output=True,
+        ]
     )
     (GENERATED / "automate_universel.py").write_text(result.stdout, encoding="utf-8")
 
@@ -48,6 +64,8 @@ def build_packed_wasm() -> None:
             "-m",
             "multilingualprogramming",
             "build-wasm-bundle",
+            "--lang",
+            "fr",
             "src/automate_packed_wasm.multi",
             "--out-dir",
             str(PACKED),
